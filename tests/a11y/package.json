@@ -1,0 +1,7 @@
+{
+  "name": "nsp-a11y-audit",
+  "private": true,
+  "description": "Optional axe-core WCAG 2.1 A/AA audit of NSP pages in headless Chrome. Not part of the app build.",
+  "scripts": { "audit": "node audit.js" },
+  "dependencies": { "axe-core": "4.10.2", "puppeteer-core": "23.11.1" }
+}

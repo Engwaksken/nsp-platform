@@ -31,6 +31,7 @@
                 @endforeach
                 @auth
                     <li><a href="{{ route('workspace') }}">My workspace</a></li>
+                    <li><a href="{{ route('mfa.setup') }}">Security</a></li>
                     @if (auth()->user()->canUseAdmin())
                         <li><a href="{{ route('admin.dashboard') }}">Admin</a></li>
                     @endif

@@ -36,8 +36,18 @@
 | Workspace | A founder landing page with the unified navigation. Each service shows "Not available yet" until its flag is on. It never invents startup data. | `FeatureFlagsTest` |
 | Registry adapter | `StartupRegistry` interface plus `DisabledStartupRegistry` | — |
 
+## Follow-up fixes (same day)
+| Gap | Fix | Evidence |
+|---|---|---|
+| No MFA for privileged users | Every admin role must use an authenticator app (TOTP, RFC 6238). A password alone no longer signs an admin in. Includes 8 one-time recovery codes (stored hashed), a 5-try limit, replay protection, an encrypted secret, and a super-admin reset for lost phones. SSO logins skip it only when the IdP reports MFA in `amr`. | `MfaTest`, `TotpTest` (RFC 6238 vectors) |
+| No password reset | Email reset link for local accounts. Generic answer (doesn't reveal accounts), 60-minute single-use token, 12-character minimum, all sessions signed out, rate limited. SSO-only and inactive accounts get no link. | `PasswordResetTest` |
+| No accessibility audit | axe-core WCAG 2.1 A/AA audit of 25 pages (public, auth, workspace, all admin screens) at 1280 px and 360 px in headless Chrome (`tests/a11y`). The first run found 23 issues: low contrast in the footer, a header button with inherited dark text, tables that couldn't be scrolled by keyboard, and sideways scrolling at 360 px. All fixed; the re-run found **0 violations**, and the first Tab press reaches the skip link. | `tests/a11y/audit.js` |
+| No CI | `.github/workflows/tests.yml`: Pint, tests on PHP 8.2 and 8.3, `composer audit`. It runs once a GitHub remote exists. | — |
+
+An automated audit catches only part of WCAG. A manual screen-reader check (NVDA or TalkBack) is still needed before claiming AA.
+
 ## Test results (local)
-- `php artisan test`: **70 passed, 311 assertions**, about 5 seconds.
+- `php artisan test`: **90 passed, 411 assertions** (Phase 1 baseline was 70 and 311).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;
@@ -47,17 +57,16 @@
 - The temporary smoke-test admin was deleted afterwards.
 
 ## Not done in Phase 1 (honest gaps)
-- **MFA for privileged users is not implemented.** The spec expects it from the IdP. Until D1 is decided, local admin login is password-only. Recommendation: decide D1 quickly, or add TOTP for local admin accounts before staging.
-- **Password reset for local accounts** isn't built. Admins set passwords. SSO users reset theirs at the IdP.
+- ~~MFA for privileged users~~ and ~~password reset~~: fixed, see "Follow-up fixes".
 - **Multilingual content:** pages have a `locale` column, but there is no translation UI.
 - **Contact-form tickets:** messages are a simple inbox with statuses, not a full ticket system (Phase 6, support tickets).
 - **Analytics:** no tracking is installed. It needs a privacy decision.
-- **Accessibility:** semantic HTML, labels, focus styles, a skip link, reduced motion and contrast warnings are in place. **No automated (axe) or manual screen-reader audit has been run**, so WCAG 2.1 AA isn't claimed.
-- **CI:** none yet, because there is no remote repository (M7).
+- **Accessibility:** the automated axe audit passes. A manual screen-reader audit hasn't been done, so WCAG 2.1 AA isn't claimed.
+- **CI:** the workflow file exists, but it can't run until a remote repository exists (M7).
 - **Screenshots:** none captured in this sprint.
 
 ## Risks
-1. Local password login for admins without MFA (see above).
+1. Two-factor sign-in and password reset depend on working email (SMTP) settings in production.
 2. IMS integration needs IMS code changes and an IdP. Neither is authorized yet.
 3. Shared hosting with no queue worker means mail is sent from cron (`deployment.md`).
 4. Spec deviations: Laravel 12 instead of 13, and a local login fallback where the spec has OIDC only. Both are recorded in `decisions.md`.

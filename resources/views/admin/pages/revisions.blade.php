@@ -10,7 +10,7 @@
 @section('content')
     <div class="page-head"><h1>Revisions: {{ $page->title }}</h1></div>
     <p class="hint">Restoring a revision copies its content back and sets the page to draft for review.</p>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">#</th><th scope="col">Saved</th><th scope="col">By</th><th scope="col">Title</th><th scope="col">Status then</th><th scope="col">Note</th><th scope="col">Actions</th></tr></thead>
             <tbody>

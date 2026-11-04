@@ -16,7 +16,7 @@
         </div>
         <button class="btn btn-secondary" type="submit">Filter</button>
     </form>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Roles</th><th scope="col">Sign-in</th><th scope="col">Status</th><th scope="col">Last sign-in</th></tr></thead>
             <tbody>

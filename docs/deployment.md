@@ -24,7 +24,8 @@ Nothing has been deployed. This is the intended procedure for staging and then p
    php artisan nsp:create-admin you@hive.example   # asks for the password; never pass it on the command line
    php artisan config:cache && php artisan route:cache && php artisan view:cache
    ```
-5. Production `.env` must set:
+5. The first admin signs in and must set up two-factor sign-in straight away. Keep `NSP_MFA_ENFORCE=true` (the default) on every server. Password reset emails need working `MAIL_*` settings, so send yourself a test reset before go-live.
+6. Production `.env` must set:
    - `SESSION_SECURE_COOKIE=true`
    - `SESSION_ENCRYPT=true`
    - `MAIL_MAILER=smtp`

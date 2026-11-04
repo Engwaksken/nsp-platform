@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\OidcController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Site;
 use App\Http\Controllers\WorkspaceController;
 use Illuminate\Support\Facades\Route;
@@ -25,12 +27,28 @@ Route::get('/robots.txt', [Site\SitemapController::class, 'robots'])->name('robo
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
     Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+    Route::get('/forgot-password', [PasswordResetController::class, 'request'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'email'])->middleware('throttle:password-reset')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:password-reset')->name('password.update');
+    Route::get('/login/two-factor', [MfaController::class, 'challenge'])->name('mfa.challenge');
+    Route::post('/login/two-factor', [MfaController::class, 'verify'])->name('mfa.verify');
     Route::middleware(['feature:oidc', 'throttle:oidc'])->group(function () {
         Route::get('/auth/oidc/redirect', [OidcController::class, 'redirect'])->name('oidc.redirect');
         Route::get('/auth/oidc/callback', [OidcController::class, 'callback'])->name('oidc.callback');
     });
 });
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+
+/*
+| Account security (two-factor sign-in)
+*/
+Route::middleware('auth')->prefix('account/security')->name('mfa.')->group(function () {
+    Route::get('/', [MfaController::class, 'setup'])->name('setup');
+    Route::post('/enable', [MfaController::class, 'enable'])->middleware('throttle:10,1')->name('enable');
+    Route::post('/recovery-codes', [MfaController::class, 'regenerateCodes'])->middleware('throttle:10,1')->name('recovery');
+    Route::post('/disable', [MfaController::class, 'disable'])->middleware('throttle:10,1')->name('disable');
+});
 
 /*
 | Founder / member workspace
@@ -40,7 +58,7 @@ Route::get('/workspace', [WorkspaceController::class, 'index'])->middleware('aut
 /*
 | Admin CMS
 */
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->group(function () {
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
     Route::middleware('can:manage-pages')->group(function () {
@@ -99,6 +117,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     Route::middleware('can:manage-users')->group(function () {
         Route::resource('users', Admin\UserController::class)->except(['show', 'destroy']);
+        Route::post('users/{user}/reset-mfa', [Admin\UserController::class, 'resetMfa'])->name('users.reset-mfa');
     });
 
     Route::middleware('can:manage-feature-flags')->group(function () {

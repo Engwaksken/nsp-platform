@@ -6,7 +6,7 @@
         <h1>{{ $definition['plural'] }}</h1>
         <a class="btn btn-primary" href="{{ route('admin.content.create', $definition['key']) }}">Add {{ $definition['singular'] }}</a>
     </div>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">{{ $definition['fields'][$definition['title']]['label'] }}</th><th scope="col">Order</th><th scope="col">Visible</th><th scope="col">Actions</th></tr></thead>
             <tbody>

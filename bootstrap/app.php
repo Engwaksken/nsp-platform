@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAdminAccess;
 use App\Http\Middleware\EnsureFeatureEnabled;
+use App\Http\Middleware\EnsureMfaVerified;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\HandleSeoRedirects;
 use App\Http\Middleware\SecurityHeaders;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => EnsureAdminAccess::class,
             'feature' => EnsureFeatureEnabled::class,
+            'mfa' => EnsureMfaVerified::class,
         ]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('workspace'));

@@ -19,7 +19,7 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
-    use RedirectsAfterLogin;
+    use CompletesLogin;
 
     private const MAX_ATTEMPTS = 5;
 
@@ -63,12 +63,8 @@ class LoginController extends Controller
         }
 
         RateLimiter::clear($throttleKey);
-        Auth::login($user, $request->boolean('remember'));
-        $request->session()->regenerate();
-        $user->forceFill(['last_login_at' => now()])->save();
-        $this->audit($user, true, null, $credentials['email']);
 
-        return $this->redirectAfterLogin($user);
+        return $this->completeLogin($user, 'local', $request->boolean('remember'), identifier: $credentials['email']);
     }
 
     public function destroy(Request $request): RedirectResponse

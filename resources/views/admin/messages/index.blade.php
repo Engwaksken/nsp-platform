@@ -9,7 +9,7 @@
             <a class="tag" href="{{ route('admin.messages.index', ['status' => $option]) }}" @if ($status === $option) aria-current="true" @endif>{{ ucfirst(str_replace('_', ' ', $option)) }}</a>
         @endforeach
     </nav>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">Received</th><th scope="col">Topic</th><th scope="col">From</th><th scope="col">Subject</th><th scope="col">Status</th></tr></thead>
             <tbody>

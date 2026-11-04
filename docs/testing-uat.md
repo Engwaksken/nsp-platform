@@ -12,7 +12,9 @@ Status: **A** = automated test passes locally. **M** = manual check done. **—*
 | Content publishing incl. scheduling, drafts hidden | 1 | `PublicSiteTest` | A |
 | Pagination, exports | 1 | Pagination is used on every list. Exports are not built. | Partly |
 | Notification preferences | 6 | — | P |
-| Responsive/mobile and accessibility flows | 1 | CSS breakpoints exist. No device or axe audit yet. | — |
+| Responsive/mobile and accessibility flows | 1 | `tests/a11y/audit.js`: axe WCAG 2.1 A/AA on 25 pages at 1280 and 360 px with 0 violations and no sideways scroll; skip link checked by keyboard. No manual screen-reader test yet. | A (automated part) |
+| Admin two-factor sign-in (MFA) | 1 | `MfaTest`, `TotpTest` | A |
+| Password reset | 1 | `PasswordResetTest` | A |
 | OIDC: PKCE, state, nonce, signature, aud/iss/exp, alg confusion | 1/2 | `OidcLoginTest` | A |
 | User matched by IdP subject, not email | 1/2 | `OidcLoginTest::test_returning_user_is_matched_by_subject_not_email` | A |
 | IMS-first founder enters NSP without re-signup | 2-3 | Needs IdP and IMS changes | P |
@@ -30,6 +32,14 @@ Status: **A** = automated test passes locally. **M** = manual check done. **—*
 
 Extra Phase 1 security tests: Markdown/HTML escaping, unsafe link schemes, a script disguised as an image, open-redirect protection after login, rate limits, the contact-form honeypot, and security headers on 404s.
 
+## Accessibility audit (optional, needs Node.js and Chrome)
+```
+cd tests/a11y && npm install
+NSP_MFA_ENFORCE=false php artisan serve     # in the project root, local machine only
+node audit.js http://127.0.0.1:8000 <admin-email> <admin-password>
+```
+Set `CHROME_PATH` if Chrome is not in the default Windows location. Never turn off `NSP_MFA_ENFORCE` on staging or production.
+
 ## UAT script for Phase 1 (staging)
 Run each step as the role named and record pass or fail with a screenshot.
 
@@ -45,3 +55,7 @@ Run each step as the role named and record pass or fail with a screenshot.
 10. **Startup user** signs in and sees the workspace with "Not available yet" on each service. Opening `/admin` returns 403.
 11. On a phone (360 px wide), the menu opens and closes, and forms are usable.
 12. Keyboard only: the skip link works, focus is visible, and every admin form can be submitted.
+13. **New admin** signs in with a password and is sent to set up two-factor sign-in. They scan the QR code, save the recovery codes, and then the admin area opens.
+14. **Admin** signs out and back in. After the password, the 6-digit code is required. A wrong code is refused, and a recovery code works once.
+15. **Super admin** resets two-factor sign-in for another admin who "lost their phone". That admin must set it up again.
+16. **Any local user** uses "Forgot your password?", receives the email, sets a new password, and finds that the old sessions are signed out.

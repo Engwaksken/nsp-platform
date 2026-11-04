@@ -21,7 +21,7 @@
         <button class="btn btn-secondary" type="submit">Filter</button>
     </form>
 
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <caption class="visually-hidden">Pages</caption>
             <thead><tr><th scope="col">Title</th><th scope="col">Address</th><th scope="col">Status</th><th scope="col">Updated</th><th scope="col">Actions</th></tr></thead>

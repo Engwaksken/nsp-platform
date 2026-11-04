@@ -59,7 +59,7 @@
             <button type="button" class="nav-toggle btn btn-secondary btn-sm" data-toggle-target="admin-sidebar" aria-expanded="false" aria-controls="admin-sidebar">Menu</button>
             <a href="{{ route('home') }}">View site</a>
             <div class="actions">
-                <span>{{ $user->name }}</span>
+                <a href="{{ route('mfa.setup') }}">{{ $user->name }}<span class="visually-hidden">: account security</span></a>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="btn btn-secondary btn-sm">Sign out</button>

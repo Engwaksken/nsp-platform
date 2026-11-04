@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\Audit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
@@ -108,6 +109,21 @@ class UserController extends Controller
         return Role::query()->orderBy('name')->pluck('name')
             ->reject(fn ($role) => in_array($role, User::PRIVILEGED_ROLES, true) && ! $actor->hasRole('super_admin'))
             ->values();
+    }
+
+    /** For a lost phone: the person sets up two-factor sign-in again at their next sign-in. */
+    public function resetMfa(Request $request, User $user): RedirectResponse
+    {
+        $actor = $request->user();
+        abort_if($user->is($actor), 403, 'You cannot reset your own two-factor sign-in. Ask another admin.');
+        abort_if($user->hasAnyRole(User::PRIVILEGED_ROLES) && ! $actor->hasRole('super_admin'), 403, 'Only a super admin can reset this account.');
+
+        $user->disableMfa();
+        // End their sessions so the reset takes effect immediately.
+        DB::table('sessions')->where('user_id', $user->id)->delete();
+        Audit::log('user.mfa_reset', $user);
+
+        return back()->with('status', 'Two-factor sign-in was reset. '.$user->name.' must set it up again at the next sign-in.');
     }
 
     private function checkedRoles(User $actor, array $roles): array

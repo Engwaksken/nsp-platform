@@ -13,7 +13,8 @@ class LocalLoginTest extends TestCase
     {
         $admin = User::factory()->withRole('platform_admin')->create(['email' => 'admin@hive.test']);
 
-        $this->post('/login', ['email' => 'ADMIN@hive.test', 'password' => 'password'])->assertRedirect('/admin');
+        // Admins must set up two-factor sign-in before using the admin area.
+        $this->post('/login', ['email' => 'ADMIN@hive.test', 'password' => 'password'])->assertRedirect('/account/security');
         $this->assertAuthenticatedAs($admin);
         $this->assertNotNull($admin->fresh()->last_login_at);
         $this->assertTrue(LoginAudit::query()->where('user_id', $admin->id)->where('success', true)->exists());

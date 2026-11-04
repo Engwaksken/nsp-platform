@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family={{ $brand['font_family'] }}:wght@400;500;600;700&display=swap">
 @endif
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=2">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};
@@ -31,4 +31,4 @@
         --brand-font: {!! e($brandFont) !!};
     }
 </style>
-<script src="{{ asset('js/nsp.js') }}?v=1" defer></script>
+<script src="{{ asset('js/nsp.js') }}?v=2" defer></script>

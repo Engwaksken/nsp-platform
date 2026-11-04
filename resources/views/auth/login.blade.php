@@ -8,6 +8,7 @@
             <h1>Sign in</h1>
 
             @error('oidc')<div class="alert alert-danger" role="alert">{{ $message }}</div>@enderror
+            @if (session('status'))<div class="alert alert-success" role="status">{{ session('status') }}</div>@endif
 
             @if ($oidcLogin)
                 <p><a class="btn btn-primary" href="{{ route('oidc.redirect') }}">Sign in with your Hive account</a></p>
@@ -27,6 +28,7 @@
                         <label class="checkbox"><input type="checkbox" name="remember" value="1"> <span>Keep me signed in on this device</span></label>
                     </div>
                     <button type="submit" class="btn btn-primary">Sign in</button>
+                    <a class="btn-link" href="{{ route('password.request') }}">Forgot your password?</a>
                 </form>
             @endif
 

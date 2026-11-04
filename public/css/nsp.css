@@ -49,6 +49,7 @@ p { margin: 0 0 1em; }
 .site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: .25rem; flex-wrap: wrap; align-items: center; }
 .site-nav a { display: block; padding: .5rem .75rem; text-decoration: none; color: var(--ink); border-radius: 8px; }
 .site-nav a:hover, .site-nav a[aria-current="page"] { background: var(--surface-alt); color: var(--brand-primary); }
+.site-nav a.btn-primary, .site-nav a.btn-primary:hover { background: var(--brand-primary); color: #fff; }
 @media (max-width: 760px) {
   .nav-toggle { display: inline-block; }
   .site-nav { width: 100%; display: none; padding-bottom: .75rem; }
@@ -118,6 +119,7 @@ details.faq summary { cursor: pointer; font-weight: 600; }
 
 .site-footer { background: #111827; color: #e5e7eb; padding: 2.5rem 0 1.5rem; margin-top: 3rem; }
 .site-footer a { color: #fff; }
+.site-footer .meta { color: #d1d5db; }
 .site-footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 1rem; }
 .footer-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 
@@ -129,6 +131,8 @@ details.faq summary { cursor: pointer; font-weight: 600; }
 
 /* Auth */
 .auth-card { max-width: 440px; margin: 3rem auto; }
+.qr-card { max-width: 280px; margin: 0 0 1rem; }
+.qr-card svg { width: 100%; height: auto; display: block; }
 .divider { display: flex; align-items: center; gap: .75rem; color: var(--ink-muted); margin: 1.25rem 0; }
 .divider::before, .divider::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
 
@@ -154,7 +158,8 @@ details.faq summary { cursor: pointer; font-weight: 600; }
 .kpis { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 1.25rem; }
 .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem; }
 .kpi strong { display: block; font-size: 1.8rem; }
-.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+/* position: relative keeps absolutely positioned screen-reader text inside the scroll box (no page-wide overflow). */
+.table-wrap { position: relative; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
 table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: .65rem .8rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { background: var(--surface-alt); font-size: .85rem; text-transform: uppercase; letter-spacing: .03em; color: var(--ink-muted); }

@@ -58,6 +58,10 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(3)->by('contact|'.$request->ip()),
             Limit::perDay(20)->by('contact-day|'.$request->ip()),
         ]);
+        RateLimiter::for('password-reset', fn (Request $request) => [
+            Limit::perMinute(5)->by('pw|'.$request->ip()),
+            Limit::perHour(5)->by('pw-email|'.strtolower((string) $request->input('email'))),
+        ]);
         RateLimiter::for('oidc', fn (Request $request) => Limit::perMinute(20)->by('oidc|'.$request->ip()));
 
         // Branding and menus for every page view; loaded once per request.

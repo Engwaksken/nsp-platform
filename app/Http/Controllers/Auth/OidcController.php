@@ -10,7 +10,6 @@ use App\Services\Oidc\OidcException;
 use App\Support\Audit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -18,7 +17,7 @@ use Illuminate\Support\Str;
 /** Sign-in through the shared Hive identity provider (authorization code + PKCE). */
 class OidcController extends Controller
 {
-    use RedirectsAfterLogin;
+    use CompletesLogin;
 
     public function __construct(private readonly OidcClient $client) {}
 
@@ -80,13 +79,10 @@ class OidcController extends Controller
             return $this->fail($result, 'inactive', 'Your account is not active. Contact an administrator.');
         }
 
-        Auth::login($result);
-        $request->session()->regenerate();
-        $request->session()->put('oidc_id_token', $tokens['id_token']);
-        $result->forceFill(['last_login_at' => now()])->save();
-        $this->audit($result, true, null);
+        // Trust the identity provider's second factor only when it says it used one (RFC 8176 "amr").
+        $idpUsedMfa = (bool) array_intersect((array) ($claims['amr'] ?? []), ['mfa', 'otp', 'hwk', 'sms']);
 
-        return $this->redirectAfterLogin($result);
+        return $this->completeLogin($result, 'oidc', false, $idpUsedMfa, ['oidc_id_token' => $tokens['id_token']]);
     }
 
     /** Returns the user, or an error message when the identity cannot be safely matched. */

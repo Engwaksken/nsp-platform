@@ -8,7 +8,7 @@
         @include('partials.field', ['name' => 'name', 'label' => 'New category', 'required' => true, 'maxlength' => 80])
         <button type="submit" class="btn btn-primary">Add</button>
     </form>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">Name</th><th scope="col">Posts</th><th scope="col">Actions</th></tr></thead>
             <tbody>

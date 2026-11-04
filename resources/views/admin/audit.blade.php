@@ -14,7 +14,7 @@
         </form>
     @endif
     <p class="hint">IP addresses and sign-in emails are stored as keyed hashes, not in clear text.</p>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             @if ($tab === 'changes')
                 <thead><tr><th scope="col">When</th><th scope="col">Who</th><th scope="col">Action</th><th scope="col">Subject</th><th scope="col">Details</th></tr></thead>

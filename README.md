@@ -23,7 +23,7 @@ Open http://127.0.0.1:8000 for the site and http://127.0.0.1:8000/admin for the 
 ## Tests
 
 ```
-php artisan test          # 70 tests; no network or database server needed
+php artisan test          # 90 tests; no network or database server needed
 vendor/bin/pint --test    # code style
 ```
 

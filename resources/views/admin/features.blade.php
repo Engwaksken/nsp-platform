@@ -4,7 +4,7 @@
 @section('content')
     <div class="page-head"><h1>Feature flags</h1></div>
     <p class="hint">Modules for later phases are locked until they are built, tested and approved.</p>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">Feature</th><th scope="col">Description</th><th scope="col">State</th><th scope="col">Change</th></tr></thead>
             <tbody>

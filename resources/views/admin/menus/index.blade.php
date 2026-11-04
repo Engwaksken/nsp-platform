@@ -8,7 +8,7 @@
     @foreach ($menus as $menu)
         <section class="panel" aria-labelledby="menu-{{ $menu->id }}">
             <h2 id="menu-{{ $menu->id }}">{{ $menu->name }} menu</h2>
-            <div class="table-wrap">
+            <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
                 <table>
                     <thead><tr><th scope="col">Label</th><th scope="col">Page or link</th><th scope="col">Order</th><th scope="col">New tab</th><th scope="col">Actions</th></tr></thead>
                     <tbody>

@@ -11,7 +11,7 @@
         @include('partials.field', ['name' => 'status_code', 'label' => 'Type', 'type' => 'select', 'options' => [301 => 'Permanent (301)', 302 => 'Temporary (302)'], 'value' => 301, 'required' => true])
         <div><button type="submit" class="btn btn-primary">Add redirect</button></div>
     </form>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">From</th><th scope="col">To</th><th scope="col">Type</th><th scope="col">Uses</th><th scope="col">Actions</th></tr></thead>
             <tbody>

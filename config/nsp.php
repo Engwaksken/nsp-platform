@@ -32,6 +32,11 @@ return [
         'cache_seconds' => 3600,
     ],
 
+    'mfa' => [
+        // Admin roles must use two-factor sign-in (authenticator app). Only switch off for local development.
+        'enforce' => (bool) env('NSP_MFA_ENFORCE', true),
+    ],
+
     // Version of the consent wording shown on the contact form; bump when the text changes.
     'contact_consent_version' => '2026-11-04',
 ];

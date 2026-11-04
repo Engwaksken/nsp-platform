@@ -2,6 +2,13 @@
 
 Sign in at `/login`. Staff with an admin role land on the **Dashboard**. The menu shows only what your role allows.
 
+## Two-factor sign-in (required for every admin role)
+- The first time you sign in, you are asked to set up an authenticator app (Google Authenticator, Microsoft Authenticator or Authy). Scan the QR code and enter the 6-digit code.
+- **Save the 8 recovery codes** somewhere safe. Each one works once if you lose your phone.
+- After that, every sign-in asks for your password and then the code from the app.
+- Lost your phone and your codes? Ask a super admin to reset two-factor sign-in on your user page. They should confirm who you are first, for example by phone.
+- Forgot your password? Use **Forgot your password?** on the sign-in page. People who sign in with their Hive account reset their password there instead.
+
 ## Who can do what
 
 | Role | Can do |

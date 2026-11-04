@@ -30,4 +30,22 @@
             <a class="btn btn-secondary" href="{{ route('admin.users.index') }}">Cancel</a>
         </div>
     </form>
+
+    @if ($user->exists)
+        <section class="panel" aria-labelledby="mfa-heading">
+            <h2 id="mfa-heading">Two-factor sign-in</h2>
+            @if ($user->hasMfa())
+                <p>On since {{ $user->mfa_enabled_at->format('j M Y') }}. {{ $user->recoveryCodesLeft() }} recovery codes left.</p>
+                @unless ($user->is(auth()->user()))
+                    <form method="post" action="{{ route('admin.users.reset-mfa', $user) }}" data-confirm="Reset two-factor sign-in for {{ $user->name }}? Only do this after confirming their identity, for example by phone.">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">Reset two-factor sign-in</button>
+                    </form>
+                    <p class="hint">Use this when someone has lost their phone and recovery codes. Confirm who they are first.</p>
+                @endunless
+            @else
+                <p>Not set up.@if ($user->requiresMfa()) They will be asked to set it up before they can use the admin area.@endif</p>
+            @endif
+        </section>
+    @endif
 @endsection

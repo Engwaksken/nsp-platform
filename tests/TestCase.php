@@ -20,6 +20,8 @@ abstract class TestCase extends BaseTestCase
         $this->seed(RolesAndPermissionsSeeder::class);
         Cache::forget(Settings::CACHE_KEY);
         Features::flush();
+        // Most tests act as an admin who already passed two-factor sign-in. MfaTest covers the real flow.
+        $this->withSession(['mfa_verified' => true]);
     }
 
     protected function userWithRole(string ...$roles): User

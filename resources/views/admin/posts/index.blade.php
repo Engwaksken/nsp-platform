@@ -10,7 +10,7 @@
         <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}"></div>
         <button class="btn btn-secondary" type="submit">Search</button>
     </form>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">Title</th><th scope="col">Status</th><th scope="col">Publish date</th><th scope="col">Actions</th></tr></thead>
             <tbody>
