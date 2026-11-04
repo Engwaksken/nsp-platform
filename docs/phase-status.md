@@ -12,7 +12,7 @@
 | 2: Identity and registry | **Registry implemented and tested locally** (inside NSP, decision M8). Shared login (OIDC) deferred by owner (D1). | Partly: "NSP-first" journey works without duplicates; the IMS-first journey needs IMS changes (Phase 3) and an IdP. |
 | 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
-| 5: Ecosystem services | **5a Opportunities and events** (pushed, CI green) **5b Funding and investors** (pushed, CI green) and **5c Experts and mentors** (implemented and tested locally). Still to build: 5d talent, 5e marketplace. | Not passed: needs all five modules and role-based UAT |
+| 5: Ecosystem services | **5a Opportunities and events** (pushed, CI green) **5b Funding and investors** (pushed, CI green) **5c Experts and mentors** (pushed, CI green) and **5d Talent and jobs** (implemented and tested locally). Still to build: 5e marketplace. | Not passed: needs all five modules and role-based UAT |
 | 6 to 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
@@ -144,8 +144,25 @@ Not done: investor-side document watermarking, deal-room Q&A, and investor repor
 
 Not done: calendar invites (.ics) and reminders before sessions, paid bookings (decision D6), and expert reporting dashboards (Phase 6).
 
+## Phase 5d: talent and recruitment (implemented 2026-11-10)
+
+| Area | What exists | Evidence |
+|---|---|---|
+| Vacancies | Startups post full-time, part-time, internship, gig or volunteer roles as drafts, then publish, close, mark filled or move back to draft. Only owners, founders and admins manage them. | `TalentTest` |
+| Jobs board | Public `/jobs` with keyword, type, sector and remote filters; only open, unexpired roles of active startups. Shows the startup's name, sector and country (publishing is the startup's choice). | `test_public_board_lists_only_open_vacancies_of_active_startups` |
+| Candidate profiles | Headline, summary, skills, work types, location, open to work, CV (PDF or .docx, content-checked, 5 MB, private disk). Hidden by default; opting in to search records the consent time and wording version; opting out clears it at once. Candidates can delete their profile and CV. | `test_search_shows_only_opted_in_candidates…`, `test_cv_upload_checks_content…`, `test_team_members_cannot_apply…` |
+| Applications | Explicit consent per application. Each application keeps its own CV copy, so later profile changes do not alter what was sent. Only the startup's owners, founders and admins see applications and CVs; CV downloads are audited. Withdrawing deletes the copy. | `test_apply_shares_a_cv_copy_with_editors_only_and_withdrawal_deletes_it` |
+| Pipeline | New → shortlisted → interview → offer → hired, or not selected. Each move is recorded (`hiring_pipeline_events`) and the candidate is emailed with candidate-friendly wording and an optional message. Team notes and interview notes are never shown to the candidate. | `test_pipeline_moves_notify_the_candidate_and_team_notes_stay_private` |
+| Interviews | Proposed by the team (online needs an https link); the candidate confirms or asks for another time; the team records held or cancelled. | same test |
+| Search and invitations | Editors search opted-in candidates by skill, headline or place; no email or CV is shown. They can invite a candidate to apply to an open vacancy; applying stays the candidate's choice. | `test_search_shows_only_opted_in_candidates…` |
+| Retention | `talent:purge-cvs` (daily 02:30) deletes application CV copies `NSP_TALENT_CV_RETENTION_DAYS` (default 180) after the application or vacancy closes. | `test_cv_upload_checks_content_and_retention_purge_deletes_old_copies` |
+| Moderation | Staff with **manage-talent** see all vacancies and take one down with a note the startup sees; they cannot see applications or CVs. | `test_viewers_cannot_post_vacancies_and_staff_can_take_them_down` |
+| Accessibility | axe audit of 11 jobs, candidate and hiring pages at 1280 and 360 px: 0 violations | `tests/a11y` |
+
+Not done: job alerts by email, structured salary ranges, and hiring reports (Phase 6). The retention period is a proposal until decision D8 sets it.
+
 ## Test results (local)
-- `php artisan test`: **174 passed, 1050 assertions** (5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
+- `php artisan test`: **181 passed, 1158 assertions** (5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

@@ -10,10 +10,10 @@ class FeatureFlagsTest extends TestCase
     public function test_modules_that_are_not_built_cannot_be_switched_on(): void
     {
         $this->actingAs($this->userWithRole('platform_admin'))
-            ->put('/admin/features/talent', ['enabled' => 1])
+            ->put('/admin/features/ai_assistant', ['enabled' => 1])
             ->assertSessionHasErrors('flags');
 
-        $this->assertFalse(Features::enabled('talent'));
+        $this->assertFalse(Features::enabled('ai_assistant'));
     }
 
     public function test_local_login_cannot_be_turned_off_while_sso_is_off(): void

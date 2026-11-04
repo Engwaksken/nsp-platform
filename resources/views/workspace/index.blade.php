@@ -38,6 +38,9 @@
                     @elseif ($section['key'] === 'experts')
                         <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.experts', $active->startup) }}">Find an expert</a> @endif
                             <a class="btn btn-secondary btn-sm" href="{{ route('experts.dashboard') }}">I am an expert or mentor</a></p>
+                    @elseif ($section['key'] === 'talent')
+                        <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.talent', $active->startup) }}">Hire</a> @endif
+                            <a class="btn btn-secondary btn-sm" href="{{ route('talent.dashboard') }}">Find a job</a></p>
                     @elseif ($section['key'] === 'funding')
                         <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.funding', $active->startup) }}">Open funding</a> @endif
                             <a class="btn btn-secondary btn-sm" href="{{ route('investor.dashboard') }}">I am an investor</a></p>

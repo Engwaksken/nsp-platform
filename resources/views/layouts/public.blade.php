@@ -32,6 +32,9 @@
                 @if (\App\Support\Features::enabled('opportunities'))
                     <li><a href="{{ route('opportunities.index') }}" @if (request()->routeIs('opportunities.*')) aria-current="page" @endif>Opportunities</a></li>
                 @endif
+                @if (\App\Support\Features::enabled('talent'))
+                    <li><a href="{{ route('jobs.index') }}" @if (request()->routeIs('jobs.*')) aria-current="page" @endif>Jobs</a></li>
+                @endif
                 @auth
                     <li><a href="{{ route('workspace') }}">My workspace</a></li>
                     <li><a href="{{ route('mfa.setup') }}">Security</a></li>

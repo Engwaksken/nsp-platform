@@ -14,7 +14,7 @@ return [
         'vgi' => ['default' => (bool) env('NSP_VGI_ENABLED', true), 'label' => 'Growth and VGI', 'description' => 'Growth assessments with an approved rubric, results and growth plans.'],
         'funding' => ['default' => (bool) env('NSP_FUNDING_ENABLED', true), 'label' => 'Funding and investors', 'description' => 'Funding requests, verified investors, introductions and private data rooms.'],
         'experts' => ['default' => (bool) env('NSP_EXPERTS_ENABLED', true), 'label' => 'Experts and mentors', 'description' => 'Verified experts, consultation requests, mentor assignments, sessions, actions and feedback.'],
-        'talent' => ['default' => false, 'label' => 'Talent', 'description' => 'Vacancies, candidates and hiring (Phase 5).'],
+        'talent' => ['default' => (bool) env('NSP_TALENT_ENABLED', true), 'label' => 'Talent and jobs', 'description' => 'Vacancies, candidate profiles with consent, applications, shortlisting and interviews.'],
         'opportunities' => ['default' => (bool) env('NSP_OPPORTUNITIES_ENABLED', true), 'label' => 'Opportunities and events', 'description' => 'Grants, accelerators, competitions, events and calls with eligibility, saving, registration and recommendations.'],
         'ai_assistant' => ['default' => false, 'label' => 'AI assistant', 'description' => 'Optional AI help with provenance and consent (Phase 6).'],
     ],
@@ -84,6 +84,14 @@ return [
         ],
         // Ratings are shown in the directory only once an expert has this many, so no single review can be identified.
         'min_reviews_shown' => 3,
+    ],
+
+    'talent' => [
+        // Copies of CVs sent with applications are deleted this many days after the application or vacancy closes.
+        'cv_retention_days' => (int) env('NSP_TALENT_CV_RETENTION_DAYS', 180),
+        // Bump when the wording of the candidate search consent changes.
+        'consent_version' => '2026-11-10',
+        'cv_max_kb' => 5120,
     ],
 
     'contact_consent_version' => '2026-11-04',

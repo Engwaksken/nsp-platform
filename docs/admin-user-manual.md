@@ -14,7 +14,7 @@ Sign in at `/login`. Staff with an admin role land on the **Dashboard**. The men
 | Role | Can do |
 |---|---|
 | Content editor | Write pages and news as drafts, upload media, edit menus, FAQs, testimonials and partners |
-| Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities, verifying investors and experts, and assigning mentors |
+| Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities, verifying investors and experts, assigning mentors and moderating vacancies |
 | Support | Read and handle contact messages |
 | Auditor | Read the audit log |
 | Platform admin | Everything except granting super admin or platform admin |
@@ -111,3 +111,8 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
 - **Admin › Experts** lists expert applications. Check experience (website, LinkedIn or a reference) before you **Verify**. **Do not verify** and **Suspend** need a note the expert sees. Suspending stops them using their engagements.
 - **Admin › Mentoring and engagements:** assign a verified mentor to a startup with a focus. The mentorship starts at once and both sides are emailed.
 - The engagements list shows status, sessions held and feedback. Session notes are private to the startup and the expert and are not shown to staff.
+
+## Vacancies (ecosystem managers and platform admins)
+- Startups publish vacancies on the public **Jobs** board themselves. **Admin › Vacancies** lists them by status.
+- **Take down** anything misleading, discriminatory, unlawful or unpaid where pay is required. A reason is required and the startup sees it. **Restore** puts it back as a draft.
+- Staff cannot see applications or CVs. Candidate CV copies are deleted automatically after the retention period (`NSP_TALENT_CV_RETENTION_DAYS`).

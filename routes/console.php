@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Schedule;
 // Remind people about saved opportunities 3 days before the deadline.
 Schedule::command('opportunities:send-reminders')->dailyAt('08:00')->withoutOverlapping();
 
+// Delete candidates' application CVs after the retention period (Phase 5d).
+Schedule::command('talent:purge-cvs')->dailyAt('02:30')->withoutOverlapping();
+
 // Send registry events to connected systems (no-op unless ims_integration is on).
 Schedule::command('registry:deliver-outbox')->everyMinute()->withoutOverlapping();
 

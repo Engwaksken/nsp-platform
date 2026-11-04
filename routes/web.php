@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\ExpertController;
 use App\Http\Controllers\InvestorController;
@@ -38,6 +39,15 @@ Route::middleware('feature:opportunities')->prefix('opportunities')->name('oppor
         Route::post('/{opportunity}/withdraw', [Site\OpportunityController::class, 'withdraw'])->name('withdraw');
     });
     Route::get('/{opportunity}', [Site\OpportunityController::class, 'show'])->name('show');
+});
+
+/*
+| Jobs board (Phase 5d)
+*/
+Route::middleware('feature:talent')->prefix('jobs')->name('jobs.')->group(function () {
+    Route::get('/', [Site\JobController::class, 'index'])->name('index');
+    Route::get('/{vacancy}', [Site\JobController::class, 'show'])->name('show');
+    Route::post('/{vacancy}/apply', [Site\JobController::class, 'apply'])->middleware(['auth', 'throttle:20,60'])->name('apply');
 });
 
 /*
@@ -125,6 +135,21 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::get('/workspace/startups/{startup}/experts', [Workspace\ExpertDirectoryController::class, 'index'])->name('workspace.experts');
         Route::post('/workspace/startups/{startup}/experts', [Workspace\ExpertDirectoryController::class, 'request'])->middleware('throttle:20,60')->name('workspace.experts.request');
     });
+    Route::middleware('feature:talent')->prefix('workspace/startups/{startup}/talent')->name('workspace.talent')->group(function () {
+        Route::get('/', [Workspace\TalentController::class, 'index'])->name('');
+        Route::post('/vacancies', [Workspace\TalentController::class, 'store'])->middleware('throttle:30,60')->name('.store');
+        Route::get('/vacancies/{vacancy}/edit', [Workspace\TalentController::class, 'edit'])->name('.edit');
+        Route::put('/vacancies/{vacancy}', [Workspace\TalentController::class, 'update'])->name('.update');
+        Route::post('/vacancies/{vacancy}/status', [Workspace\TalentController::class, 'setStatus'])->name('.status');
+        Route::get('/vacancies/{vacancy}', [Workspace\TalentController::class, 'pipeline'])->name('.vacancy');
+        Route::get('/applications/{application}', [Workspace\TalentController::class, 'application'])->name('.application');
+        Route::put('/applications/{application}', [Workspace\TalentController::class, 'move'])->name('.move');
+        Route::post('/applications/{application}/interviews', [Workspace\TalentController::class, 'scheduleInterview'])->name('.interviews.store');
+        Route::put('/interviews/{interview}', [Workspace\TalentController::class, 'updateInterview'])->name('.interviews.update');
+        Route::get('/applications/{application}/cv', [Workspace\TalentController::class, 'cv'])->middleware('throttle:60,1')->name('.cv');
+        Route::get('/candidates', [Workspace\TalentController::class, 'search'])->name('.search');
+        Route::post('/candidates/invite', [Workspace\TalentController::class, 'invite'])->middleware('throttle:30,60')->name('.invite');
+    });
     Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
     Route::middleware(['feature:ims_integration', 'throttle:30,1'])->group(function () {
         Route::get('/connect/{clientId}', [Workspace\ConnectController::class, 'show'])->name('connect.show');
@@ -169,6 +194,19 @@ Route::middleware(['auth', 'feature:experts'])->group(function () {
         Route::post('/cancel', [EngagementController::class, 'cancel'])->name('cancel');
         Route::post('/review', [EngagementController::class, 'review'])->name('review');
     });
+});
+
+/*
+| Candidates (Phase 5d)
+*/
+Route::middleware(['auth', 'feature:talent'])->prefix('talent')->name('talent.')->group(function () {
+    Route::get('/', [CandidateController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [CandidateController::class, 'profile'])->name('profile');
+    Route::put('/profile', [CandidateController::class, 'saveProfile'])->middleware('throttle:10,1')->name('profile.store');
+    Route::delete('/profile', [CandidateController::class, 'deleteProfile'])->name('profile.destroy');
+    Route::get('/profile/cv', [CandidateController::class, 'cv'])->name('cv');
+    Route::post('/applications/{application}/withdraw', [CandidateController::class, 'withdraw'])->name('withdraw');
+    Route::post('/interviews/{interview}/response', [CandidateController::class, 'respondToInterview'])->name('interviews.respond');
 });
 
 /*
@@ -282,6 +320,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
         Route::put('experts/{expert}', [Admin\ExpertController::class, 'decide'])->name('experts.decide');
         Route::get('engagements', [Admin\ExpertController::class, 'engagements'])->name('engagements.index');
         Route::post('engagements', [Admin\ExpertController::class, 'assign'])->name('engagements.assign');
+    });
+    Route::middleware(['can:manage-talent', 'feature:talent'])->group(function () {
+        Route::get('vacancies', [Admin\VacancyController::class, 'index'])->name('vacancies.index');
+        Route::post('vacancies/{vacancy}/moderate', [Admin\VacancyController::class, 'moderate'])->name('vacancies.moderate');
     });
     Route::middleware('can:review-duplicates')->group(function () {
         Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');

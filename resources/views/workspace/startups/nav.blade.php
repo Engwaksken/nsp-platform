@@ -9,6 +9,7 @@
       + (\App\Support\Features::enabled('opportunities') ? ['workspace.opportunities' => 'Opportunities'] : [])
       + (\App\Support\Features::enabled('funding') ? ['workspace.funding' => 'Funding'] : [])
       + (\App\Support\Features::enabled('experts') ? ['workspace.experts' => 'Experts'] : [])
+      + (\App\Support\Features::enabled('talent') ? ['workspace.talent' => 'Talent'] : [])
       + (\App\Support\Features::enabled('ims_integration') ? ['workspace.startups.programs' => 'Applications & programs'] : []) as $route => $label)
         <a class="tag" href="{{ route($route, $startup) }}" @if (request()->routeIs($route)) aria-current="true" @endif>{{ $label }}</a>
     @endforeach

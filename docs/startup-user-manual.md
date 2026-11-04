@@ -89,3 +89,15 @@ NSP helps you meet investors that Hive has checked. It does not promise or arran
 - Go to **My workspace › I am an expert or mentor** and fill in your profile. Hive checks it before founders can find you.
 - Your dashboard shows new requests, upcoming sessions and the startups you support. Your private session notes are visible only to you.
 - NSP does not handle payments. If you charge a fee, agree it directly with the startup.
+
+## Hiring (Talent)
+- Open your startup, then **Talent**. **Post a vacancy** (job, internship, gig or volunteer role); it starts as a draft. **Publish** puts it on the public **Jobs** board with your startup’s name, sector and country.
+- Each vacancy has its **applications**. Open one to read the profile and cover note, download the CV, move it through the stages, write team notes (never shown to the candidate) and propose interviews. When you change the stage the candidate gets an email; add a short message if you like.
+- **Find candidates** shows people who chose to be found by startups. You see skills and preferences, not their email or CV. **Invite to apply** sends them your vacancy; applying is their choice.
+- Only owners, founders and admins can see applications and CVs.
+
+## Looking for work
+- **Jobs** in the top menu lists open roles. Create your **candidate profile** once (headline, skills, CV) and apply with one click and an optional note.
+- Your profile is hidden unless you choose **Startups on NSP can find my profile**. Even then, startups never see your email or CV until you apply.
+- **My applications** shows each stage, messages and interview requests. Confirm an interview or ask for another time there. You can **withdraw** an application; its CV copy is deleted at once.
+- You can delete your profile and CV at any time.
