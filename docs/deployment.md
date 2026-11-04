@@ -43,7 +43,7 @@ Add one cron job:
 1. Back up first: `mysqldump` the NSP database and archive `storage/app/public` and `storage/app/private`.
 2. Run `php artisan down --retry=60`.
 3. Upload the new code, then run `composer install --no-dev --optimize-autoloader` and `php artisan migrate --force`.
-4. Run `php artisan db:seed --class=RolesAndPermissionsSeeder --force` when a release adds permissions (it is safe to repeat; Phase 5b added `verify-investors`, 5c added `manage-experts`, 5d added `manage-talent`, 5e added `moderate-marketplace`, 6a added `manage-communications`, 6b added `view-insights`).
+4. Run `php artisan db:seed --class=RolesAndPermissionsSeeder --force` when a release adds permissions (it is safe to repeat; Phase 5b added `verify-investors`, 5c added `manage-experts`, 5d added `manage-talent`, 5e added `moderate-marketplace`, 6a added `manage-communications`, 6b added `view-insights`, 7a added `view-system-health`).
 5. Run `php artisan config:cache && php artisan route:cache && php artisan view:cache`, then `php artisan up`.
 
 Data-room files (`storage/app/private/data-room`) and candidate CVs (`storage/app/private/talent`) live (the private `local` disk). Include that folder in backups; never link it into `public`.
@@ -51,6 +51,8 @@ Data-room files (`storage/app/private/data-room`) and candidate CVs (`storage/ap
 **Rollback:** restore the previous code folder, restore the database dump if a migration ran, then clear and rebuild the caches.
 
 ## After deploying
+- Set `NSP_BACKUP_PASSWORD` (store it in the password manager), run `php artisan nsp:backup` once, and arrange the daily off-server copy (`operations-runbook.md` §3).
+- Set `NSP_HEALTH_TOKEN` and point an uptime monitor at `/health` (`operations-runbook.md` §2).
 - `https://<domain>/up` returns 200.
 - `/robots.txt` shows the production rules (`APP_ENV=production`).
 - Response headers include `Content-Security-Policy` and `Strict-Transport-Security`.

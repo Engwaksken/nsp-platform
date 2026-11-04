@@ -14,7 +14,7 @@
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
 | 5: Ecosystem services | **All five modules implemented and tested**: 5a opportunities and events, 5b funding and investors, 5c experts and mentors, 5d talent and jobs (pushed, CI green) and 5e marketplace and startup showcase (tested locally). | Not passed yet: needs the role-based UAT in `testing-uat.md` (Phase 5 script) on staging |
 | 6: Communications and intelligence | **All three parts implemented**: 6a notifications and 6b dashboards, KPIs and exports (pushed, CI green); 6c optional AI assistant (tested locally, **switched off until legal review, decision D13**). | Not passed yet: needs the privacy and quality evaluation, including the legal review in `ai-assistant.md` |
-| 7 | Not started. Planned in `backlog.md`. | — |
+| 7: Production readiness | **7a operations implemented and tested locally** (backups with a verified restore path, health checks, uptime endpoint, runbook). Still to do: 7b security review and performance pass, 7c accessibility sweep and go-live checklist; staging, the restore drill on a clean server, penetration test and UAT need hosting (D9, D10). | Not passed: needs a signed go-live checklist |
 
 ## Phase 0: completed this sprint
 - `discovery.md`: read-only audit of Hive IMS. Confirmed: no IdP, no API, no startups table, shared hosting with cron only.
@@ -219,8 +219,18 @@ Full design and review brief: `docs/ai-assistant.md`.
 | API client | Official `anthropic-ai/sdk`; model `claude-opus-5-5`, effort `medium`, server-side refusal fallback (`fallbacks: "default"`). The real client is tested against a local stand-in server for request shape, refusal, 429 and connection failure. | `AnthropicClientTest` |
 | Accessibility | axe audit of the consent page, the form and a shown suggestion at 1280 and 360 px: 0 violations | `tests/a11y` |
 
+## Phase 7a: operations (implemented 2026-11-15)
+
+| Item | What exists | Evidence |
+|---|---|---|
+| Backups (OPS-703) | `nsp:backup` (daily 01:30): database (`VACUUM INTO` for SQLite; `mysqldump --single-transaction` with credentials in a private option file for MySQL), private files and media, and a SHA-256 manifest, all **AES-256 encrypted**. Production refuses unencrypted backups. Each backup is checked after writing, and the oldest beyond `NSP_BACKUP_KEEP` are deleted. `--verify-only` checks any archive. | `OperationsTest` (encryption of every entry, wrong password, tampering, rotation); a real run against the local database |
+| Restore | Manual, documented procedure (no command can overwrite live data) and a restore-drill log. | `docs/operations-runbook.md` §4 |
+| Health | Admin › System health, `nsp:health` (exit code for cron monitors) and token-protected `GET /health` (404 without a token; statuses only, 503 on failure). Checks: settings, database, scheduler heartbeat, queue age, failed jobs, IMS deliveries, email, backup age and encryption, disk. | `OperationsTest` |
+| Runbook (DOC-709 part) | Schedules, monitoring set-up, off-server copies, secrets that are not in backups (`APP_KEY`, backup password), what to do per failing check, incident steps, routine checks. | `docs/operations-runbook.md` |
+| CI | The zip extension is added so backup tests run on GitHub too. | `.github/workflows/tests.yml` |
+
 ## Test results (local)
-- `php artisan test`: **206 passed, 1417 assertions** (6b: 198 and 1345; 6a: 193 and 1285; 5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
+- `php artisan test`: **212 passed, 1452 assertions** (6c: 206 and 1417; 6b: 198 and 1345; 6a: 193 and 1285; 5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

@@ -21,7 +21,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, intl, pdo_sqlite, gd, openssl, fileinfo
+          extensions: mbstring, intl, pdo_sqlite, gd, openssl, fileinfo, zip
           coverage: none
 
       - name: Install dependencies

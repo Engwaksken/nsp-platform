@@ -141,5 +141,17 @@ return [
         ],
     ],
 
+    'backup' => [
+        // Outside storage/app/private and public so a backup never contains older backups.
+        'path' => env('NSP_BACKUP_PATH', storage_path('app/backups')),
+        'password' => env('NSP_BACKUP_PASSWORD'),
+        'keep' => (int) env('NSP_BACKUP_KEEP', 14),
+        'mysqldump' => env('NSP_MYSQLDUMP', 'mysqldump'),
+        'connection' => null, // the default database connection
+    ],
+
+    // Bearer token for GET /health (uptime monitors). Leave empty to switch the endpoint off.
+    'health_token' => env('NSP_HEALTH_TOKEN'),
+
     'contact_consent_version' => '2026-11-04',
 ];

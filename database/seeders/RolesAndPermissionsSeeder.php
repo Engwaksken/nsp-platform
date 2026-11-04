@@ -40,6 +40,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'moderate-marketplace' => 'Handle marketplace reports and disputes, and take listings down',
         'manage-communications' => 'Send announcements and see the email delivery log',
         'view-insights' => 'See ecosystem KPIs and download aggregate reports',
+        'view-system-health' => 'See system health (scheduler, queue, email, backups, disk)',
     ];
 
     public const ROLES = [
@@ -49,7 +50,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'review-assessments', 'manage-opportunities', 'verify-investors', 'manage-experts', 'manage-talent', 'moderate-marketplace', 'manage-communications', 'view-insights'],
         'content_editor' => ['manage-pages', 'manage-posts', 'manage-media', 'manage-menus', 'manage-site-content'],
         'support' => ['manage-contact-messages'],
-        'auditor' => ['view-audit-log', 'view-insights'],
+        'auditor' => ['view-audit-log', 'view-insights', 'view-system-health'],
         'investor' => [],
         'expert' => [],
         'consultant' => [],

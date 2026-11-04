@@ -62,13 +62,14 @@
                     @can('manage-redirects') {!! $navLink('admin.redirects.index', 'Redirects', 'admin.redirects.*') !!} @endcan
                 </ul>
             @endif
-            @if ($user->canAny(['manage-users', 'manage-settings', 'manage-feature-flags', 'view-audit-log']))
+            @if ($user->canAny(['manage-users', 'manage-settings', 'manage-feature-flags', 'view-audit-log', 'view-system-health']))
                 <p class="nav-heading">System</p>
                 <ul>
                     @can('manage-users') {!! $navLink('admin.users.index', 'Users and roles', 'admin.users.*') !!} @endcan
                     @can('manage-settings') {!! $navLink('admin.settings.edit', 'Branding and settings', 'admin.settings.*') !!} @endcan
                     @can('manage-feature-flags') {!! $navLink('admin.features.index', 'Feature flags', 'admin.features.*') !!} @endcan
                     @can('view-audit-log') {!! $navLink('admin.audit.index', 'Audit log', 'admin.audit.*') !!} @endcan
+                    @can('view-system-health') {!! $navLink('admin.system', 'System health', 'admin.system') !!} @endcan
                 </ul>
             @endif
         </nav>

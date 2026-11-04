@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\ExpertController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Site;
@@ -261,6 +262,8 @@ Route::middleware(['signed', 'throttle:20,1'])->group(function () {
     Route::post('/notifications/unsubscribe/{user}/{type}', [NotificationController::class, 'confirmUnsubscribe'])->name('notifications.unsubscribe.confirm');
 });
 
+Route::get('/health', [HealthController::class, 'endpoint'])->middleware('throttle:30,1')->name('health');
+
 /*
 | Admin CMS
 */
@@ -394,6 +397,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
         Route::get('/kpis.csv', [Admin\InsightsController::class, 'exportKpis'])->middleware('throttle:20,60')->name('export');
         Route::get('/startups.csv', [Admin\InsightsController::class, 'exportStartups'])->middleware('throttle:10,60')->name('startups');
     });
+    Route::get('system', [HealthController::class, 'admin'])->middleware('can:view-system-health')->name('system');
     Route::middleware('can:review-duplicates')->group(function () {
         Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');
         Route::post('duplicates/scan', [Admin\DuplicateController::class, 'scan'])->name('duplicates.scan');
