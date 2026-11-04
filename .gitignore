@@ -22,3 +22,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/tests/a11y/node_modules
+/tests/a11y/pages.json

@@ -14,7 +14,7 @@
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
 | 5: Ecosystem services | **All five modules implemented and tested**: 5a opportunities and events, 5b funding and investors, 5c experts and mentors, 5d talent and jobs (pushed, CI green) and 5e marketplace and startup showcase (tested locally). | Not passed yet: needs the role-based UAT in `testing-uat.md` (Phase 5 script) on staging |
 | 6: Communications and intelligence | **All three parts implemented**: 6a notifications and 6b dashboards, KPIs and exports (pushed, CI green); 6c optional AI assistant (tested locally, **switched off until legal review, decision D13**). | Not passed yet: needs the privacy and quality evaluation, including the legal review in `ai-assistant.md` |
-| 7: Production readiness | **7a operations** and **7b internal security review and performance pass** implemented and tested locally. Still to do: 7c accessibility sweep and go-live checklist; staging, the restore drill on a clean server, penetration test and UAT need hosting (D9, D10). | Not passed: needs a signed go-live checklist |
+| 7: Production readiness | **7a operations** and **7b security review and performance** (pushed, CI green); **7c full-site accessibility sweep and go-live checklist** (done locally). Everything left needs hosting or people: staging, the restore drill on a clean server, penetration test and UAT need hosting (D9, D10). | Not passed: needs a signed go-live checklist |
 
 ## Phase 0: completed this sprint
 - `discovery.md`: read-only audit of Hive IMS. Confirmed: no IdP, no API, no startups table, shared hosting with cron only.
@@ -239,8 +239,16 @@ Full design and review brief: `docs/ai-assistant.md`.
 
 Still needed on staging: an external penetration test, and a load test on a low-bandwidth profile (PERF-708 acceptance).
 
+## Phase 7c: accessibility sweep and go-live checklist (2026-11-15)
+
+| Item | What exists | Evidence |
+|---|---|---|
+| Full-site sweep (A11Y-706) | `nsp:audit-fixture` (local and testing only) creates one realistic record in every module, lists 81 pages, and removes only its own marked data with `--clean`. `tests/a11y/audit.js` checks every page at 1280 and 360 px: axe WCAG 2.1 A/AA, status, silent redirects, overflow, one h1, lang, title, the 404 page, and keyboard focus visibility. | Result: 163 checks, **0 violations, 0 problems**; `AuditFixtureTest`; `docs/accessibility.md` |
+| Manual accessibility plan | Screen reader (NVDA, TalkBack or VoiceOver), zoom, keyboard-only UAT, errors, contrast and time limits, with a results table. No compliance claim before it is done. | `docs/accessibility.md` §2 |
+| Go-live checklist (REL-710) | Decisions, environment, security, data protection, backups and monitoring, quality, people and content, launch, sign-off. | `docs/go-live-checklist.md` |
+
 ## Test results (local)
-- `php artisan test`: **222 passed, 1520 assertions** (7a: 212 and 1452; 6c: 206 and 1417; 6b: 198 and 1345; 6a: 193 and 1285; 5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
+- `php artisan test`: **224 passed, 1537 assertions** (7b: 222 and 1520; 7a: 212 and 1452; 6c: 206 and 1417; 6b: 198 and 1345; 6a: 193 and 1285; 5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

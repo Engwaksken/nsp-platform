@@ -38,13 +38,8 @@ Status: **A** = automated test passes locally. **M** = manual check done. **—*
 
 Extra Phase 1 security tests: Markdown/HTML escaping, unsafe link schemes, a script disguised as an image, open-redirect protection after login, rate limits, the contact-form honeypot, and security headers on 404s.
 
-## Accessibility audit (optional, needs Node.js and Chrome)
-```
-cd tests/a11y && npm install
-NSP_MFA_ENFORCE=false php artisan serve     # in the project root, local machine only
-node audit.js http://127.0.0.1:8000 <admin-email> <admin-password>
-```
-Set `CHROME_PATH` if Chrome is not in the default Windows location. Never turn off `NSP_MFA_ENFORCE` on staging or production.
+## Accessibility audit
+The full-site sweep (sample data in every module, 81 pages at two widths, keyboard checks) and the manual checks are described in `accessibility.md`. Never turn off `NSP_MFA_ENFORCE` on staging or production; the sweep needs it off only on a local machine.
 
 ## UAT script for Phase 1 (staging)
 Run each step as the role named and record pass or fail with a screenshot.
