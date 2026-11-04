@@ -1,0 +1,632 @@
+openapi: 3.1.0
+info:
+  title: Hive Startup Registry API
+  version: 1.0.0-draft
+  description: |
+    DRAFT CONTRACT. NOT IMPLEMENTED. No server exposes this API today.
+
+    This is the proposed Registry API v1 from the Hive NSP specification (section 7).
+    It is for review by the owner, IMS and NSP developers. Hosting (decision D2),
+    the identity provider (D1) and consent wording (D4) are still pending, so paths,
+    fields and scopes may change before implementation.
+
+    Conventions:
+    - Writes to an existing startup need `If-Match` with the current ETag. A stale
+      ETag returns 412.
+    - Creating requests need an `Idempotency-Key` header. Repeating a request with the
+      same key and body returns the first result. The same key with a different body
+      returns 422.
+    - Responses only contain fields the caller may see (see docs/data-ownership.md).
+      Hidden fields are omitted, not returned as null.
+    - Errors use RFC 9457 problem details (`application/problem+json`).
+  license:
+    name: Proprietary (Hive)
+servers:
+  - url: https://registry.example.invalid/api/v1
+    description: Placeholder. Production domain is decision D9.
+security:
+  - userAuth: []
+  - serviceAuth: []
+tags:
+  - name: Startups
+  - name: Memberships
+  - name: Links
+  - name: Consents
+  - name: Integration
+
+paths:
+  /startups:
+    post:
+      tags: [Startups]
+      summary: Create a canonical startup
+      description: The caller becomes the startup owner when called with a user token.
+      operationId: createStartup
+      security:
+        - userAuth: [registry.startups.write]
+        - serviceAuth: [registry.startups.write]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StartupCreate' }
+      responses:
+        '201':
+          description: Created
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
+            Location:
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Startup' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: Possible duplicate found. The startup is not created; the response lists candidate IDs the caller may request to join or link.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /startups/{uuid}:
+    parameters:
+      - $ref: '#/components/parameters/StartupUuid'
+    get:
+      tags: [Startups]
+      summary: Get a startup with the fields the caller may see
+      operationId: getStartup
+      security:
+        - userAuth: [registry.startups.read]
+        - serviceAuth: [registry.startups.read]
+      parameters:
+        - name: fields
+          in: query
+          description: Comma-separated field names. Fields the caller may not see are left out.
+          schema: { type: string }
+        - name: If-None-Match
+          in: header
+          schema: { type: string }
+      responses:
+        '200':
+          description: OK
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Startup' }
+        '304': { description: Not modified }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Startups]
+      summary: Update allowed fields with optimistic concurrency
+      description: Uses JSON Merge Patch. Fields the caller may not edit return 403 with the field list.
+      operationId: updateStartup
+      security:
+        - userAuth: [registry.startups.write]
+        - serviceAuth: [registry.startups.write]
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema: { $ref: '#/components/schemas/StartupPatch' }
+      responses:
+        '200':
+          description: Updated
+          headers:
+            ETag: { $ref: '#/components/headers/ETag' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Startup' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '412': { $ref: '#/components/responses/PreconditionFailed' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+        '428': { $ref: '#/components/responses/PreconditionRequired' }
+
+  /users/me/startups:
+    get:
+      tags: [Memberships]
+      summary: List startups the signed-in user is an active member of
+      operationId: listMyStartups
+      security:
+        - userAuth: [registry.memberships.read]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/MembershipSummary' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /startups/{uuid}/members/invitations:
+    parameters:
+      - $ref: '#/components/parameters/StartupUuid'
+    post:
+      tags: [Memberships]
+      summary: Invite a member
+      description: Only owner or admin members may invite. The invitee must sign in and verify their email before the membership becomes active.
+      operationId: inviteMember
+      security:
+        - userAuth: [registry.memberships.write]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvitationCreate' }
+      responses:
+        '201':
+          description: Invitation created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invitation' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: The person already has an active membership or a pending invitation.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /startup-links:
+    post:
+      tags: [Links]
+      summary: Propose a link between an external system ID and a registry startup
+      description: |
+        Creates a link proposal, not a merge. A link becomes active only after
+        authorized validation (startup owner confirmation or Hive staff review).
+        Names alone are never accepted as evidence.
+      operationId: proposeStartupLink
+      security:
+        - userAuth: [registry.links.write]
+        - serviceAuth: [registry.links.write]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StartupLinkCreate' }
+      responses:
+        '202':
+          description: Proposal accepted for review
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StartupLink' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: This external ID is already linked to another startup.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/Problem' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /startups/{uuid}/consents:
+    parameters:
+      - $ref: '#/components/parameters/StartupUuid'
+    get:
+      tags: [Consents]
+      summary: List data-sharing consents for a startup
+      operationId: listConsents
+      security:
+        - userAuth: [registry.consents.read]
+        - serviceAuth: [registry.consents.read]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Consent' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Consents]
+      summary: Grant a consent
+      description: Only owner or founder members, with a user token. Services cannot grant consent.
+      operationId: grantConsent
+      security:
+        - userAuth: [registry.consents.write]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConsentCreate' }
+      responses:
+        '201':
+          description: Granted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Consent' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /startups/{uuid}/consents/{consentId}:
+    parameters:
+      - $ref: '#/components/parameters/StartupUuid'
+      - name: consentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      tags: [Consents]
+      summary: Change the field scope of a consent
+      description: Narrowing is applied at once. Widening creates a new consent record.
+      operationId: updateConsent
+      security:
+        - userAuth: [registry.consents.write]
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              type: object
+              properties:
+                fields:
+                  type: array
+                  items: { type: string }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Consent' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '412': { $ref: '#/components/responses/PreconditionFailed' }
+    delete:
+      tags: [Consents]
+      summary: Revoke a consent
+      description: Stops future disclosure at once and emits registry.consent.revoked.v1. The consent record is kept for audit.
+      operationId: revokeConsent
+      security:
+        - userAuth: [registry.consents.write]
+      responses:
+        '204': { description: Revoked }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /integration/sync-status/{uuid}:
+    parameters:
+      - $ref: '#/components/parameters/StartupUuid'
+    get:
+      tags: [Integration]
+      summary: Sync and reconciliation status for one startup
+      operationId: getSyncStatus
+      security:
+        - userAuth: [registry.integration.read]
+        - serviceAuth: [registry.integration.read]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SyncStatus' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    userAuth:
+      type: oauth2
+      description: Access token for a signed-in user, from the Hive IdP (authorization code + PKCE). Audience must be the registry API.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://id.example.invalid/authorize
+          tokenUrl: https://id.example.invalid/token
+          scopes: &scopes
+            registry.startups.read: Read startup fields the caller may see
+            registry.startups.write: Create and update startups
+            registry.memberships.read: Read own memberships
+            registry.memberships.write: Invite and manage members
+            registry.links.write: Propose external ID links
+            registry.consents.read: Read consents
+            registry.consents.write: Grant, change and revoke consents
+            registry.integration.read: Read sync status
+    serviceAuth:
+      type: oauth2
+      description: Server-to-server token for IMS or NSP (client credentials). Each client gets only the scopes it needs.
+      flows:
+        clientCredentials:
+          tokenUrl: https://id.example.invalid/token
+          scopes: *scopes
+
+  parameters:
+    StartupUuid:
+      name: uuid
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Client-generated UUID. Kept for 24 hours.
+      schema: { type: string, format: uuid }
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: ETag from the last read, for example `"v7"`.
+      schema: { type: string }
+
+  headers:
+    ETag:
+      description: Strong ETag derived from the record version, for example `"v7"`.
+      schema: { type: string }
+
+  responses:
+    BadRequest:
+      description: Malformed request
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Forbidden:
+      description: Not allowed. For field-level denials, `errors` lists the fields.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Not found, or the caller may not know it exists
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    PreconditionFailed:
+      description: ETag does not match the current version. Reload and retry.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    PreconditionRequired:
+      description: If-Match header is missing
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unprocessable:
+      description: Validation failed, or Idempotency-Key reused with a different body
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    TooManyRequests:
+      description: Rate limited
+      headers:
+        Retry-After:
+          schema: { type: integer }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Problem:
+      type: object
+      description: RFC 9457 problem details
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri, examples: ['https://registry.example.invalid/problems/version-conflict'] }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+        correlation_id: { type: string, format: uuid }
+        errors:
+          type: array
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field: { type: string }
+              code: { type: string }
+              message: { type: string }
+
+    Visibility:
+      type: string
+      enum: [private, ecosystem, public]
+
+    StartupCore:
+      type: object
+      properties:
+        legal_name: { type: string, maxLength: 255 }
+        display_name: { type: string, maxLength: 255 }
+        registration_number: { type: [string, 'null'], maxLength: 100 }
+        country: { type: string, description: ISO 3166-1 alpha-2, pattern: '^[A-Z]{2}$' }
+        year_founded: { type: [integer, 'null'], minimum: 1900 }
+        description: { type: [string, 'null'], maxLength: 5000 }
+        website: { type: [string, 'null'], format: uri }
+
+    StartupProfile:
+      type: object
+      properties:
+        sector_id: { type: [integer, 'null'] }
+        sub_sector_id: { type: [integer, 'null'] }
+        headquarters_location: { type: [string, 'null'] }
+        team_size: { type: [integer, 'null'], minimum: 0 }
+        revenue_band: { type: [string, 'null'], description: Band code; list to be agreed }
+        traction_summary: { type: [string, 'null'], maxLength: 2000 }
+        funding_raised_amount: { type: [string, 'null'], description: Decimal as string }
+        funding_currency: { type: [string, 'null'], pattern: '^[A-Z]{3}$' }
+        contact_email: { type: [string, 'null'], format: email }
+        contact_phone: { type: [string, 'null'] }
+        visibility: { $ref: '#/components/schemas/Visibility' }
+
+    StartupCreate:
+      allOf:
+        - $ref: '#/components/schemas/StartupCore'
+        - type: object
+          required: [legal_name, country]
+          properties:
+            profile: { $ref: '#/components/schemas/StartupProfile' }
+
+    StartupPatch:
+      allOf:
+        - $ref: '#/components/schemas/StartupCore'
+        - type: object
+          properties:
+            profile: { $ref: '#/components/schemas/StartupProfile' }
+
+    Startup:
+      allOf:
+        - $ref: '#/components/schemas/StartupCore'
+        - type: object
+          required: [uuid, status, version]
+          properties:
+            uuid: { type: string, format: uuid, readOnly: true }
+            status: { type: string, enum: [active, pending_review, archived] }
+            version: { type: integer, readOnly: true }
+            profile: { $ref: '#/components/schemas/StartupProfile' }
+            profile_completion: { type: integer, minimum: 0, maximum: 100, readOnly: true }
+            founders:
+              type: array
+              items: { $ref: '#/components/schemas/Founder' }
+            created_at: { type: string, format: date-time, readOnly: true }
+            updated_at: { type: string, format: date-time, readOnly: true }
+
+    Founder:
+      type: object
+      required: [uuid, name]
+      properties:
+        uuid: { type: string, format: uuid }
+        name: { type: string }
+        title: { type: [string, 'null'] }
+        user_linked: { type: boolean, description: True if the founder has an IdP account linked. The subject is not exposed. }
+        visibility: { $ref: '#/components/schemas/Visibility' }
+
+    MembershipRole:
+      type: string
+      enum: [owner, founder, admin, team_member, viewer]
+
+    MembershipSummary:
+      type: object
+      required: [startup_uuid, display_name, role]
+      properties:
+        startup_uuid: { type: string, format: uuid }
+        display_name: { type: string }
+        role: { $ref: '#/components/schemas/MembershipRole' }
+        accepted_at: { type: string, format: date-time }
+
+    InvitationCreate:
+      type: object
+      required: [email, role]
+      properties:
+        email: { type: string, format: email }
+        role:
+          description: owner cannot be granted by invitation.
+          type: string
+          enum: [founder, admin, team_member, viewer]
+        message: { type: string, maxLength: 500 }
+
+    Invitation:
+      type: object
+      required: [uuid, startup_uuid, role, status, expires_at]
+      properties:
+        uuid: { type: string, format: uuid }
+        startup_uuid: { type: string, format: uuid }
+        role: { $ref: '#/components/schemas/MembershipRole' }
+        status: { type: string, enum: [pending, accepted, revoked, expired] }
+        expires_at: { type: string, format: date-time }
+
+    StartupLinkCreate:
+      type: object
+      required: [source_system, external_id, startup_uuid, evidence]
+      properties:
+        source_system: { type: string, enum: [ims_application, ims_member, nsp] }
+        external_id: { type: string, maxLength: 100 }
+        startup_uuid: { type: string, format: uuid }
+        evidence:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [kind, value]
+            properties:
+              kind: { type: string, enum: [registration_number, verified_domain, authorized_member, staff_note] }
+              value: { type: string }
+
+    StartupLink:
+      type: object
+      required: [uuid, source_system, external_id, startup_uuid, status]
+      properties:
+        uuid: { type: string, format: uuid }
+        source_system: { type: string }
+        external_id: { type: string }
+        startup_uuid: { type: string, format: uuid }
+        status: { type: string, enum: [proposed, awaiting_owner, approved, rejected] }
+
+    ConsentCreate:
+      type: object
+      required: [purpose, recipient_system, fields, policy_version]
+      properties:
+        purpose: { type: string, description: Purpose code; list pending decision D4 }
+        recipient_system: { type: string, enum: [ims, nsp, investors] }
+        fields:
+          type: array
+          minItems: 1
+          items: { type: string }
+        policy_version: { type: string }
+
+    Consent:
+      allOf:
+        - $ref: '#/components/schemas/ConsentCreate'
+        - type: object
+          required: [uuid, granted_at]
+          properties:
+            uuid: { type: string, format: uuid }
+            granted_at: { type: string, format: date-time }
+            revoked_at: { type: [string, 'null'], format: date-time }
+
+    SyncStatus:
+      type: object
+      required: [startup_uuid, version]
+      properties:
+        startup_uuid: { type: string, format: uuid }
+        version: { type: integer }
+        last_event_at: { type: [string, 'null'], format: date-time }
+        consumers:
+          type: array
+          items:
+            type: object
+            required: [system, last_delivered_version]
+            properties:
+              system: { type: string }
+              last_delivered_version: { type: integer }
+              pending: { type: integer }
+              dead_letters: { type: integer }
+              last_error: { type: [string, 'null'] }
+        last_reconciled_at: { type: [string, 'null'], format: date-time }
