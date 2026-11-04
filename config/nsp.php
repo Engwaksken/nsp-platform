@@ -17,7 +17,7 @@ return [
         'talent' => ['default' => (bool) env('NSP_TALENT_ENABLED', true), 'label' => 'Talent and jobs', 'description' => 'Vacancies, candidate profiles with consent, applications, shortlisting and interviews.'],
         'opportunities' => ['default' => (bool) env('NSP_OPPORTUNITIES_ENABLED', true), 'label' => 'Opportunities and events', 'description' => 'Grants, accelerators, competitions, events and calls with eligibility, saving, registration and recommendations.'],
         'marketplace' => ['default' => (bool) env('NSP_MARKETPLACE_ENABLED', true), 'label' => 'Marketplace and showcase', 'description' => 'Public startup directory (with consent), offers, requests to buy, partnerships, inquiry messages and disputes.'],
-        'ai_assistant' => ['default' => false, 'label' => 'AI assistant', 'description' => 'Optional AI help with provenance and consent (Phase 6).'],
+        'ai_assistant' => ['default' => (bool) env('NSP_AI_ASSISTANT_ENABLED', false), 'label' => 'AI assistant', 'description' => 'Optional writing help for founders (opt-in, labelled, rate-limited). Can be switched on only with an API key and recorded legal approval.'],
     ],
 
     'oidc' => [
@@ -120,6 +120,25 @@ return [
         'keep_read_days' => 90,
         'keep_unread_days' => 365,
         'keep_delivery_log_days' => 180,
+    ],
+
+    'ai' => [
+        // Never commit the key. The assistant stays locked until legal review is recorded (backlog AI-605).
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'legal_approved' => (bool) env('NSP_AI_LEGAL_APPROVED', false),
+        'model' => env('NSP_AI_MODEL', 'claude-opus-5-5'),
+        'base_url' => env('ANTHROPIC_BASE_URL'),
+        'effort' => env('NSP_AI_EFFORT', 'medium'),
+        'max_tokens' => 4000,
+        'timeout' => 60,
+        'max_retries' => 2,
+        'max_input_chars' => 4000,
+        'consent_version' => '2026-11-14',
+        'daily_limits' => [
+            'user' => (int) env('NSP_AI_DAILY_PER_USER', 20),
+            'startup' => (int) env('NSP_AI_DAILY_PER_STARTUP', 50),
+            'platform' => (int) env('NSP_AI_DAILY_TOTAL', 500),
+        ],
     ],
 
     'contact_consent_version' => '2026-11-04',

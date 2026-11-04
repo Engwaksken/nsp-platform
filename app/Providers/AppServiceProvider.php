@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Ai\AiClient;
+use App\Ai\AnthropicAiClient;
 use App\Contracts\StartupRegistry;
 use App\Models\Media;
 use App\Models\Menu;
@@ -24,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(OidcClient::class, fn () => OidcClient::fromConfig());
+        $this->app->bind(AiClient::class, fn () => new AnthropicAiClient(config('nsp.ai')));
         // The registry is hosted inside NSP (decision D2); an HTTP client can replace it later.
         $this->app->bind(StartupRegistry::class, fn () => Features::enabled('registry')
             ? new LocalStartupRegistry

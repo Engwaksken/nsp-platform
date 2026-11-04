@@ -182,6 +182,11 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::put('/listings/{listing}', [Workspace\ListingController::class, 'update'])->name('.update');
         Route::post('/listings/{listing}/status', [Workspace\ListingController::class, 'setStatus'])->name('.status');
     });
+    Route::middleware('feature:ai_assistant')->prefix('workspace/startups/{startup}/assistant')->name('workspace.assistant')->group(function () {
+        Route::get('/', [Workspace\AssistantController::class, 'show'])->name('');
+        Route::post('/', [Workspace\AssistantController::class, 'run'])->middleware('throttle:6,1')->name('.run');
+        Route::post('/consent', [Workspace\AssistantController::class, 'consent'])->name('.consent');
+    });
     Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
     Route::middleware(['feature:ims_integration', 'throttle:30,1'])->group(function () {
         Route::get('/connect/{clientId}', [Workspace\ConnectController::class, 'show'])->name('connect.show');

@@ -7,7 +7,7 @@ use Tests\TestCase;
 
 class FeatureFlagsTest extends TestCase
 {
-    public function test_modules_that_are_not_built_cannot_be_switched_on(): void
+    public function test_locked_modules_cannot_be_switched_on(): void
     {
         $this->actingAs($this->userWithRole('platform_admin'))
             ->put('/admin/features/ai_assistant', ['enabled' => 1])

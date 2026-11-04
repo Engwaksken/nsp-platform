@@ -74,3 +74,7 @@ Do this on staging first. The full rules are in `integration-contract-v1.md`.
 5. Optional, existing startups: export `application_id, startup_name, registration_number, website` from IMS and run `php artisan registry:import-ims export.csv`. Read the dry-run report before adding `--apply`.
 6. To rotate secrets later, run `php artisan nsp:api-client ims-live --rotate` and update the IMS `.env` at the same time.
 
+## Enabling the AI assistant (only after legal approval, decision D13)
+1. Put `ANTHROPIC_API_KEY=...` in the server's `.env` (never in git), and set `NSP_AI_LEGAL_APPROVED=true` once the review is signed.
+2. Run `php artisan config:cache`, then switch on **AI assistant** under **Admin › Features**.
+3. To stop it at once, set `NSP_AI_LEGAL_APPROVED=false` (or switch the flag off) and run `php artisan config:cache` again.

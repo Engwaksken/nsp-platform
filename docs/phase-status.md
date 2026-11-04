@@ -13,7 +13,7 @@
 | 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
 | 5: Ecosystem services | **All five modules implemented and tested**: 5a opportunities and events, 5b funding and investors, 5c experts and mentors, 5d talent and jobs (pushed, CI green) and 5e marketplace and startup showcase (tested locally). | Not passed yet: needs the role-based UAT in `testing-uat.md` (Phase 5 script) on staging |
-| 6: Communications and intelligence | **6a Notifications** (pushed, CI green) and **6b dashboards, KPIs and exports** (tested locally). Still to build: 6c optional AI assistant (AI-605, needs legal review). | Not passed: needs the privacy and quality evaluation |
+| 6: Communications and intelligence | **All three parts implemented**: 6a notifications and 6b dashboards, KPIs and exports (pushed, CI green); 6c optional AI assistant (tested locally, **switched off until legal review, decision D13**). | Not passed yet: needs the privacy and quality evaluation, including the legal review in `ai-assistant.md` |
 | 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
@@ -204,8 +204,23 @@ Not done: bounce and complaint processing needs a mail provider webhook (none ch
 
 Not done: scheduled emailed reports, charts (tables are used for now), and IMS program aggregates beyond the summaries IMS already sends.
 
+## Phase 6c: optional AI writing assistant (implemented 2026-11-14, switched off)
+
+Full design and review brief: `docs/ai-assistant.md`.
+
+| Area | What exists | Evidence |
+|---|---|---|
+| Lock | The `ai_assistant` flag can be switched on only when `ANTHROPIC_API_KEY` and `NSP_AI_LEGAL_APPROVED=true` are set; withdrawing approval stops use even with the flag on. | `AssistantTest::test_it_stays_locked_without_key_or_legal_approval` |
+| Consent and roles | Per-person, versioned opt-in that can be withdrawn; startup owners, founders and admins only. | `test_consent_and_editor_role_are_required` |
+| Data minimisation | Sends only the typed text plus name, sector and stage. Tests prove contact details, financial fields, registration number and the user's email are never sent. Stores counts only, no text. | `test_only_the_typed_text_and_basic_context_are_sent_and_injection_is_contained`, `test_output_is_escaped_labelled_and_never_stored` |
+| Prompt-injection defence | Fixed system prompt; founder text inside delimiters with break-out tags stripped; no tools; escaped plain-text output; never auto-saved. | same tests |
+| Provenance | "AI-generated" label with model and time; human copies what they use. | `test_output_is_escaped_labelled_and_never_stored` |
+| Limits and errors | 20 per person, 50 per startup, 500 platform-wide per day, 6 per minute; refusals and API errors shown plainly; SDK retries. | `test_daily_limits_apply`, `test_refusals_and_errors_are_shown_plainly` |
+| API client | Official `anthropic-ai/sdk`; model `claude-opus-5-5`, effort `medium`, server-side refusal fallback (`fallbacks: "default"`). The real client is tested against a local stand-in server for request shape, refusal, 429 and connection failure. | `AnthropicClientTest` |
+| Accessibility | axe audit of the consent page, the form and a shown suggestion at 1280 and 360 px: 0 violations | `tests/a11y` |
+
 ## Test results (local)
-- `php artisan test`: **198 passed, 1345 assertions** (6a: 193 and 1285; 5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
+- `php artisan test`: **206 passed, 1417 assertions** (6b: 198 and 1345; 6a: 193 and 1285; 5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

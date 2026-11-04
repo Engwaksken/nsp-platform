@@ -20,6 +20,7 @@ Spec §2 lists decisions that need owner approval before irreversible work. Unti
 | D11 | Laravel 13 upgrade timing | (a) Upgrade once hosting has PHP 8.3+. (b) Stay on Laravel 12 until its security support ends. | (a), before Phase 7 production readiness, on a branch with full tests. | Running an older major longer; upgrade cost grows with code size. | Pending |
 
 | D12 | Growth assessment rubric (VGI) | (a) Approve the starter draft as is. (b) Edit it with the programs team, then approve. (c) Supply Hive's own rubric. | (b): review the 18 questions, weights and stages with the programs team, then a second administrator approves in Admin › Growth assessments. | Founders cannot take the assessment until a version is approved. | Pending |
+| D13 | AI assistant legal approval | (a) Approve as built. (b) Approve with changes (tasks, wording, limits). (c) Do not enable. | (b) after reading `ai-assistant.md` and the provider's data terms. | The assistant is built but stays locked (`NSP_AI_LEGAL_APPROVED=false`). | Pending |
 
 ## 2. Decisions made
 

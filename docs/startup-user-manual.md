@@ -118,3 +118,10 @@ NSP helps you meet investors that Hive has checked. It does not promise or arran
 - The **Overview** tab shows your startup at a glance: profile completeness, growth stage, open actions, introductions, expert engagements, new applications and unread marketplace messages. Each card opens the page behind it.
 - Owners, founders and admins can **Download our data** as a file: everything your startup entered on NSP. It leaves out other people’s private data such as candidates’ CVs and private notes.
 - On a vacancy’s applications page you can **Download applications (CSV)**: names, emails, headlines and stages, without CVs or team notes.
+
+## AI writing assistant (when Hive turns it on)
+- Open your startup, then **AI assistant**. Owners, founders and admins can use it after turning it on for their own account.
+- Choose a task (improve your description, tighten your funding pitch or suggest growth actions), paste or type your text, and choose **Get a suggestion**.
+- Only the text you type, plus your startup’s name, sector and growth stage, is sent to the AI provider. NSP keeps neither your text nor the suggestion.
+- The suggestion is labelled AI-generated. Check it and change it before you use it; nothing is saved automatically.
+- You can turn the assistant off for your account at any time.
