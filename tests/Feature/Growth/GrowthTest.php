@@ -1,0 +1,232 @@
+<?php
+
+namespace Tests\Feature\Growth;
+
+use App\Growth\FrameworkDefinition;
+use App\Growth\GrowthService;
+use App\Models\Growth\GrowthAction;
+use App\Models\Growth\VgiAssessment;
+use App\Models\Growth\VgiFramework;
+use App\Models\Registry\OutboxEvent;
+use App\Models\Registry\Startup;
+use App\Models\User;
+use App\Registry\RegistryService;
+use App\Support\Features;
+use Database\Seeders\VgiStarterSeeder;
+use Tests\TestCase;
+
+class GrowthTest extends TestCase
+{
+    private User $owner;
+
+    private Startup $startup;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(VgiStarterSeeder::class);
+        $this->owner = User::factory()->withRole('startup_user')->create();
+        $this->startup = app(RegistryService::class)->createStartup($this->owner, [
+            'legal_name' => 'Green Fields Ltd', 'display_name' => 'Green Fields', 'registration_number' => null,
+            'country' => 'UG', 'year_founded' => 2023, 'description' => null, 'website' => null,
+        ], []);
+    }
+
+    private function approveStarter(): VgiFramework
+    {
+        $framework = VgiFramework::query()->firstOrFail();
+        app(GrowthService::class)->approve($framework, User::factory()->withRole('platform_admin')->create(), 'Reviewed by the programs team.');
+
+        return $framework->fresh();
+    }
+
+    /** Answers that pick the given option position for every question. */
+    private function answers(VgiFramework $framework, int $position): array
+    {
+        return array_map(fn ($q) => $q['options'][min($position, count($q['options']) - 1)]['key'], FrameworkDefinition::questions($framework->definition));
+    }
+
+    private function member(string $role): User
+    {
+        $user = User::factory()->withRole('startup_user')->create(['email' => $role.'@example.org']);
+        $registry = app(RegistryService::class);
+        $registry->acceptInvitation($registry->invite($this->startup, $this->owner, $role.'@example.org', $role), $user);
+
+        return $user;
+    }
+
+    public function test_nothing_is_offered_until_a_rubric_is_approved(): void
+    {
+        $this->actingAs($this->owner)->get("/workspace/startups/{$this->startup->uuid}/growth")->assertOk()->assertSee('Coming soon');
+        $this->actingAs($this->owner)->post("/workspace/startups/{$this->startup->uuid}/growth/assessments")->assertSessionHasErrors('growth');
+        $this->assertSame(0, VgiAssessment::query()->count());
+    }
+
+    public function test_four_eyes_approval_and_frozen_versions(): void
+    {
+        $framework = VgiFramework::query()->firstOrFail();
+        $editor = User::factory()->withRole('platform_admin')->create();
+        $json = json_encode($framework->definition);
+
+        $this->actingAs($editor)->put("/admin/vgi/frameworks/{$framework->id}", ['definition' => $json, 'description' => 'Edited'])->assertSessionHasNoErrors();
+        $this->actingAs($editor)->post("/admin/vgi/frameworks/{$framework->id}/approve", ['note' => 'I reviewed my own work.'])->assertSessionHasErrors('approve');
+        $this->assertSame('draft', $framework->fresh()->status);
+
+        $this->actingAs(User::factory()->withRole('ecosystem_manager')->create())->post("/admin/vgi/frameworks/{$framework->id}/approve", ['note' => 'Looks fine to me.'])->assertForbidden();
+
+        $approver = User::factory()->withRole('platform_admin')->create();
+        $this->actingAs($approver)->post("/admin/vgi/frameworks/{$framework->id}/approve", ['note' => 'Reviewed with the programs team.'])->assertRedirect();
+        $this->assertSame('approved', $framework->fresh()->status);
+
+        $this->actingAs($editor)->put("/admin/vgi/frameworks/{$framework->id}", ['definition' => $json])->assertSessionHasErrors('definition');
+        $this->actingAs($editor)->put("/admin/vgi/frameworks/{$framework->id}", ['definition' => '{not json'])->assertSessionHasErrors('definition');
+        $this->assertDatabaseHas('audit_logs', ['action' => 'vgi.framework_approved']);
+    }
+
+    public function test_invalid_rubrics_cannot_be_saved(): void
+    {
+        $framework = VgiFramework::query()->firstOrFail();
+        $definition = $framework->definition;
+        $definition['bands'][0]['max'] = 10;
+
+        $this->actingAs(User::factory()->withRole('ecosystem_manager')->create())
+            ->put("/admin/vgi/frameworks/{$framework->id}", ['definition' => json_encode($definition)])->assertSessionHasErrors('definition');
+        $this->assertSame(24.9, (float) $framework->fresh()->definition['bands'][0]['max']);
+    }
+
+    public function test_founder_completes_an_assessment_with_reproducible_results(): void
+    {
+        $framework = $this->approveStarter();
+        $base = "/workspace/startups/{$this->startup->uuid}/growth";
+        $this->actingAs($this->owner)->post("$base/assessments")->assertRedirect();
+        $assessment = VgiAssessment::query()->sole();
+
+        $answers = $this->answers($framework, 1);
+        $partial = array_slice($answers, 0, 5, true);
+        $this->actingAs($this->owner)->put("$base/assessments/{$assessment->uuid}", ['answers' => $partial, 'intent' => 'save'])->assertSessionHasNoErrors();
+        $this->actingAs($this->owner)->put("$base/assessments/{$assessment->uuid}", ['answers' => $partial, 'intent' => 'submit'])->assertSessionHasErrors('growth');
+        $this->assertSame('draft', $assessment->fresh()->status);
+
+        $this->actingAs($this->owner)->put("$base/assessments/{$assessment->uuid}", ['answers' => $answers, 'intent' => 'submit'])->assertRedirect();
+        $assessment->refresh();
+        $this->assertSame('submitted', $assessment->status);
+        $this->assertSame(37.4, $assessment->score);
+        $this->assertSame('Validation', $assessment->band_label);
+        $this->assertTrue(app(GrowthService::class)->verify($assessment));
+        $this->assertTrue(OutboxEvent::query()->where('type', 'nsp.assessment.completed.v1')->exists());
+        $this->assertTrue(OutboxEvent::query()->where('type', 'nsp.growth.stage.changed.v1')->exists());
+
+        $this->actingAs($this->owner)->get("$base/assessments/{$assessment->uuid}")->assertOk()
+            ->assertSee('Validation')->assertSee('self-assessment')->assertSee('Add to growth plan');
+        $this->actingAs($this->owner)->get("$base/assessments/{$assessment->uuid}/report")->assertOk()->assertSee('Priorities');
+        // A submitted assessment cannot be changed.
+        $this->actingAs($this->owner)->put("$base/assessments/{$assessment->uuid}", ['answers' => $this->answers($framework, 3), 'intent' => 'submit'])->assertSessionHasErrors('growth');
+        $this->assertSame(37.4, $assessment->fresh()->score);
+    }
+
+    public function test_roles_and_tenant_isolation(): void
+    {
+        $framework = $this->approveStarter();
+        $assessment = app(GrowthService::class)->start($this->startup, $this->owner);
+        app(GrowthService::class)->saveAnswers($assessment, $this->owner, $this->answers($framework, 2), []);
+        app(GrowthService::class)->submit($assessment, $this->owner);
+        $base = "/workspace/startups/{$this->startup->uuid}/growth";
+
+        $viewer = $this->member('viewer');
+        $this->actingAs($viewer)->get($base)->assertOk()->assertSee('Owners, founders and admins fill in the assessment.');
+        $this->actingAs($viewer)->post("$base/assessments")->assertForbidden();
+        $this->actingAs($viewer)->get("$base/assessments/{$assessment->uuid}")->assertOk();
+
+        $stranger = User::factory()->withRole('startup_user')->create();
+        foreach (['', "/assessments/{$assessment->uuid}", "/assessments/{$assessment->uuid}/report"] as $path) {
+            $this->actingAs($stranger)->get($base.$path)->assertNotFound();
+        }
+
+        // Another startup's assessment cannot be opened through this startup's address.
+        $other = app(RegistryService::class)->createStartup($stranger, ['legal_name' => 'Other Co', 'display_name' => 'Other', 'registration_number' => null,
+            'country' => 'UG', 'year_founded' => null, 'description' => null, 'website' => null], []);
+        $theirs = app(GrowthService::class)->start($other, $stranger);
+        $this->actingAs($this->owner)->get("$base/assessments/{$theirs->uuid}")->assertNotFound();
+    }
+
+    public function test_growth_plan_from_gaps_and_progress_updates(): void
+    {
+        $framework = $this->approveStarter();
+        $service = app(GrowthService::class);
+        $assessment = $service->start($this->startup, $this->owner);
+        $service->saveAnswers($assessment, $this->owner, $this->answers($framework, 0), []);
+        $service->submit($assessment, $this->owner);
+        $gap = $assessment->fresh()->result['gaps'][0];
+        $base = "/workspace/startups/{$this->startup->uuid}/growth";
+
+        $this->actingAs($this->owner)->post("$base/actions", ['assessment_uuid' => $assessment->uuid, 'question_key' => $gap['question_key']])->assertRedirect();
+        $action = GrowthAction::query()->sole();
+        $this->assertSame($gap['tip'], $action->title);
+        $this->actingAs($this->owner)->get($base)->assertSee($gap['tip']);
+        $this->actingAs($this->owner)->get("$base/assessments/{$assessment->uuid}")->assertSee('In your growth plan');
+
+        // Owners must be on the team.
+        $stranger = User::factory()->create();
+        $this->actingAs($this->owner)->post("$base/actions", ['title' => 'Hire a CFO', 'owner_user_id' => $stranger->id])->assertRedirect();
+        $this->assertNull(GrowthAction::query()->where('title', 'Hire a CFO')->value('owner_user_id'));
+
+        $member = $this->member('team_member');
+        $this->actingAs($member)->put("$base/actions/{$action->id}", ['status' => 'done', 'note' => 'Signed the agreement today'])->assertRedirect();
+        $this->assertSame('done', $action->fresh()->status);
+        $this->assertNotNull($action->fresh()->completed_at);
+        $this->assertDatabaseHas('growth_updates', ['growth_action_id' => $action->id, 'note' => 'Signed the agreement today']);
+        $this->actingAs($member)->delete("$base/actions/{$action->id}")->assertForbidden();
+    }
+
+    public function test_staff_adjustment_needs_a_reason_and_is_shown_to_founders(): void
+    {
+        $framework = $this->approveStarter();
+        $service = app(GrowthService::class);
+        $assessment = $service->start($this->startup, $this->owner);
+        $service->saveAnswers($assessment, $this->owner, $this->answers($framework, 1), []);
+        $service->submit($assessment, $this->owner);
+        $staff = User::factory()->withRole('ecosystem_manager')->create();
+
+        $this->actingAs($staff)->get("/admin/vgi/assessments/{$assessment->uuid}")->assertOk()->assertSee('matches the saved result');
+        $this->actingAs($staff)->post("/admin/vgi/assessments/{$assessment->uuid}/override", ['override_score' => 50, 'reason' => ''])->assertSessionHasErrors('reason');
+        $this->actingAs($staff)->post("/admin/vgi/assessments/{$assessment->uuid}/override", ['override_score' => 50, 'override_band' => 'Early traction', 'reason' => 'Verified signed customer contracts during the site visit.'])->assertSessionHasNoErrors();
+
+        $assessment->refresh();
+        $this->assertSame(50.0, $assessment->displayScore());
+        $this->assertSame(37.4, $assessment->score);
+        $this->actingAs($this->owner)->get("/workspace/startups/{$this->startup->uuid}/growth")
+            ->assertSee('Verified signed customer contracts')->assertSee('Early traction')->assertSee('37.4');
+        $this->assertDatabaseHas('audit_logs', ['action' => 'vgi.assessment_overridden', 'actor_id' => $staff->id]);
+        $this->actingAs(User::factory()->withRole('content_editor')->create())->get("/admin/vgi/assessments/{$assessment->uuid}")->assertForbidden();
+    }
+
+    public function test_new_version_replaces_old_for_new_assessments_only(): void
+    {
+        $v1 = $this->approveStarter();
+        $service = app(GrowthService::class);
+        $old = $service->start($this->startup, $this->owner);
+        $service->saveAnswers($old, $this->owner, $this->answers($v1, 1), []);
+        $service->submit($old, $this->owner);
+
+        $editor = User::factory()->withRole('ecosystem_manager')->create();
+        $v2 = $service->createDraft($editor);
+        $definition = $v2->definition;
+        $definition['dimensions'][0]['weight'] = 50;
+        $service->updateDraft($v2, $editor, $definition, 'Team weighted more');
+        $service->approve($v2, User::factory()->withRole('platform_admin')->create(), 'Reviewed new weights with programs.');
+
+        $this->assertSame('retired', $v1->fresh()->status);
+        $this->assertSame($v2->id, VgiFramework::current()->id);
+        $this->assertSame($v1->id, $old->fresh()->framework_id);
+        $this->assertTrue($service->verify($old->fresh()));
+        $this->assertSame($v2->id, $service->start($this->startup, $this->owner)->framework_id);
+    }
+
+    public function test_growth_is_hidden_when_the_feature_is_off(): void
+    {
+        Features::set('vgi', false, null);
+
+        $this->actingAs($this->owner)->get("/workspace/startups/{$this->startup->uuid}/growth")->assertNotFound();
+        $this->actingAs(User::factory()->withRole('platform_admin')->create())->get('/admin/vgi')->assertNotFound();
+    }
+}

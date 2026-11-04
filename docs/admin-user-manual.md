@@ -82,3 +82,15 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
   - A merge moves the team, founders and linked IDs to the kept record, and old links to the merged record keep working. Data-sharing choices are **not** moved; the kept startup must give its own.
   - Every merge can be undone from **Recent merges**.
 - Never merge on a name alone. Confirm with the founders first.
+
+## Growth assessments (rubric editors, approvers and reviewers)
+- **Admin › Growth assessments** lists rubric versions. The starter rubric is a **draft proposal**: founders see nothing until a version is approved.
+- **Editing:** open the draft, read the preview, and edit the JSON. Saving checks it and explains any problem, for example "bands must follow each other without gaps".
+- **Approving:**
+  - Someone other than the last editor must approve, with a note on what was reviewed.
+  - Approving freezes the version and makes it the one used for new assessments.
+  - To change it later, create a new draft version. Old results keep the version they used.
+- **Submitted assessments:**
+  - Reviewers can open a startup's result. The page checks that recalculating the result gives the same score.
+  - To adjust a score or stage, write the reason. The founders see your reason next to the calculated result.
+

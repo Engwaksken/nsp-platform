@@ -5,7 +5,8 @@
         'workspace.startups.team' => 'Team',
         'workspace.startups.consents' => 'Data sharing',
         'workspace.startups.history' => 'Change history',
-    ] + (\App\Support\Features::enabled('ims_integration') ? ['workspace.startups.programs' => 'Applications & programs'] : []) as $route => $label)
+    ] + (\App\Support\Features::enabled('vgi') ? ['workspace.growth' => 'Growth'] : [])
+      + (\App\Support\Features::enabled('ims_integration') ? ['workspace.startups.programs' => 'Applications & programs'] : []) as $route => $label)
         <a class="tag" href="{{ route($route, $startup) }}" @if (request()->routeIs($route)) aria-current="true" @endif>{{ $label }}</a>
     @endforeach
     <a class="tag" href="{{ route('workspace.startups.index') }}">All my startups</a>

@@ -1,0 +1,112 @@
+@extends('layouts.public', ['pageTitle' => 'Growth · '.$startup->display_name])
+
+@push('head')<meta name="robots" content="noindex">@endpush
+
+@section('content')
+    <div class="container section">
+        <h1>Growth · {{ $startup->display_name }}</h1>
+        @include('workspace.startups.nav')
+        @include('partials.flash')
+
+        @if (!$framework && !$latest)
+            <div class="card"><h2>Coming soon</h2><p>Hive has not published the growth assessment yet. You will be able to assess your startup and build a growth plan here.</p></div>
+        @else
+            <section class="panel" aria-labelledby="assess-heading">
+                <h2 id="assess-heading">Growth assessment</h2>
+                @if ($latest)
+                    @include('workspace.growth.scores', ['assessment' => $latest])
+                    <p><a href="{{ route('workspace.growth.assessment', [$startup, $latest]) }}">See the full results and suggested actions</a>
+                        · <a href="{{ route('workspace.growth.report', [$startup, $latest]) }}">Printable report</a></p>
+                @else
+                    <p>Answer {{ $framework?->questionCount() }} questions about your team, customers, traction, finances and operations. It takes about 15 minutes. You get a score for each area and suggested next steps.</p>
+                @endif
+                @if ($membership->canEdit() && $framework)
+                    @if ($draft)
+                        <a class="btn btn-primary" href="{{ route('workspace.growth.assessment', [$startup, $draft]) }}">Continue your assessment</a>
+                    @else
+                        <form method="post" action="{{ route('workspace.growth.start', $startup) }}">
+                            @csrf
+                            <button type="submit" class="btn btn-primary">{{ $latest ? 'Reassess now' : 'Start the assessment' }}</button>
+                        </form>
+                    @endif
+                @elseif (!$membership->canEdit())
+                    <p class="hint">Owners, founders and admins fill in the assessment.</p>
+                @endif
+            </section>
+
+            <section class="panel" aria-labelledby="plan-heading">
+                <h2 id="plan-heading">Growth plan</h2>
+                @if ($actions->isEmpty())
+                    <p class="empty">No actions yet. Add suggested actions from your assessment results, or add your own below.</p>
+                @else
+                    <div class="table-wrap" tabindex="0" role="region" aria-label="Growth plan">
+                        <table>
+                            <thead><tr><th scope="col">Action</th><th scope="col">Owner</th><th scope="col">Due</th><th scope="col">Status</th><th scope="col">Update</th></tr></thead>
+                            <tbody>
+                            @foreach ($actions as $action)
+                                <tr>
+                                    <td><strong>{{ $action->title }}</strong>@if ($action->details)<br><span class="meta">{{ $action->details }}</span>@endif
+                                        @foreach ($action->updates->take(2) as $update)<br><span class="meta">{{ $update->created_at->format('j M') }} · {{ $update->user?->name }}: {{ $update->note }}</span>@endforeach</td>
+                                    <td>{{ $action->owner?->name ?? '—' }}</td>
+                                    <td>{{ $action->due_date?->format('j M Y') ?? '—' }}@if ($action->due_date?->isPast() && $action->status !== 'done')<br><span class="badge badge-draft">Overdue</span>@endif</td>
+                                    <td><span class="badge badge-{{ ['done' => 'on', 'doing' => 'scheduled'][$action->status] ?? 'draft' }}">{{ \App\Models\Growth\GrowthAction::STATUSES[$action->status] }}</span></td>
+                                    <td>
+                                        <form method="post" action="{{ route('workspace.growth.actions.update', [$startup, $action]) }}">
+                                            @csrf @method('PUT')
+                                            <label class="visually-hidden" for="status-{{ $action->id }}">Status of {{ $action->title }}</label>
+                                            <select id="status-{{ $action->id }}" name="status">
+                                                @foreach (\App\Models\Growth\GrowthAction::STATUSES as $value => $label)<option value="{{ $value }}" @selected($action->status === $value)>{{ $label }}</option>@endforeach
+                                            </select>
+                                            <label class="visually-hidden" for="note-{{ $action->id }}">Progress note</label>
+                                            <input id="note-{{ $action->id }}" type="text" name="note" maxlength="2000" placeholder="Progress note (optional)">
+                                            <button type="submit" class="btn btn-secondary btn-sm">Save<span class="visually-hidden">: {{ $action->title }}</span></button>
+                                        </form>
+                                        @if ($membership->canEdit())
+                                            <form method="post" action="{{ route('workspace.growth.actions.destroy', [$startup, $action]) }}" data-confirm="Remove this action from the plan?">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn-link">Remove<span class="visually-hidden"> {{ $action->title }}</span></button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="meta">{{ $actions->where('status', 'done')->count() }} of {{ $actions->count() }} actions done.</p>
+                @endif
+
+                @if ($membership->canEdit())
+                    <form method="post" action="{{ route('workspace.growth.actions.store', $startup) }}" class="form-row" style="margin-top:1rem">
+                        @csrf
+                        @include('partials.field', ['name' => 'title', 'label' => 'New action', 'maxlength' => 200, 'required' => true])
+                        @include('partials.field', ['name' => 'owner_user_id', 'label' => 'Owner', 'type' => 'select', 'placeholder' => 'No owner',
+                            'options' => $members->mapWithKeys(fn ($m) => [$m->user_id => $m->user?->name])->all()])
+                        @include('partials.field', ['name' => 'due_date', 'label' => 'Due date', 'type' => 'date'])
+                        <div><button type="submit" class="btn btn-primary">Add action</button></div>
+                    </form>
+                @endif
+            </section>
+
+            @if ($history->count() > 1)
+                <section class="panel" aria-labelledby="history-heading">
+                    <h2 id="history-heading">Progress over time</h2>
+                    <table>
+                        <thead><tr><th scope="col">Date</th><th scope="col">Score</th><th scope="col">Stage</th><th scope="col">Rubric</th></tr></thead>
+                        <tbody>
+                        @foreach ($history as $past)
+                            <tr>
+                                <td><a href="{{ route('workspace.growth.assessment', [$startup, $past]) }}">{{ $past->submitted_at->format('j M Y') }}</a></td>
+                                <td>{{ number_format($past->displayScore(), 1) }}</td>
+                                <td>{{ $past->displayBand() }}</td>
+                                <td>v{{ $past->framework->version }}</td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                    <p class="hint">Scores from different rubric versions are not directly comparable.</p>
+                </section>
+            @endif
+        @endif
+    </div>
+@endsection

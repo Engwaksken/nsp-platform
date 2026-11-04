@@ -11,7 +11,7 @@ return [
         'local_login' => ['default' => (bool) env('NSP_LOCAL_LOGIN', true), 'label' => 'Email and password login', 'description' => 'Local fallback login for development and admin until the shared IdP is live.'],
         'registry' => ['default' => (bool) env('NSP_REGISTRY_ENABLED', true), 'label' => 'Startup registry', 'description' => 'Startup profiles, teams, invitations and consent (Hive Startup Registry, hosted in NSP).'],
         'ims_integration' => ['default' => (bool) env('NSP_IMS_INTEGRATION', false), 'label' => 'IMS integration', 'description' => 'Connect flow, Registry API and events with Hive IMS; application and program summaries (docs/integration-contract-v1.md).'],
-        'vgi' => ['default' => false, 'label' => 'Growth and VGI', 'description' => 'VGI assessments and growth plans (Phase 4).'],
+        'vgi' => ['default' => (bool) env('NSP_VGI_ENABLED', true), 'label' => 'Growth and VGI', 'description' => 'Growth assessments with an approved rubric, results and growth plans.'],
         'funding' => ['default' => false, 'label' => 'Funding and investors', 'description' => 'Funding needs, investors and data rooms (Phase 5).'],
         'experts' => ['default' => false, 'label' => 'Experts and mentors', 'description' => 'Expert profiles, bookings and mentorship (Phase 5).'],
         'talent' => ['default' => false, 'label' => 'Talent', 'description' => 'Vacancies, candidates and hiring (Phase 5).'],

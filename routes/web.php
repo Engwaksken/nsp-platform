@@ -78,6 +78,16 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::get('/{startup}/sharing', [Workspace\ConsentController::class, 'index'])->name('consents');
         Route::put('/{startup}/sharing/{purpose}', [Workspace\ConsentController::class, 'update'])->name('consents.update');
     });
+    Route::middleware('feature:vgi')->prefix('workspace/startups/{startup}/growth')->name('workspace.growth')->group(function () {
+        Route::get('/', [Workspace\GrowthController::class, 'index'])->name('');
+        Route::post('/assessments', [Workspace\GrowthController::class, 'start'])->name('.start');
+        Route::get('/assessments/{assessment}', [Workspace\GrowthController::class, 'show'])->name('.assessment');
+        Route::put('/assessments/{assessment}', [Workspace\GrowthController::class, 'update'])->name('.save');
+        Route::get('/assessments/{assessment}/report', [Workspace\GrowthController::class, 'report'])->name('.report');
+        Route::post('/actions', [Workspace\GrowthActionController::class, 'store'])->name('.actions.store');
+        Route::put('/actions/{action}', [Workspace\GrowthActionController::class, 'update'])->name('.actions.update');
+        Route::delete('/actions/{action}', [Workspace\GrowthActionController::class, 'destroy'])->name('.actions.destroy');
+    });
     Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
     Route::middleware(['feature:ims_integration', 'throttle:30,1'])->group(function () {
         Route::get('/connect/{clientId}', [Workspace\ConnectController::class, 'show'])->name('connect.show');
@@ -169,6 +179,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
     Route::middleware(['can:manage-integrations', 'feature:ims_integration'])->group(function () {
         Route::get('integrations', [Admin\IntegrationController::class, 'index'])->name('integrations.index');
         Route::post('integrations/deliveries/{delivery}/replay', [Admin\IntegrationController::class, 'replay'])->name('integrations.replay');
+    });
+    Route::middleware('feature:vgi')->prefix('vgi')->name('vgi.')->group(function () {
+        Route::get('/', [Admin\VgiController::class, 'index'])->name('index');
+        Route::post('/frameworks', [Admin\VgiController::class, 'createDraft'])->name('create');
+        Route::get('/frameworks/{framework}', [Admin\VgiController::class, 'edit'])->name('edit');
+        Route::put('/frameworks/{framework}', [Admin\VgiController::class, 'update'])->name('update');
+        Route::post('/frameworks/{framework}/approve', [Admin\VgiController::class, 'approve'])->name('approve');
+        Route::get('/assessments/{assessment}', [Admin\VgiController::class, 'showAssessment'])->name('assessment');
+        Route::post('/assessments/{assessment}/override', [Admin\VgiController::class, 'override'])->name('override');
     });
     Route::middleware('can:review-duplicates')->group(function () {
         Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');

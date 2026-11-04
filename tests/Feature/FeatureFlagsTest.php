@@ -10,10 +10,10 @@ class FeatureFlagsTest extends TestCase
     public function test_modules_that_are_not_built_cannot_be_switched_on(): void
     {
         $this->actingAs($this->userWithRole('platform_admin'))
-            ->put('/admin/features/vgi', ['enabled' => 1])
+            ->put('/admin/features/funding', ['enabled' => 1])
             ->assertSessionHasErrors('flags');
 
-        $this->assertFalse(Features::enabled('vgi'));
+        $this->assertFalse(Features::enabled('funding'));
     }
 
     public function test_local_login_cannot_be_turned_off_while_sso_is_off(): void

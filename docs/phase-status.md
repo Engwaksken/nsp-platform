@@ -11,7 +11,8 @@
 | 1: Foundation and CMS | Implemented and tested locally | CMS and admin permissions pass tests. Not staged. |
 | 2: Identity and registry | **Registry implemented and tested locally** (inside NSP, decision M8). Shared login (OIDC) deferred by owner (D1). | Partly: "NSP-first" journey works without duplicates; the IMS-first journey needs IMS changes (Phase 3) and an IdP. |
 | 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
-| 4 to 7 | Not started. Planned in `backlog.md`. | — |
+| 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
+| 5 to 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
 - `discovery.md`: read-only audit of Hive IMS. Confirmed: no IdP, no API, no startups table, shared hosting with cron only.
@@ -81,8 +82,24 @@ Not yet: the Registry API for IMS (Phase 3), the IMS-first journey, importing ex
 | End-to-end (local) | Both apps run together on 2026-11-04: NSP (`artisan serve`) and IMS (`php -S`, scratch MariaDB), each with its own secrets. Checked: IMS "Prefill" → NSP connect → approve (sharing turned on) → IMS callback exchanged the code once; replaying it was refused. IMS kept only consented fields (no revenue or traction). Submission stored the snapshot and queued `ims.application.submitted.v1`; IMS cron delivered it, then `status_changed` (Accepted), and NSP built the application record (program, cohort, Accepted) and linked the IMS ID. Revoking sharing in NSP delivered signed `consent.revoked`; IMS marked the application revoked; redelivery was treated as a duplicate. Not covered: the full IMS application form with real opportunity data (needs staging). | Manual run, scratch databases dropped afterwards |
 | Legacy import (Journey C) | `php artisan registry:import-ims file.csv` dry run; `--apply` links strong matches only, and lists name-only matches for review | `CommandsTest` |
 
+## Phase 4: growth assessments and growth plans (implemented 2026-11-06)
+
+| Area | What exists | Evidence |
+|---|---|---|
+| Configurable rubric | Dimensions with relative weights, weighted questions, 2–7 options scored 0–100 with improvement tips, evidence none/optional/required, stage bands covering 0–100. Edited as JSON with plain-language validation and a readable preview. | `ScorerTest`, `GrowthTest` |
+| Versions and approval | Draft → approved → retired. Four-eyes: the last editor cannot approve (super admins excepted), and an approval note is required. Approved versions are frozen; a new approval retires the old one for new assessments only. | `GrowthTest` |
+| Starter rubric | 6 areas, 18 questions, 5 stages (`database/data/vgi_starter_draft.php`): a **proposal** seeded as an unapproved draft | `ScorerTest::test_the_seeded_starter_rubric_is_valid` |
+| Deterministic scoring | Weighted averages with fixed rounding; a calculation hash over the rubric and answers. Staff can re-verify any result against its stored version. | `ScorerTest`, `GrowthTest` |
+| Founder journey | Start, save and continue, submit (all answers and required evidence); results by area with "self-assessment, not a verified rating"; history; printable report (save as PDF). Owners, founders and admins fill it in; the whole team can see it; non-members get 404. | `GrowthTest` |
+| Gap analysis and plan | Answers scoring below 50 become suggestions, weakest first, each explained ("Because you answered …"). One click adds one to the growth plan; actions have owners (team only), due dates, status and progress notes. | `GrowthTest` |
+| Human override | Staff adjust the score or stage only with a reason; the calculated result is kept; founders see both, with the reason; audited | `GrowthTest` |
+| Events | `nsp.assessment.completed.v1`, `nsp.growth.stage.changed.v1` in the outbox (not sent to IMS) | `GrowthTest` |
+| Accessibility | axe audit of 7 growth pages at 1280 and 360 px: 0 violations | `tests/a11y` |
+
+Not done: benchmarks against other startups (spec: only where data justifies it), and AI suggestions (Phase 6).
+
 ## Test results (local)
-- `php artisan test`: **134 passed, 700 assertions** (end of Phase 2: 109 and 567).
+- `php artisan test`: **149 passed, 796 assertions** (end of Phase 3: 134 and 700).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

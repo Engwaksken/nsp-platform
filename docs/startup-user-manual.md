@@ -49,3 +49,12 @@ Turning a choice off stops the sharing from that moment. The page keeps a histor
 
 ## If someone else saved first
 If a teammate saves the profile while you're editing, your save is stopped so nothing is overwritten. Reload the page, then make your change again.
+
+## Growth assessment and growth plan
+Open your startup, then **Growth**.
+- **The assessment:** owners, founders and admins answer about 18 questions on team, problem and solution, market, traction, finances and operations. You can save and finish later.
+- **Your results:** you get a score out of 100, a stage, and a score for each area. These are a **self-assessment**: helpful for planning, not a verified rating. If Hive staff adjust your result, you see their reason next to your own result.
+- **Where to focus next:** your weakest answers become suggestions, and each one says which answer it comes from. Choose **Add to growth plan** to track it.
+- **Growth plan:** give each action an owner and a due date. Anyone on the team can update the status and add progress notes.
+- **Reassessing:** reassess every few months to see your progress. Use **Printable report** to save a PDF for your board or funders.
+

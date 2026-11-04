@@ -19,6 +19,8 @@ Spec §2 lists decisions that need owner approval before irreversible work. Unti
 | D10 | Hosting and queue capacity | (a) Shared cPanel with cron only. (b) VPS with supervisor workers and Redis. | (a) works with the cron outbox design. (b) if Phase 5-6 email volume or matching jobs grow. Confirm discovery U3. | Affects delivery delays and job design. | Pending |
 | D11 | Laravel 13 upgrade timing | (a) Upgrade once hosting has PHP 8.3+. (b) Stay on Laravel 12 until its security support ends. | (a), before Phase 7 production readiness, on a branch with full tests. | Running an older major longer; upgrade cost grows with code size. | Pending |
 
+| D12 | Growth assessment rubric (VGI) | (a) Approve the starter draft as is. (b) Edit it with the programs team, then approve. (c) Supply Hive's own rubric. | (b): review the 18 questions, weights and stages with the programs team, then a second administrator approves in Admin › Growth assessments. | Founders cannot take the assessment until a version is approved. | Pending |
+
 ## 2. Decisions made
 
 | ID | Date | Decision | Reason | Follow-up |
