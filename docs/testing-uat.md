@@ -1,0 +1,47 @@
+# Testing and UAT
+
+Run all automated tests with `php artisan test`. They use SQLite in memory and need no network: the identity provider is faked with `Http::fake`, and ID tokens are signed with a **test-only** RSA key in `tests/Fixtures/`, which must never be used anywhere else.
+
+## Test matrix
+
+Status: **A** = automated test passes locally. **M** = manual check done. **—** = not done yet. **P** = planned for a later phase.
+
+| Spec §12 requirement | Phase | Test | Status |
+|---|---|---|---|
+| Admin role/permissions, CRUD, publishing | 1 | `AdminPermissionsTest`, `PageRevisionsTest` | A |
+| Content publishing incl. scheduling, drafts hidden | 1 | `PublicSiteTest` | A |
+| Pagination, exports | 1 | Pagination is used on every list. Exports are not built. | Partly |
+| Notification preferences | 6 | — | P |
+| Responsive/mobile and accessibility flows | 1 | CSS breakpoints exist. No device or axe audit yet. | — |
+| OIDC: PKCE, state, nonce, signature, aud/iss/exp, alg confusion | 1/2 | `OidcLoginTest` | A |
+| User matched by IdP subject, not email | 1/2 | `OidcLoginTest::test_returning_user_is_matched_by_subject_not_email` | A |
+| IMS-first founder enters NSP without re-signup | 2-3 | Needs IdP and IMS changes | P |
+| NSP-first founder applies to IMS with prefill and snapshot | 3 | — | P |
+| Two founders, one startup, no duplicate | 2 | — | P |
+| Founder of two startups cannot cross-access | 2 | — | P |
+| IMS migration, alias mapping, duplicate review, rollback | 3 | — | P |
+| Consent revocation stops disclosure | 3 | — | P |
+| Registry down → graceful degradation | 2 | The workspace shows a message when the registry throws (code path exists, no test yet) | P |
+| Concurrent edit → version conflict | 2 | — | P |
+| Duplicate or replayed webhook rejected | 3 | — | P |
+| IMS reviewer notes never exposed | 3 | — | P |
+| Investor blocked from data room without grant | 5 | — | P |
+| Deterministic VGI scoring | 4 | — | P |
+
+Extra Phase 1 security tests: Markdown/HTML escaping, unsafe link schemes, a script disguised as an image, open-redirect protection after login, rate limits, the contact-form honeypot, and security headers on 404s.
+
+## UAT script for Phase 1 (staging)
+Run each step as the role named and record pass or fail with a screenshot.
+
+1. **Content editor** creates a page with a hero and text section and saves it as a draft. The public address returns "not found". The preview shows the page.
+2. **Content editor** cannot choose "Published" or edit a live page. The message explains why.
+3. **Ecosystem manager** publishes the page with a publish time 10 minutes ahead. It appears only after that time.
+4. **Ecosystem manager** edits the page twice, then restores the first revision. The page returns to draft with the old content.
+5. **Content editor** uploads a JPG, then a `.php` file renamed `.png`. The second is refused.
+6. **Platform admin** sets brand colours. A colour with low contrast shows a warning, and the site uses the new colours.
+7. **Platform admin** routes "Partnership" to a team email. A test message arrives at that inbox, and the admin inbox shows it.
+8. **Support** opens the message and closes it. The audit log shows who read it.
+9. **Platform admin** tries to give someone super_admin and is refused. A super admin can do it.
+10. **Startup user** signs in and sees the workspace with "Not available yet" on each service. Opening `/admin` returns 403.
+11. On a phone (360 px wide), the menu opens and closes, and forms are usable.
+12. Keyboard only: the skip link works, focus is visible, and every admin form can be submitted.

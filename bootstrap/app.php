@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Middleware\EnsureAdminAccess;
+use App\Http\Middleware\EnsureFeatureEnabled;
+use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\HandleSeoRedirects;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -11,7 +16,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Global so they also apply to 404s for paths no route matches.
+        $middleware->append(SecurityHeaders::class);
+        $middleware->append(HandleSeoRedirects::class);
+        $middleware->appendToGroup('web', EnsureUserIsActive::class);
+        $middleware->alias([
+            'admin' => EnsureAdminAccess::class,
+            'feature' => EnsureFeatureEnabled::class,
+        ]);
+        $middleware->redirectGuestsTo(fn () => route('login'));
+        $middleware->redirectUsersTo(fn () => route('workspace'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

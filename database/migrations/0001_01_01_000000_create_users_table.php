@@ -16,9 +16,15 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            // Null for accounts that only sign in through the shared OIDC identity provider.
+            $table->string('password')->nullable();
+            $table->string('oidc_issuer')->nullable();
+            $table->string('oidc_subject')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamp('last_login_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->unique(['oidc_issuer', 'oidc_subject']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
