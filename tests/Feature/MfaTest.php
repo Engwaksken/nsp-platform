@@ -159,4 +159,15 @@ class MfaTest extends TestCase
         $this->actingAs($admin)->get('/admin')->assertRedirect('/login');
         $this->assertGuest();
     }
+
+    public function test_any_user_who_turned_on_mfa_is_challenged(): void
+    {
+        $founder = User::factory()->withRole('startup_user')->create(['email' => 'founder@hive.test']);
+        $founder->enableMfa(self::SECRET, Totp::currentStep() - 5);
+
+        $this->post('/login', ['email' => 'founder@hive.test', 'password' => 'password'])->assertRedirect('/login/two-factor');
+        $this->assertGuest();
+        $this->post('/login/two-factor', ['code' => $this->currentCode()]);
+        $this->assertAuthenticatedAs($founder);
+    }
 }

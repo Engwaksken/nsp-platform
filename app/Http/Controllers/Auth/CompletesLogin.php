@@ -22,7 +22,7 @@ trait CompletesLogin
 
     protected function completeLogin(User $user, string $method, bool $remember = false, bool $secondFactorDone = false, array $sessionExtras = [], ?string $identifier = null): RedirectResponse
     {
-        if ($user->requiresMfa() && $user->hasMfa() && ! $secondFactorDone) {
+        if ($user->hasMfa() && ! $secondFactorDone) {
             session()->regenerate();
             session()->put('mfa_pending', [
                 'user_id' => $user->id,
@@ -41,6 +41,9 @@ trait CompletesLogin
             session()->put($key, $value);
         }
         session()->put('mfa_verified', $secondFactorDone);
+        if (! $secondFactorDone && ! $user->hasMfa()) {
+            session()->forget('mfa_verified');
+        }
         $user->forceFill(['last_login_at' => now()])->save();
 
         LoginAudit::query()->create([

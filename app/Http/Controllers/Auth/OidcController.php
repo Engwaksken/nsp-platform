@@ -114,6 +114,10 @@ class OidcController extends Controller
             return $existing;
         }
 
+        if (! $emailVerified) {
+            return 'Your identity provider has not verified your email address. Verify it there, then try again.';
+        }
+
         return DB::transaction(function () use ($claims, $email, $emailVerified, $issuer, $subject) {
             $user = new User;
             $user->forceFill([

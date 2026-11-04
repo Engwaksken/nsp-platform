@@ -60,6 +60,7 @@ class PostController extends Controller
 
     public function destroy(Post $post): RedirectResponse
     {
+        abort_if($post->status === 'published' && ! Gate::allows('publish-content'), 403, 'Only people who can publish may delete a live post.');
         $post->delete();
         Audit::log('post.deleted', $post);
 

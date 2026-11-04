@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Global so they also apply to 404s for paths no route matches.
         $middleware->append(SecurityHeaders::class);
+        // Reject requests for other hosts, so links built from the request (password reset) cannot point elsewhere.
+        $middleware->trustHosts();
         $middleware->append(HandleSeoRedirects::class);
         $middleware->appendToGroup('web', EnsureUserIsActive::class);
         $middleware->alias([

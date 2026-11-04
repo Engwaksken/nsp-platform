@@ -30,7 +30,11 @@ class NotificationController extends Controller
         abort_unless($notification->user_id === $request->user()->id, 404);
         $notification->update(['read_at' => $notification->read_at ?? now()]);
         $url = (string) $notification->url;
-        $local = $url !== '' && str_starts_with($url, url('/'));
+        $target = parse_url($url);
+        $site = parse_url(url('/'));
+        $local = $url !== '' && is_array($target) && ($target['scheme'] ?? null) === ($site['scheme'] ?? null)
+            && strcasecmp($target['host'] ?? '', $site['host'] ?? '') === 0 && ($target['port'] ?? null) === ($site['port'] ?? null)
+            && ! isset($target['user']);
 
         return $local ? redirect()->to($url) : redirect()->route('notifications.index');
     }

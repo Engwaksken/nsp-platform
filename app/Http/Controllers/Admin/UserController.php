@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\Audit;
+use App\Support\SecurityAlert;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -122,6 +123,7 @@ class UserController extends Controller
         // End their sessions so the reset takes effect immediately.
         DB::table('sessions')->where('user_id', $user->id)->delete();
         Audit::log('user.mfa_reset', $user);
+        SecurityAlert::send($user, 'Your two-factor sign-in was reset', 'An administrator reset two-factor sign-in on your NSP account');
 
         return back()->with('status', 'Two-factor sign-in was reset. '.$user->name.' must set it up again at the next sign-in.');
     }

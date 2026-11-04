@@ -83,20 +83,24 @@ class ConnectFlowTest extends IntegrationTestCase
         $this->assertSame(self::REDIRECT.'?error=access_denied&state='.self::STATE, $location);
     }
 
-    public function test_team_member_cannot_turn_on_sharing_but_can_connect_when_it_is_on(): void
+    public function test_only_owners_founders_and_admins_can_connect_and_founders_need_sharing_on(): void
     {
         $owner = User::factory()->withRole('startup_user')->create();
         $member = User::factory()->withRole('startup_user')->create(['email' => 'member@example.org']);
+        $founder = User::factory()->withRole('startup_user')->create(['email' => 'founder@example.org']);
         $startup = $this->startupWithConsent($owner, consent: false);
         $registry = app(RegistryService::class);
         $registry->acceptInvitation($registry->invite($startup, $owner, 'member@example.org', 'team_member'), $member);
-        $post = fn () => $this->actingAs($member)->post('/connect/ims-test', ['redirect_uri' => self::REDIRECT, 'state' => self::STATE, 'startup_uuid' => $startup->uuid, 'decision' => 'approve']);
+        $registry->acceptInvitation($registry->invite($startup, $owner, 'founder@example.org', 'founder'), $founder);
+        $post = fn (User $user) => $this->actingAs($user)->post('/connect/ims-test', ['redirect_uri' => self::REDIRECT, 'state' => self::STATE, 'startup_uuid' => $startup->uuid, 'decision' => 'approve']);
 
-        $post()->assertSessionHasErrors('startup_uuid');
-        $this->assertNull($registry->activeConsent($startup, 'ims_prefill'));
-
+        // A team member cannot connect the startup, whether sharing is on or not.
+        $post($member)->assertForbidden();
         $registry->grantConsent($startup, $owner, 'ims_prefill');
-        $this->assertStringStartsWith(self::REDIRECT.'?code=', $post()->headers->get('Location'));
+        $post($member)->assertForbidden();
+
+        // A founder can connect once sharing is on.
+        $this->assertStringStartsWith(self::REDIRECT.'?code=', $post($founder)->headers->get('Location'));
     }
 
     public function test_cannot_connect_a_startup_you_are_not_on(): void

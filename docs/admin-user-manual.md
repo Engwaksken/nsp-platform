@@ -132,3 +132,7 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
 - **Admin › KPIs and reports** shows ecosystem figures for the last 30 days, 90 days or 12 months. Each card says exactly what it counts; the full definitions are in `docs/kpi-definitions.md`.
 - **Download KPIs (CSV)** saves the figures. **Download startup list (CSV)** (needs startup management rights) lists startups without contact details, financials or team members.
 - Every download is recorded in the audit log. Figures are counts only; to see an individual startup, open it under **Startups**.
+
+## Security emails
+- People are emailed whenever two-factor sign-in is turned on, turned off, reset, or gets new recovery codes on their account. These emails cannot be switched off.
+- When you create an admin account, ask the person to sign in and set up two-factor sign-in straight away, so nobody else can set it up with their password first.

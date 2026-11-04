@@ -48,7 +48,8 @@ class ExpertController extends Controller
         $profile->user_id = $request->user()->id;
         $isNew = ! $profile->exists;
         $profile->fill($data);
-        if ($isNew || $profile->status === 'rejected') {
+        $identityChanged = ! $isNew && $profile->status === 'verified' && $profile->isDirty(['headline', 'website']);
+        if ($isNew || $profile->status === 'rejected' || $identityChanged) {
             $profile->status = 'pending';
         }
         $profile->save();

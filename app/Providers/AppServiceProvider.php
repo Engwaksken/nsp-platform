@@ -13,11 +13,15 @@ use App\Services\Registry\LocalStartupRegistry;
 use App\Support\Features;
 use App\Support\Settings;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\LazyLoadingViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -57,6 +61,23 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::defaultView('partials.pagination');
+
+        // Links in emails (password reset, notifications) always use APP_URL in production, whatever Host was sent.
+        if ($this->app->isProduction() && config('app.url')) {
+            URL::forceRootUrl(config('app.url'));
+            if (str_starts_with((string) config('app.url'), 'https://')) {
+                URL::forceScheme('https');
+            }
+        }
+
+        // Performance guard: tests fail on lazy loading (N+1 queries); production only logs it.
+        Model::preventLazyLoading(! $this->app->isProduction());
+        Model::handleLazyLoadingViolationUsing(function ($model, $relation) {
+            if ($this->app->runningUnitTests()) {
+                throw new LazyLoadingViolationException($model, $relation);
+            }
+            Log::notice('[n+1] '.get_class($model).'::'.$relation);
+        });
 
         // Super admins pass every permission check.
         Gate::before(fn ($user) => $user->hasRole('super_admin') ? true : null);

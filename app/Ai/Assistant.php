@@ -85,7 +85,10 @@ TXT;
     /** Exactly what is sent, so it can be shown to the founder and tested. */
     public function buildUserTurn(Startup $startup, string $task, string $founderText): string
     {
-        $founderText = str_ireplace(['<founder_text>', '</founder_text>'], '', $founderText);
+        do {
+            $before = $founderText;
+            $founderText = (string) preg_replace('#<\s*/?\s*founder_text\s*>#i', '', $founderText);
+        } while ($founderText !== $before);
         $lines = [
             self::TASK_INSTRUCTIONS[$task],
             'Startup name: '.$startup->display_name,

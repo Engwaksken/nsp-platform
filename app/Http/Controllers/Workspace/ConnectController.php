@@ -55,6 +55,7 @@ class ConnectController extends Controller
         $startup = Startup::query()->where('status', 'active')->find((string) $request->input('startup_uuid'));
         $membership = $startup?->membershipOf($request->user());
         abort_unless($membership !== null, 404);
+        abort_unless($membership->canEdit(), 403, 'Only owners, founders and admins can connect the startup to another Hive system.');
 
         if (! ConsentedFields::consent($startup, $client)) {
             try {

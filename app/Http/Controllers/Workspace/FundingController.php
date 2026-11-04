@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Workspace;
 
+use App\Ecosystem\Eligibility;
 use App\Funding\FundingService;
 use App\Http\Controllers\Controller;
 use App\Models\Funding\DataRoomAccessLog;
@@ -47,8 +48,9 @@ class FundingController extends Controller
 
         $matches = collect();
         if ($open) {
+            $stages = Eligibility::stagesFor([$startup->uuid]);
             $matches = InvestorProfile::query()->verified()->where('is_listed', true)->with('user')->get()
-                ->map(fn (InvestorProfile $investor) => ['investor' => $investor] + $this->funding->fit($investor, $startup, $open))
+                ->map(fn (InvestorProfile $investor) => ['investor' => $investor] + $this->funding->fit($investor, $startup, $open, $stages))
                 ->sortByDesc(fn ($match) => [$match['fits'], count($match['reasons'])])->values();
         }
         $introductions = Introduction::query()->with('investor', 'requester')->where('startup_uuid', $startup->uuid)->latest()->get();

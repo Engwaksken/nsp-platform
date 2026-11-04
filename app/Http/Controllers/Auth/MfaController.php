@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LoginAudit;
 use App\Models\User;
 use App\Support\Audit;
+use App\Support\SecurityAlert;
 use App\Support\Settings;
 use App\Support\Totp;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
@@ -112,6 +113,7 @@ class MfaController extends Controller
         $request->session()->forget('mfa_setup_secret');
         $request->session()->put('mfa_verified', true);
         Audit::log('auth.mfa_enabled', $user);
+        SecurityAlert::send($user, 'Two-factor sign-in was turned on', 'Two-factor sign-in was set up on your NSP account');
 
         return redirect()->route('mfa.setup')->with('recovery_codes', $codes)->with('status', 'Two-factor sign-in is on.');
     }
@@ -124,6 +126,7 @@ class MfaController extends Controller
 
         $codes = $user->regenerateRecoveryCodes();
         Audit::log('auth.mfa_recovery_codes_regenerated', $user);
+        SecurityAlert::send($user, 'New recovery codes were created', 'New two-factor recovery codes were created for your NSP account');
 
         return redirect()->route('mfa.setup')->with('recovery_codes', $codes)->with('status', 'New recovery codes created. The old ones no longer work.');
     }
@@ -139,6 +142,7 @@ class MfaController extends Controller
 
         $user->disableMfa();
         Audit::log('auth.mfa_disabled', $user);
+        SecurityAlert::send($user, 'Two-factor sign-in was turned off', 'Two-factor sign-in was turned off on your NSP account');
 
         return redirect()->route('mfa.setup')->with('status', 'Two-factor sign-in is off.');
     }

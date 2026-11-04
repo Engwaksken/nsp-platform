@@ -74,6 +74,7 @@ class PageController extends Controller
     public function destroy(Page $page): RedirectResponse
     {
         abort_if($page->slug === 'home', 422, 'The home page cannot be deleted. Unpublish it instead.');
+        abort_if($page->status === 'published' && ! Gate::allows('publish-content'), 403, 'Only people who can publish may delete a live page.');
         $page->delete();
         Audit::log('page.deleted', $page);
 

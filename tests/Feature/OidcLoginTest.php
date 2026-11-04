@@ -209,4 +209,11 @@ class OidcLoginTest extends TestCase
         $this->get('/auth/oidc/redirect')->assertNotFound();
         $this->get('/login')->assertDontSee('Sign in with your Hive account');
     }
+
+    public function test_unverified_email_does_not_create_an_account(): void
+    {
+        $this->completeLogin($this->idToken(['email_verified' => false]))->assertRedirect('/login');
+        $this->assertGuest();
+        $this->assertFalse(User::query()->where('email', 'founder@startup.test')->exists());
+    }
 }

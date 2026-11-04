@@ -40,12 +40,16 @@ class LoginController extends Controller
             'password' => ['required', 'string', 'max:255'],
         ]);
         $throttleKey = Str::lower($credentials['email']).'|'.$request->ip();
+        $ipKey = 'login-ip|'.$request->ip();
+        $accountKey = 'login-account|'.Str::lower($credentials['email']);
 
-        if (RateLimiter::tooManyAttempts($throttleKey, self::MAX_ATTEMPTS)) {
-            $this->audit(null, false, 'throttled', $credentials['email']);
-            throw ValidationException::withMessages([
-                'email' => 'Too many sign-in attempts. Try again in '.RateLimiter::availableIn($throttleKey).' seconds.',
-            ]);
+        foreach ([[$throttleKey, self::MAX_ATTEMPTS], [$ipKey, 30], [$accountKey, 20]] as [$key, $max]) {
+            if (RateLimiter::tooManyAttempts($key, $max)) {
+                $this->audit(null, false, 'throttled', $credentials['email']);
+                throw ValidationException::withMessages([
+                    'email' => 'Too many sign-in attempts. Try again in '.max(1, RateLimiter::availableIn($key)).' seconds.',
+                ]);
+            }
         }
 
         $user = User::query()->where('email', Str::lower($credentials['email']))->first();
@@ -54,6 +58,8 @@ class LoginController extends Controller
 
         if (! $user || ! $user->password || ! $passwordOk) {
             RateLimiter::hit($throttleKey, 60);
+            RateLimiter::hit($ipKey, 600);
+            RateLimiter::hit($accountKey, 900);
             $this->audit($user, false, 'bad_credentials', $credentials['email']);
             throw ValidationException::withMessages(['email' => 'The email or password is incorrect.']);
         }

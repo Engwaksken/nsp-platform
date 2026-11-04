@@ -31,6 +31,8 @@ Status: **A** = automated test passes locally. **M** = manual check done. **—*
 | Unsubscribe link cannot be triggered by a GET or a forged signature | 6 | `NotificationsTest::test_one_click_unsubscribe_needs_a_valid_signature_and_post` | A |
 | Exports scoped and audited; no contacts in staff startup list | 6 | `InsightsTest` | A |
 | AI assistant sends no confidential fields; injection contained | 6 | `AssistantTest` | A |
+| Security review fixes (Host header, MFA for all, spraying limits, SSO verified email) | 7 | `SecurityReviewFixesTest`, `MfaTest`, `OidcLoginTest` | A |
+| List pages do not grow queries with rows (N+1) | 7 | `QueryCountTest` | A |
 | Investor blocked from data room without grant | 5 | `FundingTest::test_investor_without_a_data_room_grant_cannot_access_the_pitch_deck` (also expiry, revocation, unverified investors) | A |
 | Deterministic VGI scoring | 4 | — | P |
 

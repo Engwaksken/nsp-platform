@@ -208,7 +208,8 @@ class FundingTest extends TestCase
         ])->assertSessionHasErrors('introduction');
 
         $this->actingAs($investor)->post("/investors/introductions/{$introduction->uuid}/decision", ['decision' => 'accept'])->assertSessionHasNoErrors();
-        $this->actingAs($investor)->get("/investors/startups/{$startup->uuid}")->assertSee($founder->email)->assertSee('hello@greenfields.test');
+        $this->actingAs($investor)->get("/investors/startups/{$startup->uuid}")->assertSee($founder->email)
+            ->assertDontSee('hello@greenfields.test', 'Company contact fields follow the startup visibility settings, which never include investors.');
         $this->actingAs($founder)->get("/workspace/startups/{$startup->uuid}/funding")->assertSee('ivy@fund.test');
 
         // Private pipeline notes.

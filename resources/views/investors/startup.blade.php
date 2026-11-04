@@ -35,7 +35,6 @@
                     @foreach ($contacts as $member)
                         <li>{{ $member->user?->name }} ({{ \App\Models\Registry\StartupMembership::ROLES[$member->role] ?? $member->role }}) · <a href="mailto:{{ $member->user?->email }}">{{ $member->user?->email }}</a></li>
                     @endforeach
-                    @if ($profile?->contact_email)<li>Company: <a href="mailto:{{ $profile->contact_email }}">{{ $profile->contact_email }}</a>@if ($profile->contact_phone) · {{ $profile->contact_phone }}@endif</li>@endif
                 </ul>
             @elseif ($introduction?->status === 'requested')
                 <p>{{ $introduction->requested_by === 'investor' ? 'Waiting for the founders to reply.' : 'The founders asked to connect. Reply on your dashboard.' }}</p>

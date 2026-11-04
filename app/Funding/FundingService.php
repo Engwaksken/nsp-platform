@@ -100,9 +100,10 @@ class FundingService
     /**
      * Explainable fit between an investor's thesis and a funding request.
      *
+     * @param  array<string, string|null>|null  $stages  stages already looked up with Eligibility::stagesFor() (lists)
      * @return array{fits: bool, reasons: list<string>, misses: list<string>}
      */
-    public function fit(InvestorProfile $investor, Startup $startup, FundingRequest $request): array
+    public function fit(InvestorProfile $investor, Startup $startup, FundingRequest $request, ?array $stages = null): array
     {
         $reasons = [];
         $misses = [];
@@ -114,7 +115,7 @@ class FundingService
             in_array($startup->country, $investor->countries, true) ? $reasons[] = 'Country' : $misses[] = 'Country';
         }
         if ($investor->stages) {
-            $stage = Eligibility::stage($startup);
+            $stage = $stages !== null ? ($stages[$startup->uuid] ?? null) : Eligibility::stage($startup);
             if ($stage && in_array($stage, $investor->stages, true)) {
                 $reasons[] = 'Stage: '.$stage;
             } elseif ($stage) {

@@ -63,7 +63,8 @@ class InvestorController extends Controller
         $profile->user_id = $request->user()->id;
         $isNew = ! $profile->exists;
         $profile->fill($data);
-        if ($isNew || $profile->status === 'rejected') {
+        $identityChanged = ! $isNew && $profile->status === 'verified' && $profile->isDirty(['organisation', 'investor_type', 'website']);
+        if ($isNew || $profile->status === 'rejected' || $identityChanged) {
             $profile->status = 'pending';
         }
         $profile->save();
@@ -86,7 +87,8 @@ class InvestorController extends Controller
         $requests = FundingRequest::query()->with('startup.profile')->where('status', 'open')->whereIn('startup_uuid', $consented)
             ->whereHas('startup', fn ($q) => $q->where('status', 'active'))->latest()->get();
         $filter = $request->query('show', 'fits');
-        $startups = $requests->map(fn (FundingRequest $fr) => ['request' => $fr, 'startup' => $fr->startup] + $this->funding->fit($profile, $fr->startup, $fr))
+        $stages = Eligibility::stagesFor($requests->pluck('startup_uuid'));
+        $startups = $requests->map(fn (FundingRequest $fr) => ['request' => $fr, 'startup' => $fr->startup] + $this->funding->fit($profile, $fr->startup, $fr, $stages))
             ->filter(fn ($row) => $filter === 'all' || $row['fits'])
             ->sortByDesc(fn ($row) => count($row['reasons']))->values();
 

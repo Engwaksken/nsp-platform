@@ -57,4 +57,26 @@ class Eligibility
         return VgiAssessment::query()->where('startup_uuid', $startup->uuid)->where('status', 'submitted')
             ->latest('submitted_at')->first()?->displayBand();
     }
+
+    /**
+     * The current stage of many startups in one query (for lists).
+     *
+     * @param  iterable<string>  $uuids
+     * @return array<string, string|null> startup uuid => stage
+     */
+    public static function stagesFor(iterable $uuids): array
+    {
+        $uuids = collect($uuids)->unique()->values();
+        $stages = $uuids->mapWithKeys(fn ($uuid) => [$uuid => null])->all();
+        if ($uuids->isEmpty()) {
+            return $stages;
+        }
+        VgiAssessment::query()->whereIn('startup_uuid', $uuids)->where('status', 'submitted')
+            ->orderByDesc('submitted_at')->get(['startup_uuid', 'band_label', 'override_band_label', 'submitted_at'])
+            ->each(function (VgiAssessment $assessment) use (&$stages) {
+                $stages[$assessment->startup_uuid] ??= $assessment->displayBand();
+            });
+
+        return $stages;
+    }
 }

@@ -14,7 +14,7 @@
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
 | 5: Ecosystem services | **All five modules implemented and tested**: 5a opportunities and events, 5b funding and investors, 5c experts and mentors, 5d talent and jobs (pushed, CI green) and 5e marketplace and startup showcase (tested locally). | Not passed yet: needs the role-based UAT in `testing-uat.md` (Phase 5 script) on staging |
 | 6: Communications and intelligence | **All three parts implemented**: 6a notifications and 6b dashboards, KPIs and exports (pushed, CI green); 6c optional AI assistant (tested locally, **switched off until legal review, decision D13**). | Not passed yet: needs the privacy and quality evaluation, including the legal review in `ai-assistant.md` |
-| 7: Production readiness | **7a operations implemented and tested locally** (backups with a verified restore path, health checks, uptime endpoint, runbook). Still to do: 7b security review and performance pass, 7c accessibility sweep and go-live checklist; staging, the restore drill on a clean server, penetration test and UAT need hosting (D9, D10). | Not passed: needs a signed go-live checklist |
+| 7: Production readiness | **7a operations** and **7b internal security review and performance pass** implemented and tested locally. Still to do: 7c accessibility sweep and go-live checklist; staging, the restore drill on a clean server, penetration test and UAT need hosting (D9, D10). | Not passed: needs a signed go-live checklist |
 
 ## Phase 0: completed this sprint
 - `discovery.md`: read-only audit of Hive IMS. Confirmed: no IdP, no API, no startups table, shared hosting with cron only.
@@ -229,8 +229,18 @@ Full design and review brief: `docs/ai-assistant.md`.
 | Runbook (DOC-709 part) | Schedules, monitoring set-up, off-server copies, secrets that are not in backups (`APP_KEY`, backup password), what to do per failing check, incident steps, routine checks. | `docs/operations-runbook.md` |
 | CI | The zip extension is added so backup tests run on GitHub too. | `.github/workflows/tests.yml` |
 
+## Phase 7b: internal security review and performance (implemented 2026-11-15)
+
+| Item | What was done | Evidence |
+|---|---|---|
+| Security review (SEC-705 part 1) | An independent read-only review of every route and module: no critical issues and no cross-tenant access. 3 medium and 8 low findings fixed (Host header and reset links, two-factor for everyone who enabled it, investor contact exposure, password-spraying limits, security alert emails, verified SSO emails only, exact notification link check, IMS connect needs edit rights, live-content deletion, AI delimiter, re-review on identity changes). | `docs/security-review-2026-11.md`, `SecurityReviewFixesTest` and updated tests |
+| N+1 guard (PERF-708) | Lazy loading now throws in tests and is logged elsewhere. A query-count test loads 17 list pages with 3 and then 15 rows: queries must not grow with rows. It found and fixed one N+1 (growth stage per startup on the investor dashboard and the funding page). | `QueryCountTest` |
+| Indexes | Composite indexes for consent lookups by purpose, sign-ins by user and time (KPIs), assessments by startup and status, and KPI date ranges. Rollback tested. | `2026_11_15_080000_add_performance_indexes.php` |
+
+Still needed on staging: an external penetration test, and a load test on a low-bandwidth profile (PERF-708 acceptance).
+
 ## Test results (local)
-- `php artisan test`: **212 passed, 1452 assertions** (6c: 206 and 1417; 6b: 198 and 1345; 6a: 193 and 1285; 5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
+- `php artisan test`: **222 passed, 1520 assertions** (7a: 212 and 1452; 6c: 206 and 1417; 6b: 198 and 1345; 6a: 193 and 1285; 5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;
