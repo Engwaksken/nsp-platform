@@ -35,6 +35,9 @@
                         <p><a class="btn btn-primary btn-sm" href="{{ $active ? route('workspace.opportunities', $active->startup) : route('opportunities.index') }}">See opportunities</a></p>
                     @elseif ($section['key'] === 'vgi' && $active)
                         <p><a class="btn btn-primary btn-sm" href="{{ route('workspace.growth', $active->startup) }}">Open growth</a></p>
+                    @elseif ($section['key'] === 'experts')
+                        <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.experts', $active->startup) }}">Find an expert</a> @endif
+                            <a class="btn btn-secondary btn-sm" href="{{ route('experts.dashboard') }}">I am an expert or mentor</a></p>
                     @elseif ($section['key'] === 'funding')
                         <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.funding', $active->startup) }}">Open funding</a> @endif
                             <a class="btn btn-secondary btn-sm" href="{{ route('investor.dashboard') }}">I am an investor</a></p>

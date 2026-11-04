@@ -190,3 +190,4 @@ pre.json { white-space: pre-wrap; word-break: break-word; font-size: .8rem; marg
 /* Funding (Phase 5b) */
 .inline-form { display: inline-flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: .5rem 0; }
 .h4 { font-size: 1.05rem; margin: 0 0 .25rem; }
+.plain-list { list-style: none; padding-left: 0; }

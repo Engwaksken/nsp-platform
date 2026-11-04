@@ -14,7 +14,7 @@ Sign in at `/login`. Staff with an admin role land on the **Dashboard**. The men
 | Role | Can do |
 |---|---|
 | Content editor | Write pages and news as drafts, upload media, edit menus, FAQs, testimonials and partners |
-| Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities and verifying investors |
+| Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities, verifying investors and experts, and assigning mentors |
 | Support | Read and handle contact messages |
 | Auditor | Read the audit log |
 | Platform admin | Everything except granting super admin or platform admin |
@@ -106,3 +106,8 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
 - Check who the person is before you verify: their website or LinkedIn, fund registration, or a reference. A verified investor can see every startup that chose to be listed, so verify only people you would introduce yourself.
 - **Verify** gives them the investor dashboard. **Do not verify** and **Suspend** need a note; the investor sees it. Suspending hides all startups and documents from them at once.
 - Staff cannot open startups' data rooms from the admin area. Documents are shared only by founders, per investor, until a date they choose.
+
+## Experts and mentors (ecosystem managers and platform admins)
+- **Admin › Experts** lists expert applications. Check experience (website, LinkedIn or a reference) before you **Verify**. **Do not verify** and **Suspend** need a note the expert sees. Suspending stops them using their engagements.
+- **Admin › Mentoring and engagements:** assign a verified mentor to a startup with a focus. The mentorship starts at once and both sides are emailed.
+- The engagements list shows status, sessions held and feedback. Session notes are private to the startup and the expert and are not shown to staff.

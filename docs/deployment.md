@@ -43,7 +43,7 @@ Add one cron job:
 1. Back up first: `mysqldump` the NSP database and archive `storage/app/public` and `storage/app/private`.
 2. Run `php artisan down --retry=60`.
 3. Upload the new code, then run `composer install --no-dev --optimize-autoloader` and `php artisan migrate --force`.
-4. Run `php artisan db:seed --class=RolesAndPermissionsSeeder --force` when a release adds permissions (it is safe to repeat; Phase 5b added `verify-investors`).
+4. Run `php artisan db:seed --class=RolesAndPermissionsSeeder --force` when a release adds permissions (it is safe to repeat; Phase 5b added `verify-investors`, 5c added `manage-experts`).
 5. Run `php artisan config:cache && php artisan route:cache && php artisan view:cache`, then `php artisan up`.
 
 Data-room files live in `storage/app/private/data-room` (the private `local` disk). Include that folder in backups; never link it into `public`.

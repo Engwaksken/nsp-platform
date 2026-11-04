@@ -78,3 +78,14 @@ NSP helps you meet investors that Hive has checked. It does not promise or arran
 - Go to **My workspace › I am an investor** and fill in your investor profile. Hive checks it before you can see any startup.
 - Once verified, your dashboard shows startups raising now that fit your focus (or **All**), introduction requests, your pipeline and data rooms shared with you.
 - Your pipeline stages and notes are private to you.
+
+## Experts and mentors
+- Open your startup, then **Experts**. Everyone listed is checked by Hive. Filter by mentor or consultant and by expertise; each card says why the expert may suit you.
+- Choose **Ask** to request a consultation or mentoring. The expert sees your startup’s name, sector and what you write. Hive can also assign you a mentor.
+- Once the expert accepts you can see each other’s email. On the engagement page you plan **sessions** (online sessions need an https:// link), keep **shared notes**, keep **team notes** that only your team sees, and track **actions**.
+- When you are done, mark it **completed** and give feedback. Your comment goes only to the expert and Hive; other founders only see an average rating once an expert has three reviews.
+
+## I am an expert or mentor
+- Go to **My workspace › I am an expert or mentor** and fill in your profile. Hive checks it before founders can find you.
+- Your dashboard shows new requests, upcoming sessions and the startups you support. Your private session notes are visible only to you.
+- NSP does not handle payments. If you charge a fee, agree it directly with the startup.

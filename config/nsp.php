@@ -13,7 +13,7 @@ return [
         'ims_integration' => ['default' => (bool) env('NSP_IMS_INTEGRATION', false), 'label' => 'IMS integration', 'description' => 'Connect flow, Registry API and events with Hive IMS; application and program summaries (docs/integration-contract-v1.md).'],
         'vgi' => ['default' => (bool) env('NSP_VGI_ENABLED', true), 'label' => 'Growth and VGI', 'description' => 'Growth assessments with an approved rubric, results and growth plans.'],
         'funding' => ['default' => (bool) env('NSP_FUNDING_ENABLED', true), 'label' => 'Funding and investors', 'description' => 'Funding requests, verified investors, introductions and private data rooms.'],
-        'experts' => ['default' => false, 'label' => 'Experts and mentors', 'description' => 'Expert profiles, bookings and mentorship (Phase 5).'],
+        'experts' => ['default' => (bool) env('NSP_EXPERTS_ENABLED', true), 'label' => 'Experts and mentors', 'description' => 'Verified experts, consultation requests, mentor assignments, sessions, actions and feedback.'],
         'talent' => ['default' => false, 'label' => 'Talent', 'description' => 'Vacancies, candidates and hiring (Phase 5).'],
         'opportunities' => ['default' => (bool) env('NSP_OPPORTUNITIES_ENABLED', true), 'label' => 'Opportunities and events', 'description' => 'Grants, accelerators, competitions, events and calls with eligibility, saving, registration and recommendations.'],
         'ai_assistant' => ['default' => false, 'label' => 'AI assistant', 'description' => 'Optional AI help with provenance and consent (Phase 6).'],
@@ -74,5 +74,17 @@ return [
     ],
 
     // Version of the consent wording shown on the contact form; bump when the text changes.
+    'experts' => [
+        // Expertise areas experts choose from and founders filter by (spec: expert_skills).
+        'areas' => [
+            'strategy' => 'Business model and strategy', 'finance' => 'Finance and bookkeeping', 'fundraising' => 'Fundraising and investor readiness',
+            'marketing' => 'Marketing and sales', 'product' => 'Product and technology', 'operations' => 'Operations and supply chain',
+            'legal' => 'Legal, tax and compliance', 'people' => 'Team, HR and leadership', 'export' => 'Export and market access',
+            'impact' => 'Impact measurement', 'agronomy' => 'Agronomy and value chains', 'pitching' => 'Pitching and storytelling',
+        ],
+        // Ratings are shown in the directory only once an expert has this many, so no single review can be identified.
+        'min_reviews_shown' => 3,
+    ],
+
     'contact_consent_version' => '2026-11-04',
 ];

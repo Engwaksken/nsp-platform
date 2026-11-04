@@ -12,7 +12,7 @@
 | 2: Identity and registry | **Registry implemented and tested locally** (inside NSP, decision M8). Shared login (OIDC) deferred by owner (D1). | Partly: "NSP-first" journey works without duplicates; the IMS-first journey needs IMS changes (Phase 3) and an IdP. |
 | 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
-| 5: Ecosystem services | **5a Opportunities and events** (pushed, CI green) and **5b Funding and investors** (implemented and tested locally). Still to build: 5c experts and mentors, 5d talent, 5e marketplace. | Not passed: needs all five modules and role-based UAT |
+| 5: Ecosystem services | **5a Opportunities and events** (pushed, CI green) **5b Funding and investors** (pushed, CI green) and **5c Experts and mentors** (implemented and tested locally). Still to build: 5d talent, 5e marketplace. | Not passed: needs all five modules and role-based UAT |
 | 6 to 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
@@ -129,8 +129,23 @@ Privacy follows decision D5 option (a), the recommended default.
 
 Not done: investor-side document watermarking, deal-room Q&A, and investor reports for Hive (Phase 6 reporting).
 
+## Phase 5c: experts, consultants and mentors (implemented 2026-11-09)
+
+| Area | What exists | Evidence |
+|---|---|---|
+| Expert verification | Anyone signed in applies at `/experts/profile` (headline, bio, mentor/consultant/both, expertise areas, sectors, languages, availability, optional fee note, capacity). Staff with **manage-experts** verify, decline with a reason or suspend; the `expert` role follows. | `ExpertsTest::test_staff_verify_experts_and_assign_mentors` |
+| Directory | Per startup: verified, listed experts only; search, mentor/consultant and expertise filters; reasons ("Knows Agriculture", "Expertise: Finance", "Free sessions"). Average rating shown only from 3 reviews, so no single review is identifiable. | `test_directory_lists_only_verified_listed_experts_with_reasons`, `test_completion_and_one_review…` |
+| Requests and mentor matching | Founders (owner, founder, admin) request a consultation or mentoring; only the expert accepts or declines. Staff can assign a mentor directly. One open engagement per startup and expert. | `test_request_accept_and_contacts_are_shared_only_after_acceptance`, `test_unverified_experts_and_consultant_only_mentoring_are_refused` |
+| Engagement page | Shared by the expert and the startup team; anyone else gets 404. Contacts appear once active. Sessions (date, length, online with https link, in person or phone), statuses, actions with owner, due date and overdue flag. | `test_sessions_actions_and_note_visibility` |
+| Notes visibility | Per session: shared notes (both sides), expert-only notes, startup-only notes. Viewers read but cannot change. Private notes are hidden from serialisation and from the staff overview. | same test |
+| Feedback and outcomes | Either side completes with an outcome; the startup gives one rating, "did it help?" and a comment that only the expert and staff see. | `test_completion_and_one_review…` |
+| Notifications | Email on request, decision, mentor assignment, session planned, cancellation, completion and feedback. No notes in emails. | `ExpertsTest` |
+| Accessibility | axe audit of 8 expert and engagement pages at 1280 and 360 px: 0 violations | `tests/a11y` |
+
+Not done: calendar invites (.ics) and reminders before sessions, paid bookings (decision D6), and expert reporting dashboards (Phase 6).
+
 ## Test results (local)
-- `php artisan test`: **168 passed, 956 assertions** (5a: 158 and 855; end of Phase 4: 149 and 796).
+- `php artisan test`: **174 passed, 1050 assertions** (5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

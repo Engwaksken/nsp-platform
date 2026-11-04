@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\EngagementController;
+use App\Http\Controllers\ExpertController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\Site;
 use App\Http\Controllers\Workspace;
@@ -119,6 +121,10 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::post('/introductions', [Workspace\FundingController::class, 'introduce'])->middleware('throttle:20,60')->name('.introductions.store');
         Route::post('/introductions/{introduction}/decision', [Workspace\FundingController::class, 'decide'])->name('.introductions.decide');
     });
+    Route::middleware('feature:experts')->group(function () {
+        Route::get('/workspace/startups/{startup}/experts', [Workspace\ExpertDirectoryController::class, 'index'])->name('workspace.experts');
+        Route::post('/workspace/startups/{startup}/experts', [Workspace\ExpertDirectoryController::class, 'request'])->middleware('throttle:20,60')->name('workspace.experts.request');
+    });
     Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
     Route::middleware(['feature:ims_integration', 'throttle:30,1'])->group(function () {
         Route::get('/connect/{clientId}', [Workspace\ConnectController::class, 'show'])->name('connect.show');
@@ -143,6 +149,26 @@ Route::middleware(['auth', 'feature:funding'])->group(function () {
         Route::post('/introductions/{introduction}/decision', [InvestorController::class, 'decide'])->name('decide');
     });
     Route::get('/data-room/{file}', [InvestorController::class, 'download'])->middleware('throttle:60,1')->name('dataroom.download');
+});
+
+/*
+| Experts, mentors and engagements (Phase 5c)
+*/
+Route::middleware(['auth', 'feature:experts'])->group(function () {
+    Route::get('/experts', [ExpertController::class, 'dashboard'])->name('experts.dashboard');
+    Route::get('/experts/profile', [ExpertController::class, 'profile'])->name('experts.profile');
+    Route::put('/experts/profile', [ExpertController::class, 'saveProfile'])->middleware('throttle:10,1')->name('experts.profile.store');
+    Route::prefix('engagements/{engagement}')->name('engagements.')->group(function () {
+        Route::get('/', [EngagementController::class, 'show'])->name('show');
+        Route::post('/decision', [EngagementController::class, 'decide'])->name('decide');
+        Route::post('/sessions', [EngagementController::class, 'schedule'])->middleware('throttle:30,1')->name('sessions.store');
+        Route::put('/sessions/{session}', [EngagementController::class, 'updateSession'])->name('sessions.update');
+        Route::post('/actions', [EngagementController::class, 'addAction'])->middleware('throttle:60,1')->name('actions.store');
+        Route::post('/actions/{action}/toggle', [EngagementController::class, 'toggleAction'])->name('actions.toggle');
+        Route::post('/complete', [EngagementController::class, 'complete'])->name('complete');
+        Route::post('/cancel', [EngagementController::class, 'cancel'])->name('cancel');
+        Route::post('/review', [EngagementController::class, 'review'])->name('review');
+    });
 });
 
 /*
@@ -250,6 +276,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
     Route::middleware(['can:verify-investors', 'feature:funding'])->group(function () {
         Route::get('investors', [Admin\InvestorController::class, 'index'])->name('investors.index');
         Route::put('investors/{investor}', [Admin\InvestorController::class, 'decide'])->name('investors.decide');
+    });
+    Route::middleware(['can:manage-experts', 'feature:experts'])->group(function () {
+        Route::get('experts', [Admin\ExpertController::class, 'index'])->name('experts.index');
+        Route::put('experts/{expert}', [Admin\ExpertController::class, 'decide'])->name('experts.decide');
+        Route::get('engagements', [Admin\ExpertController::class, 'engagements'])->name('engagements.index');
+        Route::post('engagements', [Admin\ExpertController::class, 'assign'])->name('engagements.assign');
     });
     Route::middleware('can:review-duplicates')->group(function () {
         Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');
