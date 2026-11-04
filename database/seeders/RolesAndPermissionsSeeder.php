@@ -29,6 +29,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'view-audit-log' => 'View the audit and login logs',
         'manage-startups' => 'View and manage registered startups',
         'review-duplicates' => 'Review possible duplicate startups and merge them',
+        'manage-integrations' => 'See and retry deliveries to connected systems (IMS)',
     ];
 
     public const ROLES = [

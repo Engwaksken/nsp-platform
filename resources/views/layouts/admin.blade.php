@@ -41,6 +41,7 @@
                 <ul>
                     @can('manage-startups') {!! $navLink('admin.startups.index', 'Startups', 'admin.startups.*') !!} @endcan
                     @can('review-duplicates') {!! $navLink('admin.duplicates.index', 'Possible duplicates', 'admin.duplicates.*') !!} @endcan
+                    @if (\App\Support\Features::enabled('ims_integration'))@can('manage-integrations') {!! $navLink('admin.integrations.index', 'Integrations', 'admin.integrations.*') !!} @endcan @endif
                 </ul>
             @endif
             @if ($user->canAny(['manage-contact-messages', 'manage-redirects']))

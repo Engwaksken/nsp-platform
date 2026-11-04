@@ -66,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(5)->by('pw|'.$request->ip()),
             Limit::perHour(5)->by('pw-email|'.strtolower((string) $request->input('email'))),
         ]);
+        RateLimiter::for('api-clients', fn (Request $request) => Limit::perMinute(120)->by('api|'.strtok((string) $request->bearerToken(), '.').'|'.$request->ip()));
         RateLimiter::for('oidc', fn (Request $request) => Limit::perMinute(20)->by('oidc|'.$request->ip()));
 
         // Branding and menus for every page view; loaded once per request.

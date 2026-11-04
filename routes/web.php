@@ -78,6 +78,11 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::get('/{startup}/sharing', [Workspace\ConsentController::class, 'index'])->name('consents');
         Route::put('/{startup}/sharing/{purpose}', [Workspace\ConsentController::class, 'update'])->name('consents.update');
     });
+    Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
+    Route::middleware(['feature:ims_integration', 'throttle:30,1'])->group(function () {
+        Route::get('/connect/{clientId}', [Workspace\ConnectController::class, 'show'])->name('connect.show');
+        Route::post('/connect/{clientId}', [Workspace\ConnectController::class, 'decide'])->name('connect.decide');
+    });
     Route::get('/invitations/{token}', [Workspace\InvitationController::class, 'show'])->name('invitations.show');
     Route::post('/invitations/{token}/accept', [Workspace\InvitationController::class, 'accept'])->middleware('throttle:20,1')->name('invitations.accept');
     Route::post('/invitations/{token}/decline', [Workspace\InvitationController::class, 'decline'])->name('invitations.decline');
@@ -160,6 +165,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
         Route::get('startups/{startup}', [Admin\StartupController::class, 'show'])->name('startups.show');
         Route::put('startups/{startup}/status', [Admin\StartupController::class, 'updateStatus'])->name('startups.status');
         Route::post('startups/{startup}/aliases', [Admin\StartupController::class, 'addAlias'])->name('startups.aliases');
+    });
+    Route::middleware(['can:manage-integrations', 'feature:ims_integration'])->group(function () {
+        Route::get('integrations', [Admin\IntegrationController::class, 'index'])->name('integrations.index');
+        Route::post('integrations/deliveries/{delivery}/replay', [Admin\IntegrationController::class, 'replay'])->name('integrations.replay');
     });
     Route::middleware('can:review-duplicates')->group(function () {
         Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');

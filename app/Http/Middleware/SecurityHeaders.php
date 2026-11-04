@@ -2,8 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Integration\ApiClient;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
 class SecurityHeaders
@@ -21,7 +24,7 @@ class SecurityHeaders
             "connect-src 'self'",
             "frame-ancestors 'none'",
             "base-uri 'self'",
-            "form-action 'self' ".$this->identityProviderOrigin(),
+            "form-action 'self' ".$this->formTargets($request),
             "object-src 'none'",
         ]);
 
@@ -37,14 +40,35 @@ class SecurityHeaders
         return $response;
     }
 
-    /** The login form posts nowhere external, but the OIDC redirect may follow a form-like navigation. */
-    private function identityProviderOrigin(): string
+    /**
+     * Browsers apply form-action to redirects that follow a form post. Allow the
+     * identity provider (sign-out) and, on the connect page only, the registered
+     * redirect addresses of connected systems.
+     */
+    private function formTargets(Request $request): string
     {
-        $issuer = (string) config('nsp.oidc.issuer');
-        $parts = parse_url($issuer);
+        $origins = [self::origin((string) config('nsp.oidc.issuer'))];
+        if ($request->is('connect/*')) {
+            $origins = array_merge($origins, Cache::remember('nsp.connect_origins', 300, function () {
+                if (! Schema::hasTable('api_clients')) {
+                    return [];
+                }
 
-        return isset($parts['scheme'], $parts['host'])
-            ? $parts['scheme'].'://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '')
-            : '';
+                return ApiClient::query()->where('is_active', true)->pluck('redirect_uris')
+                    ->flatten()->map(fn ($uri) => self::origin((string) $uri))->filter()->unique()->values()->all();
+            }));
+        }
+
+        return implode(' ', array_unique(array_filter($origins)));
+    }
+
+    private static function origin(string $url): string
+    {
+        $parts = parse_url($url);
+        if (! isset($parts['scheme'], $parts['host']) || ! in_array($parts['scheme'], ['https', 'http'], true)) {
+            return '';
+        }
+
+        return $parts['scheme'].'://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '');
     }
 }

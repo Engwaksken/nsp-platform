@@ -10,7 +10,8 @@
 | 0: Discovery and architecture | Documents written. Owner decisions D1 to D11 are pending (`decisions.md`). | Not passed: needs owner approval of the architecture |
 | 1: Foundation and CMS | Implemented and tested locally | CMS and admin permissions pass tests. Not staged. |
 | 2: Identity and registry | **Registry implemented and tested locally** (inside NSP, decision M8). Shared login (OIDC) deferred by owner (D1). | Partly: "NSP-first" journey works without duplicates; the IMS-first journey needs IMS changes (Phase 3) and an IdP. |
-| 3 to 7 | Not started. Planned in `backlog.md`. | — |
+| 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
+| 4 to 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
 - `discovery.md`: read-only audit of Hive IMS. Confirmed: no IdP, no API, no startups table, shared hosting with cron only.
@@ -66,8 +67,21 @@ An automated audit catches only part of WCAG. A manual screen-reader check (NVDA
 
 Not yet: the Registry API for IMS (Phase 3), the IMS-first journey, importing existing IMS startups (Phase 3 dry-run), shared login (D1).
 
+## Phase 3: IMS integration (implemented 2026-11-05, NSP side)
+
+| Area | What exists | Evidence |
+|---|---|---|
+| Contract | `docs/integration-contract-v1.md`: clients, connect flow, Registry API, events, signatures, retries | — |
+| Connected systems | API clients with hashed secret, encrypted webhook secret, exact redirect URIs and scopes; created and rotated with `php artisan nsp:api-client` (secrets shown once) | `CommandsTest` |
+| Connect flow (journey that starts in NSP) | The founder picks a startup and approves sharing; owners and founders can turn sharing on there. Single-use 5-minute codes bound to client and redirect URI; any failed try uses the code up. Only consented core fields are returned, never financials. The page's CSP allows the redirect back to the registered IMS address only. | `ConnectFlowTest` |
+| Registry API v1 | `connect/token`, `startups/{uuid}` (consent required; merged → 301), `startup-links` (idempotent, 409 on conflict), `integration/sync-status/{uuid}`; per-client rate limit; JSON errors | `RegistryApiTest` |
+| Incoming events | HMAC signature over timestamp and raw body, 5-minute window, idempotent inbox, type and field whitelists (scores, comments and answers are dropped), merged-startup redirection, cross-startup link protection; rejected events recorded | `InboundEventsTest` |
+| Applications and programs | IMS events build "My applications" and "My programs" for the startup's team only | `InboundEventsTest` |
+| Outgoing events | Per-client deliveries only for startups linked to that system; signed; retried after 1, 5, 15, 60 and 240 minutes, then every 12 hours; dead after 8 tries; admin page with "Send again" | `OutboxDeliveryTest` |
+| Legacy import (Journey C) | `php artisan registry:import-ims file.csv` dry run; `--apply` links strong matches only, and lists name-only matches for review | `CommandsTest` |
+
 ## Test results (local)
-- `php artisan test`: **109 passed, 567 assertions** (end of Phase 1: 90 and 411).
+- `php artisan test`: **134 passed, 700 assertions** (end of Phase 2: 109 and 567).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

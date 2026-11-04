@@ -59,3 +59,15 @@ Add one cron job:
 3. Rebuild the config cache.
 4. Test sign-in on staging first.
 5. Only after SSO works, consider turning off local login. The admin screen prevents turning off both.
+
+## Connecting Hive IMS (Phase 3)
+Do this on staging first. The full rules are in `integration-contract-v1.md`.
+1. On the NSP server, create the client:
+   `php artisan nsp:api-client ims-live --name="Hive IMS" --redirect-uri=https://ims.hivecolab.com/nsp-callback --webhook-url=https://ims.hivecolab.com/nsp-webhook`
+   It prints `NSP_CLIENT_ID`, `NSP_CLIENT_SECRET` and `NSP_WEBHOOK_SECRET` once. Put them in the IMS `.env` straight away and do not store them anywhere else.
+2. In the NSP `.env`, set `NSP_IMS_INTEGRATION=true` and `IMS_URL=https://ims.hivecolab.com`. Rebuild the config cache.
+3. In the IMS `.env`, set `NSP_INTEGRATION_ENABLED=true`, `NSP_BASE_URL=https://<nsp domain>` and `NSP_REDIRECT_URI` to the same callback address as in step 1. Add the IMS outbox cron job.
+4. Test it: apply in IMS with "Prefill from my Hive NSP profile", check that the application appears in NSP under Applications & programs, then turn sharing off in NSP and check that IMS marks the link as revoked.
+5. Optional, existing startups: export `application_id, startup_name, registration_number, website` from IMS and run `php artisan registry:import-ims export.csv`. Read the dry-run report before adding `--apply`.
+6. To rotate secrets later, run `php artisan nsp:api-client ims-live --rotate` and update the IMS `.env` at the same time.
+
