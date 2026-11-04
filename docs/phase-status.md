@@ -9,7 +9,8 @@
 |---|---|---|
 | 0: Discovery and architecture | Documents written. Owner decisions D1 to D11 are pending (`decisions.md`). | Not passed: needs owner approval of the architecture |
 | 1: Foundation and CMS | Implemented and tested locally | CMS and admin permissions pass tests. Not staged. |
-| 2 to 7 | Not started. Planned in `backlog.md`. | — |
+| 2: Identity and registry | **Registry implemented and tested locally** (inside NSP, decision M8). Shared login (OIDC) deferred by owner (D1). | Partly: "NSP-first" journey works without duplicates; the IMS-first journey needs IMS changes (Phase 3) and an IdP. |
+| 3 to 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
 - `discovery.md`: read-only audit of Hive IMS. Confirmed: no IdP, no API, no startups table, shared hosting with cron only.
@@ -46,8 +47,27 @@
 
 An automated audit catches only part of WCAG. A manual screen-reader check (NVDA or TalkBack) is still needed before claiming AA.
 
+## Phase 2: startup registry (implemented 2026-11-05)
+
+| Area | What exists | Evidence |
+|---|---|---|
+| Canonical startup | One record per company with a stable UUID, core fields, a separate profile, version number, status (active/archived/merged) | `StartupRegistryTest` |
+| Privacy | Revenue, funding, traction and phone encrypted at rest. Per-group visibility: editors only / whole team / team and Hive staff. Financials default to editors only. Staff views are audited. | `StartupRegistryTest`, `DuplicateReviewTest` |
+| Duplicates at sign-up | Same registration number or website blocks a second record and offers "Ask to join". Same name only warns; if the user confirms it is a different company, the pair is queued for staff review. | `StartupRegistryTest` |
+| Team | Roles owner, founder, admin, team member, viewer. Email invitations (single use, 7 days, only for the invited address), join requests with approval, role changes, leaving. A startup always keeps an owner. | `StartupRegistryTest` |
+| Tenant isolation | Non-members get 404 on every startup page and action, so a changed UUID reveals nothing. A startup selector keeps the current startup per session and is re-checked on each request. | `StartupRegistryTest::test_founder_of_two_startups_cannot_open_a_third_by_changing_the_url` |
+| Concurrent edits | Saves check the version; a stale form is refused, never overwrites | `StartupRegistryTest` |
+| Change history | Every change recorded with who, when and version. Private values are never stored, only "[changed]". | `StartupRegistryTest` |
+| Consent | Three purposes (IMS prefill, NSP directory, anonymised reports) with versioned wording. Grant/revoke by owners and founders; revocation is published as an event. | `StartupRegistryTest` |
+| Duplicate review and merge | Scan by registration, website and name (scored 90/70/30, re-scans don't inflate). Reviewer must write evidence. Merge moves team, founders and links, keeps an old-ID redirect, never moves consents. Every merge can be undone exactly. | `DuplicateReviewTest` |
+| Outbox | `registry.startup.created/updated/merged/unmerged`, `registry.membership.changed`, `registry.consent.granted/revoked` written in the same transaction, without private values. Delivery is Phase 3. | Tests above |
+| Aliases | Staff can link an ID from another system (for example an IMS application) to a startup | Admin screen |
+| Accessibility | axe WCAG 2.1 A/AA audit of all 12 registry pages at 1280 and 360 px: 0 violations | `tests/a11y` |
+
+Not yet: the Registry API for IMS (Phase 3), the IMS-first journey, importing existing IMS startups (Phase 3 dry-run), shared login (D1).
+
 ## Test results (local)
-- `php artisan test`: **90 passed, 411 assertions** (Phase 1 baseline was 70 and 311).
+- `php artisan test`: **109 passed, 567 assertions** (end of Phase 1: 90 and 411).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

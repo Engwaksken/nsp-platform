@@ -3,29 +3,24 @@
 namespace App\Contracts;
 
 use App\Exceptions\RegistryUnavailable;
+use App\Models\User;
 
 /**
- * Client for the Hive Startup Registry (system of record for startup identity).
- * The contract mirrors docs/api/openapi.yaml. Until the registry exists
- * (decision D2), the bound implementation reports that it is unavailable.
+ * Read access to the Hive Startup Registry for NSP pages. The registry is
+ * hosted inside NSP for now (decision D2); if it moves to its own service,
+ * an HTTP implementation of this interface (docs/api/openapi.yaml) replaces
+ * the local one without changing callers.
  */
 interface StartupRegistry
 {
     public function isAvailable(): bool;
 
     /**
-     * Startups the signed-in user belongs to, as summaries.
+     * Startups the user is an active member of.
      *
      * @return list<array{uuid: string, display_name: string, role: string}>
      *
      * @throws RegistryUnavailable
      */
-    public function startupsForUser(string $userSubject): array;
-
-    /**
-     * One startup's fields that the caller is allowed to see.
-     *
-     * @throws RegistryUnavailable
-     */
-    public function findStartup(string $startupUuid, string $userSubject): ?array;
+    public function startupsForUser(User $user): array;
 }

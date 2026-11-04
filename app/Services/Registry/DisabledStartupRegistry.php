@@ -4,8 +4,9 @@ namespace App\Services\Registry;
 
 use App\Contracts\StartupRegistry;
 use App\Exceptions\RegistryUnavailable;
+use App\Models\User;
 
-/** Bound while the registry is not built or the `registry` feature flag is off. */
+/** Bound while the `registry` feature flag is off. */
 class DisabledStartupRegistry implements StartupRegistry
 {
     public function isAvailable(): bool
@@ -13,13 +14,8 @@ class DisabledStartupRegistry implements StartupRegistry
         return false;
     }
 
-    public function startupsForUser(string $userSubject): array
+    public function startupsForUser(User $user): array
     {
-        throw new RegistryUnavailable('The startup registry is not connected yet.');
-    }
-
-    public function findStartup(string $startupUuid, string $userSubject): ?array
-    {
-        throw new RegistryUnavailable('The startup registry is not connected yet.');
+        throw new RegistryUnavailable('The startup registry is switched off.');
     }
 }

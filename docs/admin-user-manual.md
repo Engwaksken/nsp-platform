@@ -70,3 +70,15 @@ When a page moves, add a redirect from the old address to the new one. A redirec
 
 ## Feature flags
 Modules that are not built yet show "Not built yet" and can't be switched on. Single sign-on can be switched on once IT has configured it.
+
+## Startup registry (ecosystem managers and platform admins)
+- **Startups** lists every registered startup. Opening one is recorded in the audit log.
+- **Private details** (revenue, funding, traction, contact) are shown only if the startup chose "our team and Hive staff".
+- **Archive** hides a startup from its team. **Restore** brings it back.
+- **Linked records:** add an ID from another system (for example an IMS application number) only after confirming it's the same company. An ID can be linked to one startup only.
+- **Possible duplicates:**
+  - **Scan for duplicates** compares registration numbers (strong evidence), websites (strong) and names (weak).
+  - For each pair, write down your evidence, then choose **Different companies** or **Merge**, picking which record to keep.
+  - A merge moves the team, founders and linked IDs to the kept record, and old links to the merged record keep working. Data-sharing choices are **not** moved; the kept startup must give its own.
+  - Every merge can be undone from **Recent merges**.
+- Never merge on a name alone. Confirm with the founders first.

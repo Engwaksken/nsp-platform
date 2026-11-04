@@ -34,9 +34,9 @@ class WorkspaceController extends Controller
 
         $startups = null;
         $registryMessage = null;
-        if (Features::enabled('registry') && $user->oidc_subject) {
+        if (Features::enabled('registry')) {
             try {
-                $startups = $registry->startupsForUser($user->oidc_subject);
+                $startups = $registry->startupsForUser($user);
             } catch (RegistryUnavailable $exception) {
                 $registryMessage = 'Your startup profiles cannot be loaded right now. Please try again later.';
             }

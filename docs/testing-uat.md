@@ -19,12 +19,12 @@ Status: **A** = automated test passes locally. **M** = manual check done. **—*
 | User matched by IdP subject, not email | 1/2 | `OidcLoginTest::test_returning_user_is_matched_by_subject_not_email` | A |
 | IMS-first founder enters NSP without re-signup | 2-3 | Needs IdP and IMS changes | P |
 | NSP-first founder applies to IMS with prefill and snapshot | 3 | — | P |
-| Two founders, one startup, no duplicate | 2 | — | P |
-| Founder of two startups cannot cross-access | 2 | — | P |
-| IMS migration, alias mapping, duplicate review, rollback | 3 | — | P |
-| Consent revocation stops disclosure | 3 | — | P |
+| Two founders, one startup, no duplicate | 2 | `StartupRegistryTest::test_two_founders_join_one_startup_by_invitation_without_duplicates` | A |
+| Founder of two startups cannot cross-access | 2 | `StartupRegistryTest::test_founder_of_two_startups_cannot_open_a_third_by_changing_the_url` | A |
+| IMS migration, alias mapping, duplicate review, rollback | 2/3 | Duplicate review, reversible merge and aliases: `DuplicateReviewTest`. IMS import dry-run is Phase 3 | Partly |
+| Consent revocation stops disclosure | 2/3 | Revocation recorded and published as an event (`StartupRegistryTest`); stopping disclosure in IMS is Phase 3 | Partly |
 | Registry down → graceful degradation | 2 | The workspace shows a message when the registry throws (code path exists, no test yet) | P |
-| Concurrent edit → version conflict | 2 | — | P |
+| Concurrent edit → version conflict | 2 | `StartupRegistryTest::test_concurrent_edits_are_refused_instead_of_overwriting` | A |
 | Duplicate or replayed webhook rejected | 3 | — | P |
 | IMS reviewer notes never exposed | 3 | — | P |
 | Investor blocked from data room without grant | 5 | — | P |

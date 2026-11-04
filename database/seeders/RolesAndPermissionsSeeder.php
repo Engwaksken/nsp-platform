@@ -27,13 +27,15 @@ class RolesAndPermissionsSeeder extends Seeder
         'manage-users' => 'Create users and assign roles',
         'manage-feature-flags' => 'Switch features on and off',
         'view-audit-log' => 'View the audit and login logs',
+        'manage-startups' => 'View and manage registered startups',
+        'review-duplicates' => 'Review possible duplicate startups and merge them',
     ];
 
     public const ROLES = [
         'super_admin' => [], // passes every check through Gate::before
         'platform_admin' => ['*'],
         'ecosystem_manager' => ['manage-pages', 'manage-posts', 'publish-content', 'manage-media', 'manage-menus',
-            'manage-site-content', 'manage-redirects', 'manage-contact-messages'],
+            'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates'],
         'content_editor' => ['manage-pages', 'manage-posts', 'manage-media', 'manage-menus', 'manage-site-content'],
         'support' => ['manage-contact-messages'],
         'auditor' => ['view-audit-log'],

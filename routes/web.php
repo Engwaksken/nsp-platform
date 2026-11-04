@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Site;
+use App\Http\Controllers\Workspace;
 use App\Http\Controllers\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +55,33 @@ Route::middleware('auth')->prefix('account/security')->name('mfa.')->group(funct
 | Founder / member workspace
 */
 Route::get('/workspace', [WorkspaceController::class, 'index'])->middleware('auth')->name('workspace');
+
+/*
+| Startup registry (hosted in NSP; decision D2)
+*/
+Route::middleware(['auth', 'feature:registry'])->group(function () {
+    Route::prefix('workspace/startups')->name('workspace.startups.')->group(function () {
+        Route::get('/', [Workspace\StartupController::class, 'index'])->name('index');
+        Route::get('/new', [Workspace\StartupController::class, 'create'])->name('create');
+        Route::post('/', [Workspace\StartupController::class, 'store'])->middleware('throttle:20,1')->name('store');
+        Route::get('/{startup}', [Workspace\StartupController::class, 'show'])->name('show');
+        Route::get('/{startup}/edit', [Workspace\StartupController::class, 'edit'])->name('edit');
+        Route::put('/{startup}', [Workspace\StartupController::class, 'update'])->name('update');
+        Route::post('/{startup}/switch', [Workspace\StartupController::class, 'switch'])->name('switch');
+        Route::get('/{startup}/history', [Workspace\StartupController::class, 'history'])->name('history');
+        Route::post('/{startup}/join', [Workspace\StartupController::class, 'requestJoin'])->middleware('throttle:10,1')->name('join');
+        Route::get('/{startup}/team', [Workspace\TeamController::class, 'index'])->name('team');
+        Route::post('/{startup}/team', [Workspace\TeamController::class, 'invite'])->middleware('throttle:30,1')->name('team.invite');
+        Route::put('/{startup}/team/{member}', [Workspace\TeamController::class, 'updateRole'])->name('team.role');
+        Route::delete('/{startup}/team/{member}', [Workspace\TeamController::class, 'remove'])->name('team.remove');
+        Route::post('/{startup}/team/{member}/decision', [Workspace\TeamController::class, 'decide'])->name('team.decide');
+        Route::get('/{startup}/sharing', [Workspace\ConsentController::class, 'index'])->name('consents');
+        Route::put('/{startup}/sharing/{purpose}', [Workspace\ConsentController::class, 'update'])->name('consents.update');
+    });
+    Route::get('/invitations/{token}', [Workspace\InvitationController::class, 'show'])->name('invitations.show');
+    Route::post('/invitations/{token}/accept', [Workspace\InvitationController::class, 'accept'])->middleware('throttle:20,1')->name('invitations.accept');
+    Route::post('/invitations/{token}/decline', [Workspace\InvitationController::class, 'decline'])->name('invitations.decline');
+});
 
 /*
 | Admin CMS
@@ -126,6 +154,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
     });
 
     Route::get('audit', [Admin\AuditLogController::class, 'index'])->middleware('can:view-audit-log')->name('audit.index');
+
+    Route::middleware('can:manage-startups')->group(function () {
+        Route::get('startups', [Admin\StartupController::class, 'index'])->name('startups.index');
+        Route::get('startups/{startup}', [Admin\StartupController::class, 'show'])->name('startups.show');
+        Route::put('startups/{startup}/status', [Admin\StartupController::class, 'updateStatus'])->name('startups.status');
+        Route::post('startups/{startup}/aliases', [Admin\StartupController::class, 'addAlias'])->name('startups.aliases');
+    });
+    Route::middleware('can:review-duplicates')->group(function () {
+        Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');
+        Route::post('duplicates/scan', [Admin\DuplicateController::class, 'scan'])->name('duplicates.scan');
+        Route::post('duplicates/{candidate}', [Admin\DuplicateController::class, 'decide'])->name('duplicates.decide');
+        Route::post('merges/{merge}/undo', [Admin\DuplicateController::class, 'undo'])->name('merges.undo');
+    });
 });
 
 /*

@@ -1,0 +1,12 @@
+{{-- Tabs for one startup. Expects $startup. --}}
+<nav class="tags" aria-label="{{ $startup->display_name }} sections" style="margin:1rem 0">
+    @foreach ([
+        'workspace.startups.show' => 'Profile',
+        'workspace.startups.team' => 'Team',
+        'workspace.startups.consents' => 'Data sharing',
+        'workspace.startups.history' => 'Change history',
+    ] as $route => $label)
+        <a class="tag" href="{{ route($route, $startup) }}" @if (request()->routeIs($route)) aria-current="true" @endif>{{ $label }}</a>
+    @endforeach
+    <a class="tag" href="{{ route('workspace.startups.index') }}">All my startups</a>
+</nav>

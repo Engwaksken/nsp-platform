@@ -7,6 +7,8 @@ use App\Models\Media;
 use App\Models\Menu;
 use App\Services\Oidc\OidcClient;
 use App\Services\Registry\DisabledStartupRegistry;
+use App\Services\Registry\LocalStartupRegistry;
+use App\Support\Features;
 use App\Support\Settings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -22,8 +24,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(OidcClient::class, fn () => OidcClient::fromConfig());
-        // Replace with an HTTP client once the registry exists (decision D2).
-        $this->app->bind(StartupRegistry::class, DisabledStartupRegistry::class);
+        // The registry is hosted inside NSP (decision D2); an HTTP client can replace it later.
+        $this->app->bind(StartupRegistry::class, fn () => Features::enabled('registry')
+            ? new LocalStartupRegistry
+            : new DisabledStartupRegistry);
     }
 
     private function brandData(): array

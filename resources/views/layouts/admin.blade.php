@@ -36,6 +36,13 @@
                     @endcan
                 </ul>
             @endif
+            @if ($user->canAny(['manage-startups', 'review-duplicates']) && \App\Support\Features::enabled('registry'))
+                <p class="nav-heading">Registry</p>
+                <ul>
+                    @can('manage-startups') {!! $navLink('admin.startups.index', 'Startups', 'admin.startups.*') !!} @endcan
+                    @can('review-duplicates') {!! $navLink('admin.duplicates.index', 'Possible duplicates', 'admin.duplicates.*') !!} @endcan
+                </ul>
+            @endif
             @if ($user->canAny(['manage-contact-messages', 'manage-redirects']))
                 <p class="nav-heading">Engagement</p>
                 <ul>
