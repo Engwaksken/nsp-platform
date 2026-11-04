@@ -126,6 +126,8 @@ The receiver:
 
 NSP only delivers events to a client for startups that have an alias in that client's system (they connected or applied through it), and never includes private values.
 
+If IMS has no applications for the subject (for example the founder connected but never applied), it answers `202` and records the event. This is not an error.
+
 ### 4.3 Delivery and retries (both sides)
 - Events are written to an **outbox** in the same database transaction as the change.
 - A cron job (every minute) sends pending events.
