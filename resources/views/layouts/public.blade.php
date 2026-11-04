@@ -41,6 +41,8 @@
                 @endif
                 @auth
                     <li><a href="{{ route('workspace') }}">My workspace</a></li>
+                    @php($unreadNotifications = \App\Models\Communication\UserNotification::query()->where('user_id', auth()->id())->whereNull('read_at')->count())
+                    <li><a href="{{ route('notifications.index') }}" @if (request()->routeIs('notifications.*')) aria-current="page" @endif>Notifications @if ($unreadNotifications)<span class="badge badge-on">{{ $unreadNotifications }}<span class="visually-hidden"> unread</span></span>@endif</a></li>
                     <li><a href="{{ route('mfa.setup') }}">Security</a></li>
                     @if (auth()->user()->canUseAdmin())
                         <li><a href="{{ route('admin.dashboard') }}">Admin</a></li>

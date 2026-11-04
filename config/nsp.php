@@ -104,5 +104,23 @@ return [
         ],
     ],
 
+    'notifications' => [
+        // Activity notices people can switch per channel. Security and account emails are not listed:
+        // they are always sent. Announcements are newsletters, so email is off until people opt in.
+        'types' => [
+            'registry' => ['label' => 'My startup team', 'description' => 'Requests to join your startup.', 'email' => true, 'in_app' => true],
+            'opportunities' => ['label' => 'Saved opportunities', 'description' => 'Reminders before deadlines.', 'email' => true, 'in_app' => true],
+            'funding' => ['label' => 'Funding and investors', 'description' => 'Introductions and data-room access.', 'email' => true, 'in_app' => true],
+            'experts' => ['label' => 'Experts and mentors', 'description' => 'Requests, sessions and feedback.', 'email' => true, 'in_app' => true],
+            'talent' => ['label' => 'Jobs and hiring', 'description' => 'Applications, interviews and invitations.', 'email' => true, 'in_app' => true],
+            'marketplace' => ['label' => 'Marketplace messages', 'description' => 'New messages and report outcomes.', 'email' => true, 'in_app' => true],
+            'announcements' => ['label' => 'News from Hive', 'description' => 'Announcements and newsletters from the Hive team.', 'email' => false, 'in_app' => true],
+        ],
+        // Read notifications are deleted after this many days, unread ones after a year; the delivery log after 180 days.
+        'keep_read_days' => 90,
+        'keep_unread_days' => 365,
+        'keep_delivery_log_days' => 180,
+    ],
+
     'contact_consent_version' => '2026-11-04',
 ];

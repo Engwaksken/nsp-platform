@@ -30,6 +30,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'mfa' => EnsureMfaVerified::class,
             'api.client' => AuthenticateApiClient::class,
         ]);
+        // Mail clients post one-click unsubscribes (RFC 8058) without a CSRF token; the URL is signed instead.
+        $middleware->validateCsrfTokens(except: ['notifications/unsubscribe/*']);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('workspace'));
     })

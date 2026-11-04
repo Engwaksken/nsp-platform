@@ -50,9 +50,10 @@
                     @if (\App\Support\Features::enabled('ims_integration'))@can('manage-integrations') {!! $navLink('admin.integrations.index', 'Integrations', 'admin.integrations.*') !!} @endcan @endif
                 </ul>
             @endif
-            @if ($user->canAny(['manage-contact-messages', 'manage-redirects']))
+            @if ($user->canAny(['manage-contact-messages', 'manage-redirects', 'manage-communications']))
                 <p class="nav-heading">Engagement</p>
                 <ul>
+                    @can('manage-communications') {!! $navLink('admin.communications.index', 'Announcements and email log', 'admin.communications.*') !!} @endcan
                     @can('manage-contact-messages') {!! $navLink('admin.messages.index', 'Contact messages', 'admin.messages.*') !!} @endcan
                     @can('manage-redirects') {!! $navLink('admin.redirects.index', 'Redirects', 'admin.redirects.*') !!} @endcan
                 </ul>

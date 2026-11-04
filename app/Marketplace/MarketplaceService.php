@@ -2,7 +2,7 @@
 
 namespace App\Marketplace;
 
-use App\Mail\ServiceNotice;
+use App\Communication\Notifier;
 use App\Models\Marketplace\Inquiry;
 use App\Models\Marketplace\Listing;
 use App\Models\Marketplace\Message;
@@ -12,9 +12,6 @@ use App\Models\Registry\StartupMembership;
 use App\Models\User;
 use App\Registry\RegistryException;
 use App\Support\Audit;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Throwable;
 
 /**
  * Rules for the marketplace:
@@ -150,13 +147,6 @@ class MarketplaceService
 
     private function notify(?User $user, string $subject, array $lines, string $url): void
     {
-        if (! $user?->is_active) {
-            return;
-        }
-        try {
-            Mail::to($user->email)->queue(new ServiceNotice($subject, $lines, $url));
-        } catch (Throwable $exception) {
-            Log::warning('[marketplace] notice failed: '.$exception->getMessage());
-        }
+        app(Notifier::class)->notify($user, 'marketplace', $subject, array_values($lines), $url);
     }
 }

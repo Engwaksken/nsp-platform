@@ -2,7 +2,7 @@
 
 namespace App\Experts;
 
-use App\Mail\ServiceNotice;
+use App\Communication\Notifier;
 use App\Models\Experts\Engagement;
 use App\Models\Experts\ExpertProfile;
 use App\Models\Experts\ExpertReview;
@@ -13,9 +13,6 @@ use App\Models\Registry\StartupMembership;
 use App\Models\User;
 use App\Registry\RegistryException;
 use App\Support\Audit;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Throwable;
 
 /**
  * Rules for experts and mentors:
@@ -303,13 +300,6 @@ class ExpertService
 
     private function notify(?User $user, string $subject, array $lines, string $url): void
     {
-        if (! $user?->is_active) {
-            return;
-        }
-        try {
-            Mail::to($user->email)->queue(new ServiceNotice($subject, $lines, $url));
-        } catch (Throwable $exception) {
-            Log::warning('[experts] notice failed: '.$exception->getMessage());
-        }
+        app(Notifier::class)->notify($user, 'experts', $subject, array_values($lines), $url);
     }
 }

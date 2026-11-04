@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Communication\TracksDelivery;
 use App\Support\Settings;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 
 class JoinRequestReceived extends Mailable implements ShouldQueue
 {
-    use Queueable, SerializesModels;
+    use Queueable, SerializesModels, TracksDelivery;
 
     public function __construct(
         public string $startupName,

@@ -13,7 +13,8 @@
 | 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
 | 5: Ecosystem services | **All five modules implemented and tested**: 5a opportunities and events, 5b funding and investors, 5c experts and mentors, 5d talent and jobs (pushed, CI green) and 5e marketplace and startup showcase (tested locally). | Not passed yet: needs the role-based UAT in `testing-uat.md` (Phase 5 script) on staging |
-| 6 to 7 | Not started. Planned in `backlog.md`. | — |
+| 6: Communications and intelligence | **6a Notifications implemented and tested locally** (COM-601, COM-602). Still to build: 6b dashboards, KPIs and exports (ANA-603, ANA-604); 6c optional AI assistant (AI-605, needs legal review). | Not passed: needs the privacy and quality evaluation |
+| 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
 - `discovery.md`: read-only audit of Hive IMS. Confirmed: no IdP, no API, no startups table, shared hosting with cron only.
@@ -174,8 +175,25 @@ Not done: job alerts by email, structured salary ranges, and hiring reports (Pha
 
 Not done: listing images, seller ratings, payments or escrow (decision D6), a resource directory beyond CMS pages, and fuller marketplace analytics (Phase 6).
 
+## Phase 6a: notifications and email delivery (implemented 2026-11-12)
+
+Channels follow decision D7's recommended default: email and in-app. No SMS or WhatsApp.
+
+| Area | What exists | Evidence |
+|---|---|---|
+| One notifier | Every activity notice (team join requests, opportunity reminders, funding, experts, talent, marketplace, announcements) goes through `App\Communication\Notifier`. Security and account emails (password reset, sign-in codes, invitations to an address) bypass it and are always sent. | `NotificationsTest::test_module_notices_now_land_in_the_centre`, existing module tests |
+| Notification centre | `/notifications` with unread filter, "mark all as read" and an unread count in the menu. Opening a notification marks it read and only follows links on this site. | `test_notices_go_in_app_and_by_email_with_a_delivery_log_and_unsubscribe` |
+| Preferences | Per type and per channel (email, on NSP). Defaults: on for activity, **email off for announcements** (newsletter consent is opt-in). | `test_preferences_are_honoured_per_channel` |
+| Unsubscribe | Every notifier email carries a signed one-click unsubscribe (`List-Unsubscribe` and `List-Unsubscribe-Post`, RFC 8058) and a link in the text. A GET only asks to confirm, so link scanners cannot unsubscribe people; a POST (from the page or the mail client) does it. | `test_one_click_unsubscribe_needs_a_valid_signature_and_post` |
+| Delivery log and retries | `email_deliveries` records queued, sent (from the mailer's sent event) and failed (after 3 attempts with 1, 5 and 15 minute backoff). No message text or addresses are stored. Works with the cron-driven queue. | `test_delivery_log_is_updated_when_sent_and_when_retries_fail` |
+| Announcements | Staff with **manage-communications** draft and send to everyone, startup team members, verified investors or verified experts; sent in chunks by a queued job; one send only. | `test_announcements_reach_the_chosen_audience_and_email_only_opted_in_people` |
+| Retention | `notifications:prune` (daily 03:00): read notifications after 90 days, all after 365, delivery log after 180. | `test_prune_removes_old_notifications_and_log_rows` |
+| Accessibility | axe audit of 6 notification, unsubscribe and admin pages at 1280 and 360 px: 0 violations | `tests/a11y` |
+
+Not done: bounce and complaint processing needs a mail provider webhook (none chosen yet; failures are logged), activity feeds and support tickets (later in Phase 6 or 7).
+
 ## Test results (local)
-- `php artisan test`: **186 passed, 1239 assertions** (5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
+- `php artisan test`: **193 passed, 1285 assertions** (5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

@@ -14,7 +14,7 @@ Sign in at `/login`. Staff with an admin role land on the **Dashboard**. The men
 | Role | Can do |
 |---|---|
 | Content editor | Write pages and news as drafts, upload media, edit menus, FAQs, testimonials and partners |
-| Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities, verifying investors and experts, assigning mentors, moderating vacancies and handling marketplace disputes |
+| Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities, verifying investors and experts, assigning mentors, moderating vacancies handling marketplace disputes, and sending announcements |
 | Support | Read and handle contact messages |
 | Auditor | Read the audit log |
 | Platform admin | Everything except granting super admin or platform admin |
@@ -122,3 +122,8 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
 - A report about a **conversation** lets you read that conversation; each time you open it is recorded in the audit log. You cannot read conversations nobody reported.
 - **Resolve** or **Dismiss** with a note; the reporter is emailed the note. Tick **Take the listing down** when it breaks the rules; the startup sees your note. A removed listing can be **restored** as a draft.
 - Hive does not take part in sales or hold money. Point people to the right authority for fraud.
+
+## Announcements and email log (ecosystem managers and platform admins)
+- **Admin › Announcements and email log:** write an announcement, choose the audience (everyone, startup team members, verified investors or verified experts) and save it as a draft. The audience size is shown next to each choice. **Send** delivers it once.
+- Everyone in the audience sees it under **Notifications**. Only people who opted in to “News from Hive” get it by email, because announcements are newsletters.
+- The **email delivery log** shows each email as waiting, sent or failed (after three tries), with the error. It does not keep message text or addresses. If many emails fail, check the SMTP settings in `.env`.

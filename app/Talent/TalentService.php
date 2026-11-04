@@ -2,7 +2,7 @@
 
 namespace App\Talent;
 
-use App\Mail\ServiceNotice;
+use App\Communication\Notifier;
 use App\Models\Registry\Startup;
 use App\Models\Registry\StartupMembership;
 use App\Models\Talent\Interview;
@@ -14,10 +14,7 @@ use App\Models\Talent\VacancyInvitation;
 use App\Models\User;
 use App\Registry\RegistryException;
 use App\Support\Audit;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Throwable;
 
 /**
  * Rules for talent and hiring:
@@ -231,13 +228,6 @@ class TalentService
 
     private function notify(?User $user, string $subject, array $lines, string $url): void
     {
-        if (! $user?->is_active) {
-            return;
-        }
-        try {
-            Mail::to($user->email)->queue(new ServiceNotice($subject, array_values($lines), $url));
-        } catch (Throwable $exception) {
-            Log::warning('[talent] notice failed: '.$exception->getMessage());
-        }
+        app(Notifier::class)->notify($user, 'talent', $subject, array_values($lines), $url);
     }
 }

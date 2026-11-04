@@ -2,6 +2,7 @@
 
 namespace App\Registry;
 
+use App\Communication\Notifier;
 use App\Mail\JoinRequestReceived;
 use App\Mail\StartupInvitation;
 use App\Models\Registry\DataSharingConsent;
@@ -307,11 +308,9 @@ class RegistryService
 
         $managers = $startup->activeMemberships()->whereIn('role', StartupMembership::TEAM_MANAGER_ROLES)->with('user')->get();
         foreach ($managers as $manager) {
-            try {
-                Mail::to($manager->user->email)->queue(new JoinRequestReceived($startup->display_name, $user->name, route('workspace.startups.team', $startup)));
-            } catch (Throwable $exception) {
-                Log::warning('[registry] join request email failed: '.$exception->getMessage());
-            }
+            app(Notifier::class)->notify($manager->user, 'registry', $user->name.' asked to join '.$startup->display_name,
+                ['Approve or decline the request on your team page.'], route('workspace.startups.team', $startup),
+                new JoinRequestReceived($startup->display_name, $user->name, route('workspace.startups.team', $startup)));
         }
 
         return $request;

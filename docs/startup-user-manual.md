@@ -108,3 +108,8 @@ NSP helps you meet investors that Hive has checked. It does not promise or arran
 - People message you on NSP. Owners, founders and admins reply; other team members can read. You get an email when there is a new message, without its text.
 - To contact another startup, open its listing and **Send message**, for yourself or on behalf of your startup. Your conversations are under **My workspace › My messages**.
 - If something goes wrong, use **Report a problem** in the conversation. Hive staff can then read it to help. Hive does not take part in sales or hold payments.
+
+## Notifications
+- **Notifications** in the top menu shows updates from every part of NSP; the number is how many you have not read.
+- **Choose what you receive** lets you switch email and on-NSP notices on or off for each kind of update. News from Hive is not emailed unless you turn it on. Security emails (password resets and sign-in codes) are always sent.
+- Every update email has a link to stop that kind of email with one click.

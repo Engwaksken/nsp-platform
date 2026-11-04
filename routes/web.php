@@ -9,6 +9,7 @@ use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\ExpertController;
 use App\Http\Controllers\InvestorController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Site;
 use App\Http\Controllers\Workspace;
 use App\Http\Controllers\WorkspaceController;
@@ -238,6 +239,21 @@ Route::middleware(['auth', 'feature:talent'])->prefix('talent')->name('talent.')
 });
 
 /*
+| Notifications (Phase 6a)
+*/
+Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::get('/preferences', [NotificationController::class, 'preferences'])->name('preferences');
+    Route::put('/preferences', [NotificationController::class, 'savePreferences'])->name('preferences.save');
+    Route::post('/read-all', [NotificationController::class, 'readAll'])->name('read-all');
+    Route::get('/{notification}', [NotificationController::class, 'open'])->whereNumber('notification')->name('open');
+});
+Route::middleware(['signed', 'throttle:20,1'])->group(function () {
+    Route::get('/notifications/unsubscribe/{user}/{type}', [NotificationController::class, 'unsubscribe'])->name('notifications.unsubscribe');
+    Route::post('/notifications/unsubscribe/{user}/{type}', [NotificationController::class, 'confirmUnsubscribe'])->name('notifications.unsubscribe.confirm');
+});
+
+/*
 | Admin CMS
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->group(function () {
@@ -358,6 +374,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
         Route::get('/reports/{report}', [Admin\MarketplaceController::class, 'report'])->name('report');
         Route::post('/reports/{report}', [Admin\MarketplaceController::class, 'resolve'])->name('resolve');
         Route::post('/listings/{listing}/restore', [Admin\MarketplaceController::class, 'restore'])->name('restore');
+    });
+    Route::middleware('can:manage-communications')->prefix('communications')->name('communications.')->group(function () {
+        Route::get('/', [Admin\CommunicationController::class, 'index'])->name('index');
+        Route::post('/announcements', [Admin\CommunicationController::class, 'store'])->name('store');
+        Route::post('/announcements/{announcement}/send', [Admin\CommunicationController::class, 'send'])->name('send');
+        Route::delete('/announcements/{announcement}', [Admin\CommunicationController::class, 'destroy'])->name('destroy');
     });
     Route::middleware('can:review-duplicates')->group(function () {
         Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');

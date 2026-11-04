@@ -2,6 +2,7 @@
 
 namespace App\Funding;
 
+use App\Communication\Notifier;
 use App\Ecosystem\Eligibility;
 use App\Mail\FundingNotice;
 use App\Models\Funding\DataRoomFile;
@@ -16,9 +17,6 @@ use App\Models\Registry\StartupMembership;
 use App\Models\User;
 use App\Registry\RegistryException;
 use App\Support\Audit;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Throwable;
 
 /**
  * Privacy rules for funding (decision D5, option a):
@@ -243,13 +241,6 @@ class FundingService
 
     private function notify(?User $user, string $subject, array $lines, string $url): void
     {
-        if (! $user?->is_active) {
-            return;
-        }
-        try {
-            Mail::to($user->email)->queue(new FundingNotice($subject, $lines, $url));
-        } catch (Throwable $exception) {
-            Log::warning('[funding] notice failed: '.$exception->getMessage());
-        }
+        app(Notifier::class)->notify($user, 'funding', $subject, array_values($lines), $url, new FundingNotice($subject, $lines, $url));
     }
 }

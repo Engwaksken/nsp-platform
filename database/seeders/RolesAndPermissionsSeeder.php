@@ -38,13 +38,14 @@ class RolesAndPermissionsSeeder extends Seeder
         'manage-experts' => 'Verify experts and assign mentors to startups',
         'manage-talent' => 'See all vacancies and take down unsuitable ones',
         'moderate-marketplace' => 'Handle marketplace reports and disputes, and take listings down',
+        'manage-communications' => 'Send announcements and see the email delivery log',
     ];
 
     public const ROLES = [
         'super_admin' => [], // passes every check through Gate::before
         'platform_admin' => ['*'],
         'ecosystem_manager' => ['manage-pages', 'manage-posts', 'publish-content', 'manage-media', 'manage-menus',
-            'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'review-assessments', 'manage-opportunities', 'verify-investors', 'manage-experts', 'manage-talent', 'moderate-marketplace'],
+            'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'review-assessments', 'manage-opportunities', 'verify-investors', 'manage-experts', 'manage-talent', 'moderate-marketplace', 'manage-communications'],
         'content_editor' => ['manage-pages', 'manage-posts', 'manage-media', 'manage-menus', 'manage-site-content'],
         'support' => ['manage-contact-messages'],
         'auditor' => ['view-audit-log'],

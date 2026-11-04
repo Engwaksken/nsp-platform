@@ -13,6 +13,9 @@ Schedule::command('opportunities:send-reminders')->dailyAt('08:00')->withoutOver
 // Delete candidates' application CVs after the retention period (Phase 5d).
 Schedule::command('talent:purge-cvs')->dailyAt('02:30')->withoutOverlapping();
 
+// Delete old notifications and delivery-log rows (Phase 6a).
+Schedule::command('notifications:prune')->dailyAt('03:00')->withoutOverlapping();
+
 // Send registry events to connected systems (no-op unless ims_integration is on).
 Schedule::command('registry:deliver-outbox')->everyMinute()->withoutOverlapping();
 
