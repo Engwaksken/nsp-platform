@@ -14,7 +14,7 @@ Sign in at `/login`. Staff with an admin role land on the **Dashboard**. The men
 | Role | Can do |
 |---|---|
 | Content editor | Write pages and news as drafts, upload media, edit menus, FAQs, testimonials and partners |
-| Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities, verifying investors and experts, assigning mentors and moderating vacancies |
+| Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities, verifying investors and experts, assigning mentors, moderating vacancies and handling marketplace disputes |
 | Support | Read and handle contact messages |
 | Auditor | Read the audit log |
 | Platform admin | Everything except granting super admin or platform admin |
@@ -116,3 +116,9 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
 - Startups publish vacancies on the public **Jobs** board themselves. **Admin › Vacancies** lists them by status.
 - **Take down** anything misleading, discriminatory, unlawful or unpaid where pay is required. A reason is required and the startup sees it. **Restore** puts it back as a draft.
 - Staff cannot see applications or CVs. Candidate CV copies are deleted automatically after the retention period (`NSP_TALENT_CV_RETENTION_DAYS`).
+
+## Marketplace and disputes (ecosystem managers and platform admins)
+- **Admin › Marketplace and disputes** shows simple figures and the reports people sent.
+- A report about a **conversation** lets you read that conversation; each time you open it is recorded in the audit log. You cannot read conversations nobody reported.
+- **Resolve** or **Dismiss** with a note; the reporter is emailed the note. Tick **Take the listing down** when it breaks the rules; the startup sees your note. A removed listing can be **restored** as a draft.
+- Hive does not take part in sales or hold money. Point people to the right authority for fraud.

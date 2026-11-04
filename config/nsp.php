@@ -16,6 +16,7 @@ return [
         'experts' => ['default' => (bool) env('NSP_EXPERTS_ENABLED', true), 'label' => 'Experts and mentors', 'description' => 'Verified experts, consultation requests, mentor assignments, sessions, actions and feedback.'],
         'talent' => ['default' => (bool) env('NSP_TALENT_ENABLED', true), 'label' => 'Talent and jobs', 'description' => 'Vacancies, candidate profiles with consent, applications, shortlisting and interviews.'],
         'opportunities' => ['default' => (bool) env('NSP_OPPORTUNITIES_ENABLED', true), 'label' => 'Opportunities and events', 'description' => 'Grants, accelerators, competitions, events and calls with eligibility, saving, registration and recommendations.'],
+        'marketplace' => ['default' => (bool) env('NSP_MARKETPLACE_ENABLED', true), 'label' => 'Marketplace and showcase', 'description' => 'Public startup directory (with consent), offers, requests to buy, partnerships, inquiry messages and disputes.'],
         'ai_assistant' => ['default' => false, 'label' => 'AI assistant', 'description' => 'Optional AI help with provenance and consent (Phase 6).'],
     ],
 
@@ -92,6 +93,15 @@ return [
         // Bump when the wording of the candidate search consent changes.
         'consent_version' => '2026-11-10',
         'cv_max_kb' => 5120,
+    ],
+
+    'marketplace' => [
+        'categories' => [
+            'software' => 'Software and digital services', 'agri' => 'Agricultural produce and inputs', 'manufactured' => 'Manufactured goods',
+            'food' => 'Food and beverages', 'energy' => 'Energy and clean tech', 'logistics' => 'Logistics and transport',
+            'marketing' => 'Marketing and creative', 'professional' => 'Professional services', 'training' => 'Training and education',
+            'health' => 'Health products and services', 'finance' => 'Financial services', 'other' => 'Other',
+        ],
     ],
 
     'contact_consent_version' => '2026-11-04',

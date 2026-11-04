@@ -36,7 +36,7 @@
                     @endcan
                 </ul>
             @endif
-            @if ($user->canAny(['manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'approve-vgi-frameworks', 'review-assessments', 'manage-integrations', 'manage-opportunities', 'verify-investors', 'manage-experts', 'manage-talent']) && \App\Support\Features::enabled('registry'))
+            @if ($user->canAny(['manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'approve-vgi-frameworks', 'review-assessments', 'manage-integrations', 'manage-opportunities', 'verify-investors', 'manage-experts', 'manage-talent', 'moderate-marketplace']) && \App\Support\Features::enabled('registry'))
                 <p class="nav-heading">Registry</p>
                 <ul>
                     @can('manage-startups') {!! $navLink('admin.startups.index', 'Startups', 'admin.startups.*') !!} @endcan
@@ -46,6 +46,7 @@
                     @if (\App\Support\Features::enabled('funding'))@can('verify-investors') {!! $navLink('admin.investors.index', 'Investors', 'admin.investors.*') !!} @endcan @endif
                     @if (\App\Support\Features::enabled('experts'))@can('manage-experts') {!! $navLink('admin.experts.index', 'Experts', 'admin.experts.*') !!} {!! $navLink('admin.engagements.index', 'Mentoring and engagements', 'admin.engagements.*') !!} @endcan @endif
                     @if (\App\Support\Features::enabled('talent'))@can('manage-talent') {!! $navLink('admin.vacancies.index', 'Vacancies', 'admin.vacancies.*') !!} @endcan @endif
+                    @if (\App\Support\Features::enabled('marketplace'))@can('moderate-marketplace') {!! $navLink('admin.marketplace.index', 'Marketplace and disputes', 'admin.marketplace.*') !!} @endcan @endif
                     @if (\App\Support\Features::enabled('ims_integration'))@can('manage-integrations') {!! $navLink('admin.integrations.index', 'Integrations', 'admin.integrations.*') !!} @endcan @endif
                 </ul>
             @endif

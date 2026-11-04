@@ -101,3 +101,10 @@ NSP helps you meet investors that Hive has checked. It does not promise or arran
 - Your profile is hidden unless you choose **Startups on NSP can find my profile**. Even then, startups never see your email or CV until you apply.
 - **My applications** shows each stage, messages and interview requests. Confirm an interview or ask for another time there. You can **withdraw** an application; its CV copy is deleted at once.
 - You can delete your profile and CV at any time.
+
+## Marketplace and startup directory
+- To appear in the public **Startups** directory, turn on **List us in the NSP startup directory** under **Data sharing**. Only your name, sector, location, description and website are shown.
+- Open your startup, then **Marketplace**, to post an **offer** (something you sell), a **request to buy** (something you need) or a **partnership** request. It starts as a draft; **Publish** puts it in the public marketplace.
+- People message you on NSP. Owners, founders and admins reply; other team members can read. You get an email when there is a new message, without its text.
+- To contact another startup, open its listing and **Send message**, for yourself or on behalf of your startup. Your conversations are under **My workspace › My messages**.
+- If something goes wrong, use **Report a problem** in the conversation. Hive staff can then read it to help. Hive does not take part in sales or hold payments.

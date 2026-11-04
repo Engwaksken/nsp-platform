@@ -32,6 +32,10 @@
                 @if (\App\Support\Features::enabled('opportunities'))
                     <li><a href="{{ route('opportunities.index') }}" @if (request()->routeIs('opportunities.*')) aria-current="page" @endif>Opportunities</a></li>
                 @endif
+                @if (\App\Support\Features::enabled('marketplace'))
+                    <li><a href="{{ route('directory.index') }}" @if (request()->routeIs('directory.*')) aria-current="page" @endif>Startups</a></li>
+                    <li><a href="{{ route('marketplace.index') }}" @if (request()->routeIs('marketplace.*')) aria-current="page" @endif>Marketplace</a></li>
+                @endif
                 @if (\App\Support\Features::enabled('talent'))
                     <li><a href="{{ route('jobs.index') }}" @if (request()->routeIs('jobs.*')) aria-current="page" @endif>Jobs</a></li>
                 @endif

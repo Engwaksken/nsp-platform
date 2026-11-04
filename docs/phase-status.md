@@ -12,7 +12,7 @@
 | 2: Identity and registry | **Registry implemented and tested locally** (inside NSP, decision M8). Shared login (OIDC) deferred by owner (D1). | Partly: "NSP-first" journey works without duplicates; the IMS-first journey needs IMS changes (Phase 3) and an IdP. |
 | 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
-| 5: Ecosystem services | **5a Opportunities and events** (pushed, CI green) **5b Funding and investors** (pushed, CI green) **5c Experts and mentors** (pushed, CI green) and **5d Talent and jobs** (implemented and tested locally). Still to build: 5e marketplace. | Not passed: needs all five modules and role-based UAT |
+| 5: Ecosystem services | **All five modules implemented and tested**: 5a opportunities and events, 5b funding and investors, 5c experts and mentors, 5d talent and jobs (pushed, CI green) and 5e marketplace and startup showcase (tested locally). | Not passed yet: needs the role-based UAT in `testing-uat.md` (Phase 5 script) on staging |
 | 6 to 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
@@ -161,8 +161,21 @@ Not done: calendar invites (.ics) and reminders before sessions, paid bookings (
 
 Not done: job alerts by email, structured salary ranges, and hiring reports (Phase 6). The retention period is a proposal until decision D8 sets it.
 
+## Phase 5e: marketplace and startup showcase (implemented 2026-11-11)
+
+| Area | What exists | Evidence |
+|---|---|---|
+| Startup directory | Public `/startups`, built on the existing `nsp_directory` consent. Only consenting active startups appear, with only the consented fields (name, sector, location, description, website). Revoking removes the startup at once. | `MarketplaceTest::test_directory_shows_only_consented_startups_and_only_consented_fields` |
+| Listings | Offers (sell), requests to buy (procurement) and partnership requests, with category, price note, location and an optional end date. Drafts until published; only owners, founders and admins manage them. Public `/marketplace` with keyword, type and category filters. | `test_listings_are_drafts_until_published_and_only_editors_manage_them`, `test_listing_reports_and_expiry` |
+| Inquiry messaging | Any signed-in user starts one conversation per listing, for themselves or for a startup they manage. Messages stay on NSP; emails only say there is a new message, never its text, and email addresses are not exchanged. The startup's viewers read, editors reply; either side can close it. | `test_inquiry_conversation_stays_between_the_two_sides_without_email_content` |
+| Disputes | Anyone can report a listing; either side can report a conversation, which then becomes visible to staff with **moderate-marketplace** (each view is audited). Staff resolve or dismiss with a note to the reporter and can take the listing down (the startup sees the note) or restore it. | `test_reported_conversation_becomes_a_dispute_staff_can_resolve` |
+| Reporting | Admin page with published listings by type, conversations in the last 30 days and open reports. | same test |
+| Accessibility | axe audit of 12 marketplace, directory and dispute pages at 1280 and 360 px: 0 violations | `tests/a11y` |
+
+Not done: listing images, seller ratings, payments or escrow (decision D6), a resource directory beyond CMS pages, and fuller marketplace analytics (Phase 6).
+
 ## Test results (local)
-- `php artisan test`: **181 passed, 1158 assertions** (5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
+- `php artisan test`: **186 passed, 1239 assertions** (5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

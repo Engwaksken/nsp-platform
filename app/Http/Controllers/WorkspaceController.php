@@ -26,6 +26,7 @@ class WorkspaceController extends Controller
             ['key' => 'funding', 'title' => 'Funding & Investors', 'text' => 'Funding needs, investor readiness and data room.'],
             ['key' => 'experts', 'title' => 'Experts', 'text' => 'Mentors, consultants and booked sessions.'],
             ['key' => 'talent', 'title' => 'Talent', 'text' => 'Vacancies, internships and candidates.'],
+            ['key' => 'marketplace', 'title' => 'Marketplace', 'text' => 'Sell, buy and find partners; messages with buyers and suppliers.'],
             ['key' => 'opportunities', 'title' => 'Opportunities', 'text' => 'Grants, accelerators, competitions and events matched to your startup.'],
         ];
         foreach ($sections as &$section) {

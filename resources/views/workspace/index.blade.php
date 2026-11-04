@@ -41,6 +41,9 @@
                     @elseif ($section['key'] === 'talent')
                         <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.talent', $active->startup) }}">Hire</a> @endif
                             <a class="btn btn-secondary btn-sm" href="{{ route('talent.dashboard') }}">Find a job</a></p>
+                    @elseif ($section['key'] === 'marketplace')
+                        <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.marketplace', $active->startup) }}">My listings</a> @endif
+                            <a class="btn btn-secondary btn-sm" href="{{ route('marketplace.inbox') }}">My messages</a></p>
                     @elseif ($section['key'] === 'funding')
                         <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.funding', $active->startup) }}">Open funding</a> @endif
                             <a class="btn btn-secondary btn-sm" href="{{ route('investor.dashboard') }}">I am an investor</a></p>

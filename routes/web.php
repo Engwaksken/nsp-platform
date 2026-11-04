@@ -51,6 +51,27 @@ Route::middleware('feature:talent')->prefix('jobs')->name('jobs.')->group(functi
 });
 
 /*
+| Marketplace and startup showcase (Phase 5e)
+*/
+Route::middleware('feature:marketplace')->group(function () {
+    Route::get('/startups', [Site\StartupDirectoryController::class, 'index'])->name('directory.index');
+    Route::get('/startups/{startup}', [Site\StartupDirectoryController::class, 'show'])->name('directory.show');
+    Route::prefix('marketplace')->name('marketplace.')->group(function () {
+        Route::get('/', [Site\MarketplaceController::class, 'index'])->name('index');
+        Route::middleware('auth')->group(function () {
+            Route::get('/messages', [Site\MarketplaceController::class, 'inbox'])->name('inbox');
+            Route::get('/messages/{inquiry}', [Site\MarketplaceController::class, 'conversation'])->name('inquiries.show');
+            Route::post('/messages/{inquiry}', [Site\MarketplaceController::class, 'reply'])->middleware('throttle:60,60')->name('inquiries.reply');
+            Route::post('/messages/{inquiry}/close', [Site\MarketplaceController::class, 'close'])->name('inquiries.close');
+            Route::post('/messages/{inquiry}/report', [Site\MarketplaceController::class, 'reportInquiry'])->middleware('throttle:10,60')->name('inquiries.report');
+            Route::post('/{listing}/inquire', [Site\MarketplaceController::class, 'inquire'])->middleware('throttle:10,60')->name('inquire');
+            Route::post('/{listing}/report', [Site\MarketplaceController::class, 'reportListing'])->middleware('throttle:10,60')->name('report');
+        });
+        Route::get('/{listing}', [Site\MarketplaceController::class, 'show'])->name('show');
+    });
+});
+
+/*
 | Authentication
 */
 Route::middleware('guest')->group(function () {
@@ -149,6 +170,13 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::get('/applications/{application}/cv', [Workspace\TalentController::class, 'cv'])->middleware('throttle:60,1')->name('.cv');
         Route::get('/candidates', [Workspace\TalentController::class, 'search'])->name('.search');
         Route::post('/candidates/invite', [Workspace\TalentController::class, 'invite'])->middleware('throttle:30,60')->name('.invite');
+    });
+    Route::middleware('feature:marketplace')->prefix('workspace/startups/{startup}/marketplace')->name('workspace.marketplace')->group(function () {
+        Route::get('/', [Workspace\ListingController::class, 'index'])->name('');
+        Route::post('/listings', [Workspace\ListingController::class, 'store'])->middleware('throttle:30,60')->name('.store');
+        Route::get('/listings/{listing}/edit', [Workspace\ListingController::class, 'edit'])->name('.edit');
+        Route::put('/listings/{listing}', [Workspace\ListingController::class, 'update'])->name('.update');
+        Route::post('/listings/{listing}/status', [Workspace\ListingController::class, 'setStatus'])->name('.status');
     });
     Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
     Route::middleware(['feature:ims_integration', 'throttle:30,1'])->group(function () {
@@ -324,6 +352,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
     Route::middleware(['can:manage-talent', 'feature:talent'])->group(function () {
         Route::get('vacancies', [Admin\VacancyController::class, 'index'])->name('vacancies.index');
         Route::post('vacancies/{vacancy}/moderate', [Admin\VacancyController::class, 'moderate'])->name('vacancies.moderate');
+    });
+    Route::middleware(['can:moderate-marketplace', 'feature:marketplace'])->prefix('marketplace')->name('marketplace.')->group(function () {
+        Route::get('/', [Admin\MarketplaceController::class, 'index'])->name('index');
+        Route::get('/reports/{report}', [Admin\MarketplaceController::class, 'report'])->name('report');
+        Route::post('/reports/{report}', [Admin\MarketplaceController::class, 'resolve'])->name('resolve');
+        Route::post('/listings/{listing}/restore', [Admin\MarketplaceController::class, 'restore'])->name('restore');
     });
     Route::middleware('can:review-duplicates')->group(function () {
         Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');

@@ -27,6 +27,7 @@ Status: **A** = automated test passes locally. **M** = manual check done. **—*
 | Concurrent edit → version conflict | 2 | `StartupRegistryTest::test_concurrent_edits_are_refused_instead_of_overwriting` | A |
 | Duplicate or replayed webhook rejected | 3 | `InboundEventsTest::test_duplicates_are_acknowledged_once_and_tampering_or_replays_rejected` | A |
 | IMS reviewer notes never exposed | 3 | Field whitelist drops scores, comments and answers: `InboundEventsTest` | A |
+| Marketplace messages hidden from staff until reported | 5 | `MarketplaceTest::test_inquiry_conversation_stays_between_the_two_sides_without_email_content` | A |
 | Investor blocked from data room without grant | 5 | `FundingTest::test_investor_without_a_data_room_grant_cannot_access_the_pitch_deck` (also expiry, revocation, unverified investors) | A |
 | Deterministic VGI scoring | 4 | — | P |
 
@@ -59,3 +60,17 @@ Run each step as the role named and record pass or fail with a screenshot.
 14. **Admin** signs out and back in. After the password, the 6-digit code is required. A wrong code is refused, and a recovery code works once.
 15. **Super admin** resets two-factor sign-in for another admin who "lost their phone". That admin must set it up again.
 16. **Any local user** uses "Forgot your password?", receives the email, sets a new password, and finds that the old sessions are signed out.
+
+## UAT script for Phase 5 (staging, role-based)
+Use separate accounts for each role. Pass = every step behaves as written.
+
+1. **Founder (owner)** registers a startup, turns on the directory consent and finds it under **Startups**; turns it off and it disappears.
+2. **Founder** saves an opportunity, registers interest, and sees a recommendation with its reasons.
+3. **Investor** applies; **ecosystem manager** verifies them. **Founder** opens a funding request with investor sharing on; the investor sees it and expresses interest; the founder accepts; contacts appear on both sides.
+4. **Founder** uploads a pitch deck. Before sharing, the investor cannot open it (not found). After **Share data room** with an end date the investor downloads it and the founder sees the download in the log. After **Remove access** it is not found again.
+5. **Expert** applies; **ecosystem manager** verifies them and assigns them as a mentor to the founder's startup. Both are emailed. They plan a session and write shared and private notes; each side sees only the right notes; staff see no notes. The founder completes and gives feedback.
+6. **Founder** posts a vacancy and publishes it; it appears under **Jobs**. **Candidate** creates a profile with a CV, applies with consent, is shortlisted with a message, confirms an interview, then withdraws; the CV copy is gone.
+7. **Founder** searches candidates: only opted-in people appear, without email or CV, and can be invited.
+8. **Founder** publishes a marketplace offer. **Another user** sends a message; the founder replies; a team **viewer** can read but not reply; staff cannot open it. The buyer reports it; staff read it, resolve with a note and take the listing down; the founder sees the note.
+9. **Content editor** cannot open the investor, expert, vacancy or marketplace admin pages (403).
+10. Every page above works on a 360 px phone and by keyboard alone.
