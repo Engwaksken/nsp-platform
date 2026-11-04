@@ -27,7 +27,7 @@ Status: **A** = automated test passes locally. **M** = manual check done. **—*
 | Concurrent edit → version conflict | 2 | `StartupRegistryTest::test_concurrent_edits_are_refused_instead_of_overwriting` | A |
 | Duplicate or replayed webhook rejected | 3 | `InboundEventsTest::test_duplicates_are_acknowledged_once_and_tampering_or_replays_rejected` | A |
 | IMS reviewer notes never exposed | 3 | Field whitelist drops scores, comments and answers: `InboundEventsTest` | A |
-| Investor blocked from data room without grant | 5 | — | P |
+| Investor blocked from data room without grant | 5 | `FundingTest::test_investor_without_a_data_room_grant_cannot_access_the_pitch_deck` (also expiry, revocation, unverified investors) | A |
 | Deterministic VGI scoring | 4 | — | P |
 
 Extra Phase 1 security tests: Markdown/HTML escaping, unsafe link schemes, a script disguised as an image, open-redirect protection after login, rate limits, the contact-form honeypot, and security headers on 404s.

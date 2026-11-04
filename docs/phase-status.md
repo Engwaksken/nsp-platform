@@ -12,7 +12,7 @@
 | 2: Identity and registry | **Registry implemented and tested locally** (inside NSP, decision M8). Shared login (OIDC) deferred by owner (D1). | Partly: "NSP-first" journey works without duplicates; the IMS-first journey needs IMS changes (Phase 3) and an IdP. |
 | 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
-| 5: Ecosystem services | **5a Opportunities and events implemented and tested locally.** Still to build: 5b funding and investors (data room), 5c experts and mentors, 5d talent, 5e marketplace. | Not passed: needs all five modules and role-based UAT |
+| 5: Ecosystem services | **5a Opportunities and events** (pushed, CI green) and **5b Funding and investors** (implemented and tested locally). Still to build: 5c experts and mentors, 5d talent, 5e marketplace. | Not passed: needs all five modules and role-based UAT |
 | 6 to 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
@@ -112,8 +112,25 @@ Not done: benchmarks against other startups (spec: only where data justifies it)
 | Staff | Create and edit; open, review, draft, closed, rejected and archived lists; registrations with status; CSV export (audited, protected against spreadsheet formulas) | `OpportunitiesTest` |
 | Accessibility | axe audit of 8 opportunity pages at 1280 and 360 px: 0 violations | `tests/a11y` |
 
+## Phase 5b: funding and investors (implemented 2026-11-08)
+
+Privacy follows decision D5 option (a), the recommended default.
+
+| Area | What exists | Evidence |
+|---|---|---|
+| Investor verification | Anyone signed in can apply at `/investors/profile`. Staff with **verify-investors** (ecosystem managers, platform admins) verify, decline with a reason, or suspend. Verifying gives the `investor` role; suspending removes it and hides everything at once. | `FundingTest::test_staff_verify_investors_and_the_role_follows` |
+| Funding request | One open request per startup: amount, currency, instruments, pitch, use of funds. Owners, founders and admins edit; viewers only read. Closing it hides the startup from investors. | `FundingTest` |
+| Listing rule | A startup appears to investors only with an open request **and** the new `investor_listing` consent, and shows only name, sector, location, country, growth stage and the request. Revoking consent hides it immediately. | `test_only_verified_investors_see_startups_and_only_consented_open_requests` |
+| Matching | Explainable fit both ways (sector, country, stage, instrument, ticket size), with reasons and "outside their focus". | `FundingTest` |
+| Introductions | Founder → investor or investor → startup. Only the other side can accept. Contact details appear only after acceptance. Email notices never contain private data. | `test_introductions_reveal_contacts_only_after_acceptance_and_notes_stay_private` |
+| Investor pipeline | Private stage and notes per startup; never shown to the startup, hidden from serialisation. | same test |
+| Data room | Private disk (never public URLs). Uploads checked by extension and by content type; 20 MB limit. The team can always download; an investor only with an active grant, which needs an accepted introduction and has an expiry (default 30 days, max 180) and can be revoked. Every download is logged for the startup; investor downloads are also audited. Served as an attachment with `nosniff` and `no-store`. | `test_investor_without_a_data_room_grant_cannot_access_the_pitch_deck`, `test_granted_investor_can_download_until_revoked_or_expired_and_downloads_are_logged`, `test_uploads_are_checked_by_content_not_name` |
+| Accessibility | axe audit of 7 funding and investor pages at 1280 and 360 px: 0 violations | `tests/a11y` |
+
+Not done: investor-side document watermarking, deal-room Q&A, and investor reports for Hive (Phase 6 reporting).
+
 ## Test results (local)
-- `php artisan test`: **158 passed, 855 assertions** (end of Phase 4: 149 and 796).
+- `php artisan test`: **168 passed, 956 assertions** (5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

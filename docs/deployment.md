@@ -40,10 +40,13 @@ Add one cron job:
 `routes/console.php` already schedules `queue:work --stop-when-empty` every minute, so queued mail (contact notifications) goes out within about a minute. If the host gives SSH access and supervisor, run a real `queue:work` worker instead and remove that schedule (decision D10).
 
 ## Updates
-1. Back up first: `mysqldump` the NSP database and archive `storage/app/public`.
+1. Back up first: `mysqldump` the NSP database and archive `storage/app/public` and `storage/app/private`.
 2. Run `php artisan down --retry=60`.
 3. Upload the new code, then run `composer install --no-dev --optimize-autoloader` and `php artisan migrate --force`.
-4. Run `php artisan config:cache && php artisan route:cache && php artisan view:cache`, then `php artisan up`.
+4. Run `php artisan db:seed --class=RolesAndPermissionsSeeder --force` when a release adds permissions (it is safe to repeat; Phase 5b added `verify-investors`).
+5. Run `php artisan config:cache && php artisan route:cache && php artisan view:cache`, then `php artisan up`.
+
+Data-room files live in `storage/app/private/data-room` (the private `local` disk). Include that folder in backups; never link it into `public`.
 
 **Rollback:** restore the previous code folder, restore the database dump if a migration ran, then clear and rebuild the caches.
 

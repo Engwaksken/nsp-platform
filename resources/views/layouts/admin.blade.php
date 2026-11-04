@@ -36,13 +36,14 @@
                     @endcan
                 </ul>
             @endif
-            @if ($user->canAny(['manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'approve-vgi-frameworks', 'review-assessments', 'manage-integrations', 'manage-opportunities']) && \App\Support\Features::enabled('registry'))
+            @if ($user->canAny(['manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'approve-vgi-frameworks', 'review-assessments', 'manage-integrations', 'manage-opportunities', 'verify-investors']) && \App\Support\Features::enabled('registry'))
                 <p class="nav-heading">Registry</p>
                 <ul>
                     @can('manage-startups') {!! $navLink('admin.startups.index', 'Startups', 'admin.startups.*') !!} @endcan
                     @can('review-duplicates') {!! $navLink('admin.duplicates.index', 'Possible duplicates', 'admin.duplicates.*') !!} @endcan
                     @if (\App\Support\Features::enabled('opportunities'))@can('manage-opportunities') {!! $navLink('admin.opportunities.index', 'Opportunities', 'admin.opportunities.*') !!} @endcan @endif
                     @if (\App\Support\Features::enabled('vgi') && $user->canAny(['edit-vgi-frameworks', 'approve-vgi-frameworks', 'review-assessments'])) {!! $navLink('admin.vgi.index', 'Growth assessments', 'admin.vgi.*') !!} @endif
+                    @if (\App\Support\Features::enabled('funding'))@can('verify-investors') {!! $navLink('admin.investors.index', 'Investors', 'admin.investors.*') !!} @endcan @endif
                     @if (\App\Support\Features::enabled('ims_integration'))@can('manage-integrations') {!! $navLink('admin.integrations.index', 'Integrations', 'admin.integrations.*') !!} @endcan @endif
                 </ul>
             @endif

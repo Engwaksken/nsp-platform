@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\Site;
 use App\Http\Controllers\Workspace;
 use App\Http\Controllers\WorkspaceController;
@@ -107,6 +108,17 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::get('/workspace/startups/{startup}/opportunities', [Workspace\OpportunityController::class, 'index'])->name('workspace.opportunities');
         Route::post('/workspace/startups/{startup}/opportunities/{opportunity}/feedback', [Workspace\OpportunityController::class, 'feedback'])->name('workspace.opportunities.feedback');
     });
+    Route::middleware('feature:funding')->prefix('workspace/startups/{startup}/funding')->name('workspace.funding')->group(function () {
+        Route::get('/', [Workspace\FundingController::class, 'index'])->name('');
+        Route::put('/request', [Workspace\FundingController::class, 'saveRequest'])->name('.request');
+        Route::post('/request/close', [Workspace\FundingController::class, 'closeRequest'])->name('.close');
+        Route::post('/files', [Workspace\FundingController::class, 'upload'])->middleware('throttle:30,1')->name('.files.store');
+        Route::delete('/files/{file}', [Workspace\FundingController::class, 'destroyFile'])->name('.files.destroy');
+        Route::post('/grants', [Workspace\FundingController::class, 'grant'])->name('.grants.store');
+        Route::delete('/grants/{grant}', [Workspace\FundingController::class, 'revoke'])->name('.grants.destroy');
+        Route::post('/introductions', [Workspace\FundingController::class, 'introduce'])->middleware('throttle:20,60')->name('.introductions.store');
+        Route::post('/introductions/{introduction}/decision', [Workspace\FundingController::class, 'decide'])->name('.introductions.decide');
+    });
     Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
     Route::middleware(['feature:ims_integration', 'throttle:30,1'])->group(function () {
         Route::get('/connect/{clientId}', [Workspace\ConnectController::class, 'show'])->name('connect.show');
@@ -115,6 +127,22 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
     Route::get('/invitations/{token}', [Workspace\InvitationController::class, 'show'])->name('invitations.show');
     Route::post('/invitations/{token}/accept', [Workspace\InvitationController::class, 'accept'])->middleware('throttle:20,1')->name('invitations.accept');
     Route::post('/invitations/{token}/decline', [Workspace\InvitationController::class, 'decline'])->name('invitations.decline');
+});
+
+/*
+| Investors and data rooms (Phase 5b)
+*/
+Route::middleware(['auth', 'feature:funding'])->group(function () {
+    Route::prefix('investors')->name('investor.')->group(function () {
+        Route::get('/', [InvestorController::class, 'dashboard'])->name('dashboard');
+        Route::get('/profile', [InvestorController::class, 'apply'])->name('apply');
+        Route::put('/profile', [InvestorController::class, 'saveProfile'])->middleware('throttle:10,1')->name('apply.store');
+        Route::get('/startups/{startup}', [InvestorController::class, 'startup'])->name('startup');
+        Route::post('/startups/{startup}/interest', [InvestorController::class, 'interest'])->middleware('throttle:20,60')->name('interest');
+        Route::put('/introductions/{introduction}', [InvestorController::class, 'pipeline'])->name('pipeline');
+        Route::post('/introductions/{introduction}/decision', [InvestorController::class, 'decide'])->name('decide');
+    });
+    Route::get('/data-room/{file}', [InvestorController::class, 'download'])->middleware('throttle:60,1')->name('dataroom.download');
 });
 
 /*
@@ -218,6 +246,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
         Route::post('/frameworks/{framework}/approve', [Admin\VgiController::class, 'approve'])->name('approve');
         Route::get('/assessments/{assessment}', [Admin\VgiController::class, 'showAssessment'])->name('assessment');
         Route::post('/assessments/{assessment}/override', [Admin\VgiController::class, 'override'])->name('override');
+    });
+    Route::middleware(['can:verify-investors', 'feature:funding'])->group(function () {
+        Route::get('investors', [Admin\InvestorController::class, 'index'])->name('investors.index');
+        Route::put('investors/{investor}', [Admin\InvestorController::class, 'decide'])->name('investors.decide');
     });
     Route::middleware('can:review-duplicates')->group(function () {
         Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');

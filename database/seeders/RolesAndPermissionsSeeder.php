@@ -34,13 +34,14 @@ class RolesAndPermissionsSeeder extends Seeder
         'review-assessments' => 'See submitted startup assessments and adjust scores with a reason',
         'manage-opportunities' => 'Publish and moderate opportunities and events',
         'manage-integrations' => 'See and retry deliveries to connected systems (IMS)',
+        'verify-investors' => 'Verify investors before they can see startups',
     ];
 
     public const ROLES = [
         'super_admin' => [], // passes every check through Gate::before
         'platform_admin' => ['*'],
         'ecosystem_manager' => ['manage-pages', 'manage-posts', 'publish-content', 'manage-media', 'manage-menus',
-            'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'review-assessments', 'manage-opportunities'],
+            'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'review-assessments', 'manage-opportunities', 'verify-investors'],
         'content_editor' => ['manage-pages', 'manage-posts', 'manage-media', 'manage-menus', 'manage-site-content'],
         'support' => ['manage-contact-messages'],
         'auditor' => ['view-audit-log'],

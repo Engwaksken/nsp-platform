@@ -12,7 +12,7 @@ return [
         'registry' => ['default' => (bool) env('NSP_REGISTRY_ENABLED', true), 'label' => 'Startup registry', 'description' => 'Startup profiles, teams, invitations and consent (Hive Startup Registry, hosted in NSP).'],
         'ims_integration' => ['default' => (bool) env('NSP_IMS_INTEGRATION', false), 'label' => 'IMS integration', 'description' => 'Connect flow, Registry API and events with Hive IMS; application and program summaries (docs/integration-contract-v1.md).'],
         'vgi' => ['default' => (bool) env('NSP_VGI_ENABLED', true), 'label' => 'Growth and VGI', 'description' => 'Growth assessments with an approved rubric, results and growth plans.'],
-        'funding' => ['default' => false, 'label' => 'Funding and investors', 'description' => 'Funding needs, investors and data rooms (Phase 5).'],
+        'funding' => ['default' => (bool) env('NSP_FUNDING_ENABLED', true), 'label' => 'Funding and investors', 'description' => 'Funding requests, verified investors, introductions and private data rooms.'],
         'experts' => ['default' => false, 'label' => 'Experts and mentors', 'description' => 'Expert profiles, bookings and mentorship (Phase 5).'],
         'talent' => ['default' => false, 'label' => 'Talent', 'description' => 'Vacancies, candidates and hiring (Phase 5).'],
         'opportunities' => ['default' => (bool) env('NSP_OPPORTUNITIES_ENABLED', true), 'label' => 'Opportunities and events', 'description' => 'Grants, accelerators, competitions, events and calls with eligibility, saving, registration and recommendations.'],
@@ -57,6 +57,12 @@ return [
                 'label' => 'List us in the NSP startup directory',
                 'text' => 'Show our display name, sector, location, description and website in the public NSP startup directory.',
                 'scope' => ['display_name', 'sector', 'headquarters_location', 'description', 'website'],
+            ],
+            'investor_listing' => [
+                'recipient' => 'investors',
+                'label' => 'Show our funding request to verified investors',
+                'text' => 'While we have an open funding request, Hive-verified investors on NSP may see our display name, sector, location, growth stage and the funding request we wrote for investors. Nothing else is shown, and documents are only shared with investors we choose.',
+                'scope' => ['display_name', 'sector', 'headquarters_location', 'stage', 'funding_request'],
             ],
             'ecosystem_reports' => [
                 'recipient' => 'hive',

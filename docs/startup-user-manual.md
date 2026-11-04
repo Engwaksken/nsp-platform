@@ -65,3 +65,16 @@ Open your startup, then **Growth**.
 - **Register or express interest:** where the organiser allows it, you can register for yourself or for your startup. The organiser sees your name, email and startup.
 - **Recommended for your startup:** open your startup, then **Opportunities**. Each recommendation says why it is shown. Choose **Not relevant** to hide it.
 - **Share an opportunity** you know about. Hive checks it before it appears.
+
+## Funding and investors
+NSP helps you meet investors that Hive has checked. It does not promise or arrange funding.
+- Open your startup, then **Funding**. Write a **funding request**: how much, which types of funding, your pitch and how you will use the money. You can have one open request at a time; close it when you are done.
+- Investors only find you when you have an open request **and** you turn on **Show our funding request to verified investors** under **Data sharing**. They see your name, sector, location, growth stage and the request. Nothing else.
+- **Verified investors** shows who fits your request and why. Choose **Request introduction** to send a short message. Investors can also express interest in you; you decide whether to accept.
+- Contact details are shared only when an introduction is accepted.
+- **Data room:** upload your pitch deck, financials and other documents (PDF, Office files or images, up to 20 MB). Your team can always open them. To let an investor see them, connect first, then **Share data room** with an end date. You can remove access at any time. The **download log** shows who opened what and when.
+
+## I am an investor
+- Go to **My workspace › I am an investor** and fill in your investor profile. Hive checks it before you can see any startup.
+- Once verified, your dashboard shows startups raising now that fit your focus (or **All**), introduction requests, your pipeline and data rooms shared with you.
+- Your pipeline stages and notes are private to you.

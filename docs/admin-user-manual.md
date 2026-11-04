@@ -14,7 +14,7 @@ Sign in at `/login`. Staff with an admin role land on the **Dashboard**. The men
 | Role | Can do |
 |---|---|
 | Content editor | Write pages and news as drafts, upload media, edit menus, FAQs, testimonials and partners |
-| Ecosystem manager | Everything a content editor can, plus publish, redirects and contact messages |
+| Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities and verifying investors |
 | Support | Read and handle contact messages |
 | Auditor | Read the audit log |
 | Platform admin | Everything except granting super admin or platform admin |
@@ -100,3 +100,9 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
 - **To review:** these were shared by users. Check the link and details, then **Publish** or **Reject**. A rejection needs a reason, and the person who shared it sees that reason.
 - **Registrations:** shows who registered, for which startup, and their message. You can confirm or decline each one and **Download CSV**. Downloads are recorded in the audit log.
 - **Reminders:** people who saved an opportunity get one email 3 days before the deadline.
+
+## Investors (ecosystem managers and platform admins)
+- **Admin › Investors** lists investor applications. Start with **Waiting for review**.
+- Check who the person is before you verify: their website or LinkedIn, fund registration, or a reference. A verified investor can see every startup that chose to be listed, so verify only people you would introduce yourself.
+- **Verify** gives them the investor dashboard. **Do not verify** and **Suspend** need a note; the investor sees it. Suspending hides all startups and documents from them at once.
+- Staff cannot open startups' data rooms from the admin area. Documents are shared only by founders, per investor, until a date they choose.
