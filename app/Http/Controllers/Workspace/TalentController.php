@@ -12,6 +12,7 @@ use App\Models\Talent\VacancyInvitation;
 use App\Models\User;
 use App\Registry\RegistryException;
 use App\Support\Audit;
+use App\Support\Csv;
 use App\Talent\TalentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -98,6 +99,20 @@ class TalentController extends Controller
             'startup' => $startup, 'membership' => $membership, 'vacancy' => $vacancy, 'applications' => $applications, 'profiles' => $profiles,
             'counts' => $vacancy->applications()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'), 'status' => $status,
         ]);
+    }
+
+    /** Applications for one vacancy: what the team already sees on screen, without CVs or team notes. */
+    public function exportApplications(Request $request, Startup $startup, Vacancy $vacancy): StreamedResponse
+    {
+        $this->editorOr403($request, $startup);
+        $this->ownedOr404($startup, $vacancy);
+        Audit::log('talent.applications_exported', $vacancy);
+        $rows = $vacancy->applications()->with('applicant')->orderBy('created_at')->get()->map(fn (JobApplication $a) => [
+            $a->created_at->format('Y-m-d H:i'), $a->applicant?->name, $a->applicant?->email,
+            TalentProfile::query()->where('user_id', $a->applicant_id)->value('headline'), JobApplication::STATUSES[$a->status], $a->invited ? 'yes' : 'no',
+        ]);
+
+        return Csv::download('applications-'.$vacancy->slug.'.csv', ['Applied', 'Name', 'Email', 'Headline', 'Stage', 'Invited'], $rows);
     }
 
     public function application(Request $request, Startup $startup, JobApplication $application): View

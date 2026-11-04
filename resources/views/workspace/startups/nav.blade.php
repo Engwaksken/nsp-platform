@@ -1,6 +1,7 @@
 {{-- Tabs for one startup. Expects $startup. --}}
 <nav class="tags" aria-label="{{ $startup->display_name }} sections" style="margin:1rem 0">
     @foreach ([
+        'workspace.startups.overview' => 'Overview',
         'workspace.startups.show' => 'Profile',
         'workspace.startups.team' => 'Team',
         'workspace.startups.consents' => 'Data sharing',

@@ -29,6 +29,7 @@ Status: **A** = automated test passes locally. **M** = manual check done. **—*
 | IMS reviewer notes never exposed | 3 | Field whitelist drops scores, comments and answers: `InboundEventsTest` | A |
 | Marketplace messages hidden from staff until reported | 5 | `MarketplaceTest::test_inquiry_conversation_stays_between_the_two_sides_without_email_content` | A |
 | Unsubscribe link cannot be triggered by a GET or a forged signature | 6 | `NotificationsTest::test_one_click_unsubscribe_needs_a_valid_signature_and_post` | A |
+| Exports scoped and audited; no contacts in staff startup list | 6 | `InsightsTest` | A |
 | Investor blocked from data room without grant | 5 | `FundingTest::test_investor_without_a_data_room_grant_cannot_access_the_pitch_deck` (also expiry, revocation, unverified investors) | A |
 | Deterministic VGI scoring | 4 | — | P |
 

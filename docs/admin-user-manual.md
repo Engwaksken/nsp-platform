@@ -16,7 +16,7 @@ Sign in at `/login`. Staff with an admin role land on the **Dashboard**. The men
 | Content editor | Write pages and news as drafts, upload media, edit menus, FAQs, testimonials and partners |
 | Ecosystem manager | Everything a content editor can, plus publish, redirects, contact messages, startups, opportunities, verifying investors and experts, assigning mentors, moderating vacancies handling marketplace disputes, and sending announcements |
 | Support | Read and handle contact messages |
-| Auditor | Read the audit log |
+| Auditor | Read the audit log and the KPIs |
 | Platform admin | Everything except granting super admin or platform admin |
 | Super admin | Everything |
 
@@ -127,3 +127,8 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
 - **Admin › Announcements and email log:** write an announcement, choose the audience (everyone, startup team members, verified investors or verified experts) and save it as a draft. The audience size is shown next to each choice. **Send** delivers it once.
 - Everyone in the audience sees it under **Notifications**. Only people who opted in to “News from Hive” get it by email, because announcements are newsletters.
 - The **email delivery log** shows each email as waiting, sent or failed (after three tries), with the error. It does not keep message text or addresses. If many emails fail, check the SMTP settings in `.env`.
+
+## KPIs and reports (ecosystem managers, auditors and platform admins)
+- **Admin › KPIs and reports** shows ecosystem figures for the last 30 days, 90 days or 12 months. Each card says exactly what it counts; the full definitions are in `docs/kpi-definitions.md`.
+- **Download KPIs (CSV)** saves the figures. **Download startup list (CSV)** (needs startup management rights) lists startups without contact details, financials or team members.
+- Every download is recorded in the audit log. Figures are counts only; to see an individual startup, open it under **Startups**.

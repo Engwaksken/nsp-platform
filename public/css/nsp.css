@@ -191,3 +191,8 @@ pre.json { white-space: pre-wrap; word-break: break-word; font-size: .8rem; marg
 .inline-form { display: inline-flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: .5rem 0; }
 .h4 { font-size: 1.05rem; margin: 0 0 .25rem; }
 .plain-list { list-style: none; padding-left: 0; }
+
+/* Insights and overview (Phase 6b) */
+.kpi-value { display: block; font-size: 1.8rem; font-weight: 700; line-height: 1.2; margin: .25rem 0; }
+.card-link { display: block; color: inherit; text-decoration: none; }
+.card-link:hover, .card-link:focus-visible { border-color: var(--primary, currentColor); text-decoration: underline; }

@@ -8,7 +8,8 @@
         <h1>{{ $vacancy->title }}</h1>
         @include('partials.flash')
         <p class="meta">{{ \App\Models\Talent\Vacancy::TYPES[$vacancy->type] }} · <span class="badge">{{ \App\Models\Talent\Vacancy::STATUSES[$vacancy->status] }}</span>
-            · <a href="{{ route('workspace.talent.edit', [$startup, $vacancy]) }}">Edit or publish</a></p>
+            · <a href="{{ route('workspace.talent.edit', [$startup, $vacancy]) }}">Edit or publish</a>
+            · <a href="{{ route('workspace.talent.export', [$startup, $vacancy]) }}">Download applications (CSV)</a></p>
 
         <nav class="tags" aria-label="Filter by stage">
             <a class="tag" href="{{ route('workspace.talent.vacancy', [$startup, $vacancy]) }}" @if (! $status) aria-current="true" @endif>All ({{ $counts->sum() }})</a>

@@ -113,3 +113,8 @@ NSP helps you meet investors that Hive has checked. It does not promise or arran
 - **Notifications** in the top menu shows updates from every part of NSP; the number is how many you have not read.
 - **Choose what you receive** lets you switch email and on-NSP notices on or off for each kind of update. News from Hive is not emailed unless you turn it on. Security emails (password resets and sign-in codes) are always sent.
 - Every update email has a link to stop that kind of email with one click.
+
+## Overview and your data
+- The **Overview** tab shows your startup at a glance: profile completeness, growth stage, open actions, introductions, expert engagements, new applications and unread marketplace messages. Each card opens the page behind it.
+- Owners, founders and admins can **Download our data** as a file: everything your startup entered on NSP. It leaves out other people’s private data such as candidates’ CVs and private notes.
+- On a vacancy’s applications page you can **Download applications (CSV)**: names, emails, headlines and stages, without CVs or team notes.

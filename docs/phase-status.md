@@ -13,7 +13,7 @@
 | 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
 | 5: Ecosystem services | **All five modules implemented and tested**: 5a opportunities and events, 5b funding and investors, 5c experts and mentors, 5d talent and jobs (pushed, CI green) and 5e marketplace and startup showcase (tested locally). | Not passed yet: needs the role-based UAT in `testing-uat.md` (Phase 5 script) on staging |
-| 6: Communications and intelligence | **6a Notifications implemented and tested locally** (COM-601, COM-602). Still to build: 6b dashboards, KPIs and exports (ANA-603, ANA-604); 6c optional AI assistant (AI-605, needs legal review). | Not passed: needs the privacy and quality evaluation |
+| 6: Communications and intelligence | **6a Notifications** (pushed, CI green) and **6b dashboards, KPIs and exports** (tested locally). Still to build: 6c optional AI assistant (AI-605, needs legal review). | Not passed: needs the privacy and quality evaluation |
 | 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
@@ -192,8 +192,20 @@ Channels follow decision D7's recommended default: email and in-app. No SMS or W
 
 Not done: bounce and complaint processing needs a mail provider webhook (none chosen yet; failures are logged), activity feeds and support tickets (later in Phase 6 or 7).
 
+## Phase 6b: dashboards, KPIs and exports (implemented 2026-11-13)
+
+| Area | What exists | Evidence |
+|---|---|---|
+| KPI definitions | 13 KPIs defined in `docs/kpi-definitions.md` (registrations, active startups, returning users, onboarding, VGI completion, program participation, opportunity engagement, matches, introductions, funding pipeline, jobs, marketplace). Aggregates only; IMS figures are counts of startups. | `InsightsTest::test_kpis_follow_their_definitions` |
+| Staff insights | **Admin › KPIs and reports** for staff with **view-insights** (ecosystem managers, auditors, platform admins): KPIs for 30 days, 90 days or 12 months, plus a six-month table. | `test_insights_are_for_permitted_staff_and_exports_are_audited_and_scoped` |
+| Role-aware dashboards | Admin dashboard shows only the queues the role handles (opportunities to review, investors and experts to verify, open reports, failed emails). A startup **Overview** tab links each module's count. Investor, expert and candidate dashboards from Phase 5 complete the set. | `test_admin_dashboard_shows_only_counts_the_role_may_see`, `test_startup_overview_and_data_export_are_team_scoped` |
+| Exports | KPI CSV; startup list CSV without contacts, financials or teams (also needs `manage-startups`); applications CSV per vacancy without CVs or team notes (startup editors); the startup's own data as JSON (startup editors). Every export is audited, scoped to what the person may already see, and formula-safe. | `InsightsTest` |
+| Accessibility | axe audit of the admin dashboard, insights and startup overview at 1280 and 360 px: 0 violations | `tests/a11y` |
+
+Not done: scheduled emailed reports, charts (tables are used for now), and IMS program aggregates beyond the summaries IMS already sends.
+
 ## Test results (local)
-- `php artisan test`: **193 passed, 1285 assertions** (5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
+- `php artisan test`: **198 passed, 1345 assertions** (6a: 193 and 1285; 5e: 186 and 1239; 5d: 181 and 1158; 5c: 174 and 1050; 5b: 168 and 956; 5a: 158 and 855; end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

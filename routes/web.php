@@ -119,6 +119,8 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::put('/{startup}', [Workspace\StartupController::class, 'update'])->name('update');
         Route::post('/{startup}/switch', [Workspace\StartupController::class, 'switch'])->name('switch');
         Route::get('/{startup}/history', [Workspace\StartupController::class, 'history'])->name('history');
+        Route::get('/{startup}/overview', [Workspace\OverviewController::class, 'index'])->name('overview');
+        Route::get('/{startup}/export', [Workspace\OverviewController::class, 'export'])->middleware('throttle:10,60')->name('export');
         Route::post('/{startup}/join', [Workspace\StartupController::class, 'requestJoin'])->middleware('throttle:10,1')->name('join');
         Route::get('/{startup}/team', [Workspace\TeamController::class, 'index'])->name('team');
         Route::post('/{startup}/team', [Workspace\TeamController::class, 'invite'])->middleware('throttle:30,1')->name('team.invite');
@@ -164,6 +166,7 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::put('/vacancies/{vacancy}', [Workspace\TalentController::class, 'update'])->name('.update');
         Route::post('/vacancies/{vacancy}/status', [Workspace\TalentController::class, 'setStatus'])->name('.status');
         Route::get('/vacancies/{vacancy}', [Workspace\TalentController::class, 'pipeline'])->name('.vacancy');
+        Route::get('/vacancies/{vacancy}/applications.csv', [Workspace\TalentController::class, 'exportApplications'])->middleware('throttle:20,60')->name('.export');
         Route::get('/applications/{application}', [Workspace\TalentController::class, 'application'])->name('.application');
         Route::put('/applications/{application}', [Workspace\TalentController::class, 'move'])->name('.move');
         Route::post('/applications/{application}/interviews', [Workspace\TalentController::class, 'scheduleInterview'])->name('.interviews.store');
@@ -380,6 +383,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
         Route::post('/announcements', [Admin\CommunicationController::class, 'store'])->name('store');
         Route::post('/announcements/{announcement}/send', [Admin\CommunicationController::class, 'send'])->name('send');
         Route::delete('/announcements/{announcement}', [Admin\CommunicationController::class, 'destroy'])->name('destroy');
+    });
+    Route::middleware('can:view-insights')->prefix('insights')->name('insights.')->group(function () {
+        Route::get('/', [Admin\InsightsController::class, 'index'])->name('index');
+        Route::get('/kpis.csv', [Admin\InsightsController::class, 'exportKpis'])->middleware('throttle:20,60')->name('export');
+        Route::get('/startups.csv', [Admin\InsightsController::class, 'exportStartups'])->middleware('throttle:10,60')->name('startups');
     });
     Route::middleware('can:review-duplicates')->group(function () {
         Route::get('duplicates', [Admin\DuplicateController::class, 'index'])->name('duplicates.index');

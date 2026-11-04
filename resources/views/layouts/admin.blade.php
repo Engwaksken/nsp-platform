@@ -36,6 +36,10 @@
                     @endcan
                 </ul>
             @endif
+            @can('view-insights')
+                <p class="nav-heading">Insights</p>
+                <ul>{!! $navLink('admin.insights.index', 'KPIs and reports', 'admin.insights.*') !!}</ul>
+            @endcan
             @if ($user->canAny(['manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'approve-vgi-frameworks', 'review-assessments', 'manage-integrations', 'manage-opportunities', 'verify-investors', 'manage-experts', 'manage-talent', 'moderate-marketplace']) && \App\Support\Features::enabled('registry'))
                 <p class="nav-heading">Registry</p>
                 <ul>
