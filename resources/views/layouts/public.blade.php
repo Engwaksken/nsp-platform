@@ -29,6 +29,9 @@
                            @if ($item->open_in_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label }}</a>
                     </li>
                 @endforeach
+                @if (\App\Support\Features::enabled('opportunities'))
+                    <li><a href="{{ route('opportunities.index') }}" @if (request()->routeIs('opportunities.*')) aria-current="page" @endif>Opportunities</a></li>
+                @endif
                 @auth
                     <li><a href="{{ route('workspace') }}">My workspace</a></li>
                     <li><a href="{{ route('mfa.setup') }}">Security</a></li>

@@ -32,6 +32,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'edit-vgi-frameworks' => 'Edit draft growth-assessment rubrics',
         'approve-vgi-frameworks' => 'Approve a growth-assessment rubric version for founders',
         'review-assessments' => 'See submitted startup assessments and adjust scores with a reason',
+        'manage-opportunities' => 'Publish and moderate opportunities and events',
         'manage-integrations' => 'See and retry deliveries to connected systems (IMS)',
     ];
 
@@ -39,7 +40,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'super_admin' => [], // passes every check through Gate::before
         'platform_admin' => ['*'],
         'ecosystem_manager' => ['manage-pages', 'manage-posts', 'publish-content', 'manage-media', 'manage-menus',
-            'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'review-assessments'],
+            'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'review-assessments', 'manage-opportunities'],
         'content_editor' => ['manage-pages', 'manage-posts', 'manage-media', 'manage-menus', 'manage-site-content'],
         'support' => ['manage-contact-messages'],
         'auditor' => ['view-audit-log'],

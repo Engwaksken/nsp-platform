@@ -12,7 +12,8 @@
 | 2: Identity and registry | **Registry implemented and tested locally** (inside NSP, decision M8). Shared login (OIDC) deferred by owner (D1). | Partly: "NSP-first" journey works without duplicates; the IMS-first journey needs IMS changes (Phase 3) and an IdP. |
 | 3: IMS integration | **NSP side implemented and tested locally.** IMS side implemented in `ims-site`, switched off by default (see `integration-contract-v1.md`). Not staged. | Not passed: needs both sides on staging and an end-to-end run with real IMS data |
 | 4: Growth and VGI | **Implemented and tested locally.** The starter rubric is seeded as an unapproved DRAFT; founders see nothing until Hive approves a version. | Reproducible scoring and authorized access pass tests. Needs Hive to review and approve the rubric (decision D12). |
-| 5 to 7 | Not started. Planned in `backlog.md`. | — |
+| 5: Ecosystem services | **5a Opportunities and events implemented and tested locally.** Still to build: 5b funding and investors (data room), 5c experts and mentors, 5d talent, 5e marketplace. | Not passed: needs all five modules and role-based UAT |
+| 6 to 7 | Not started. Planned in `backlog.md`. | — |
 
 ## Phase 0: completed this sprint
 - `discovery.md`: read-only audit of Hive IMS. Confirmed: no IdP, no API, no startups table, shared hosting with cron only.
@@ -98,8 +99,21 @@ Not yet: the Registry API for IMS (Phase 3), the IMS-first journey, importing ex
 
 Not done: benchmarks against other startups (spec: only where data justifies it), and AI suggestions (Phase 6).
 
+## Phase 5a: opportunities and events (implemented 2026-11-07)
+
+| Area | What exists | Evidence |
+|---|---|---|
+| Directory | Public list of open, published grants, accelerators, competitions, events, tenders, partnerships and investment calls. Search, type, sector, online and "closing in 14 days" filters. Detail page with the organiser's link. | `OpportunitiesTest` |
+| Eligibility | Rules for sectors, countries, growth stages, registered companies only and maximum company age. On each opportunity, a founder sees ✓, ✗ or "unknown, add it to your profile" for their current startup, labelled as guidance only. | `OpportunitiesTest` |
+| Recommendations v1 | Rules first: no failed rule, ranked by matched rules then deadline, with the reasons shown ("Matches sector · Closes in 3 days"). "Not relevant" hides an item for that person. | `OpportunitiesTest` |
+| Save and remind | Bookmarks; one email reminder 3 days before the deadline (daily 08:00) | `OpportunitiesTest` |
+| Registration and interest | For opportunities that allow it: register for yourself or for a startup you belong to; capacity limits; withdraw. The organiser sees name, email and startup only. | `OpportunitiesTest` |
+| Submissions and moderation | Any signed-in user can share an opportunity; it stays hidden until staff publish it; a rejection needs a reason the submitter sees. Users cannot switch on registration. | `OpportunitiesTest` |
+| Staff | Create and edit; open, review, draft, closed, rejected and archived lists; registrations with status; CSV export (audited, protected against spreadsheet formulas) | `OpportunitiesTest` |
+| Accessibility | axe audit of 8 opportunity pages at 1280 and 360 px: 0 violations | `tests/a11y` |
+
 ## Test results (local)
-- `php artisan test`: **149 passed, 796 assertions** (end of Phase 3: 134 and 700).
+- `php artisan test`: **158 passed, 855 assertions** (end of Phase 4: 149 and 796).
 - `vendor/bin/pint --test`: passed.
 - Manual smoke test with `php artisan serve`:
   - every public route returned the expected status;

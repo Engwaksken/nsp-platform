@@ -28,7 +28,7 @@ class Page extends Model
     ];
 
     /** Slugs that clash with application routes. */
-    public const RESERVED_SLUGS = ['admin', 'login', 'logout', 'auth', 'workspace', 'news', 'faqs', 'contact', 'storage', 'up', 'sitemap.xml', 'robots.txt', 'api'];
+    public const RESERVED_SLUGS = ['admin', 'login', 'logout', 'auth', 'workspace', 'news', 'opportunities', 'connect', 'invitations', 'account', 'faqs', 'contact', 'storage', 'up', 'sitemap.xml', 'robots.txt', 'api'];
 
     protected $fillable = ['title', 'slug', 'template', 'summary', 'blocks', 'status', 'published_at',
         'seo_title', 'seo_description', 'og_image_id', 'locale'];

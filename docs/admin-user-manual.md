@@ -94,3 +94,9 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
   - Reviewers can open a startup's result. The page checks that recalculating the result gives the same score.
   - To adjust a score or stage, write the reason. The founders see your reason next to the calculated result.
 
+## Opportunities and events
+- **Admin › Opportunities** lists open opportunities and has tabs for To review, Drafts, Closed, Rejected and Archived.
+- **New opportunity:** fill in the details and who can apply. Leave a group empty if it's open to all. Tick **Let people register** for events or calls run through NSP, and set the number of places if it's limited.
+- **To review:** these were shared by users. Check the link and details, then **Publish** or **Reject**. A rejection needs a reason, and the person who shared it sees that reason.
+- **Registrations:** shows who registered, for which startup, and their message. You can confirm or decline each one and **Download CSV**. Downloads are recorded in the audit log.
+- **Reminders:** people who saved an opportunity get one email 3 days before the deadline.

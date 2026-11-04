@@ -58,3 +58,10 @@ Open your startup, then **Growth**.
 - **Growth plan:** give each action an owner and a due date. Anyone on the team can update the status and add progress notes.
 - **Reassessing:** reassess every few months to see your progress. Use **Printable report** to save a PDF for your board or funders.
 
+## Opportunities
+- **Opportunities** (top menu) lists open grants, accelerators, competitions, events and calls. Filter by type, sector, online, or closing soon.
+- Open one to see **whether your startup qualifies**. Each rule shows ✓, ✗ or "unknown". Unknown means your profile is missing that detail. This is guidance only; the organiser decides.
+- **Save and remind me:** we email you once, 3 days before the deadline.
+- **Register or express interest:** where the organiser allows it, you can register for yourself or for your startup. The organiser sees your name, email and startup.
+- **Recommended for your startup:** open your startup, then **Opportunities**. Each recommendation says why it is shown. Choose **Not relevant** to hide it.
+- **Share an opportunity** you know about. Hive checks it before it appears.

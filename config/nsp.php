@@ -15,7 +15,7 @@ return [
         'funding' => ['default' => false, 'label' => 'Funding and investors', 'description' => 'Funding needs, investors and data rooms (Phase 5).'],
         'experts' => ['default' => false, 'label' => 'Experts and mentors', 'description' => 'Expert profiles, bookings and mentorship (Phase 5).'],
         'talent' => ['default' => false, 'label' => 'Talent', 'description' => 'Vacancies, candidates and hiring (Phase 5).'],
-        'opportunities' => ['default' => false, 'label' => 'Opportunities and marketplace', 'description' => 'Grants, events, competitions and marketplace (Phase 5).'],
+        'opportunities' => ['default' => (bool) env('NSP_OPPORTUNITIES_ENABLED', true), 'label' => 'Opportunities and events', 'description' => 'Grants, accelerators, competitions, events and calls with eligibility, saving, registration and recommendations.'],
         'ai_assistant' => ['default' => false, 'label' => 'AI assistant', 'description' => 'Optional AI help with provenance and consent (Phase 6).'],
     ],
 

@@ -23,6 +23,21 @@ Route::get('/sitemap.xml', [Site\SitemapController::class, 'sitemap'])->name('si
 Route::get('/robots.txt', [Site\SitemapController::class, 'robots'])->name('robots');
 
 /*
+| Opportunities and events (Phase 5a)
+*/
+Route::middleware('feature:opportunities')->prefix('opportunities')->name('opportunities.')->group(function () {
+    Route::get('/', [Site\OpportunityController::class, 'index'])->name('index');
+    Route::middleware('auth')->group(function () {
+        Route::get('/submit', [Site\OpportunityController::class, 'create'])->name('create');
+        Route::post('/', [Site\OpportunityController::class, 'store'])->middleware('throttle:10,60')->name('store');
+        Route::post('/{opportunity}/bookmark', [Site\OpportunityController::class, 'bookmark'])->name('bookmark');
+        Route::post('/{opportunity}/register', [Site\OpportunityController::class, 'register'])->middleware('throttle:20,1')->name('register');
+        Route::post('/{opportunity}/withdraw', [Site\OpportunityController::class, 'withdraw'])->name('withdraw');
+    });
+    Route::get('/{opportunity}', [Site\OpportunityController::class, 'show'])->name('show');
+});
+
+/*
 | Authentication
 */
 Route::middleware('guest')->group(function () {
@@ -87,6 +102,10 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::post('/actions', [Workspace\GrowthActionController::class, 'store'])->name('.actions.store');
         Route::put('/actions/{action}', [Workspace\GrowthActionController::class, 'update'])->name('.actions.update');
         Route::delete('/actions/{action}', [Workspace\GrowthActionController::class, 'destroy'])->name('.actions.destroy');
+    });
+    Route::middleware('feature:opportunities')->group(function () {
+        Route::get('/workspace/startups/{startup}/opportunities', [Workspace\OpportunityController::class, 'index'])->name('workspace.opportunities');
+        Route::post('/workspace/startups/{startup}/opportunities/{opportunity}/feedback', [Workspace\OpportunityController::class, 'feedback'])->name('workspace.opportunities.feedback');
     });
     Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
     Route::middleware(['feature:ims_integration', 'throttle:30,1'])->group(function () {
@@ -179,6 +198,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
     Route::middleware(['can:manage-integrations', 'feature:ims_integration'])->group(function () {
         Route::get('integrations', [Admin\IntegrationController::class, 'index'])->name('integrations.index');
         Route::post('integrations/deliveries/{delivery}/replay', [Admin\IntegrationController::class, 'replay'])->name('integrations.replay');
+    });
+    Route::middleware(['can:manage-opportunities', 'feature:opportunities'])->prefix('opportunities')->name('opportunities.')->group(function () {
+        Route::get('/', [Admin\OpportunityController::class, 'index'])->name('index');
+        Route::get('/create', [Admin\OpportunityController::class, 'create'])->name('create');
+        Route::post('/', [Admin\OpportunityController::class, 'store'])->name('store');
+        Route::get('/{opportunity}/edit', [Admin\OpportunityController::class, 'edit'])->name('edit');
+        Route::put('/{opportunity}', [Admin\OpportunityController::class, 'update'])->name('update');
+        Route::post('/{opportunity}/moderate', [Admin\OpportunityController::class, 'moderate'])->name('moderate');
+        Route::get('/{opportunity}/registrations', [Admin\OpportunityController::class, 'interests'])->name('interests');
+        Route::get('/{opportunity}/registrations.csv', [Admin\OpportunityController::class, 'export'])->name('export');
+        Route::put('/{opportunity}/registrations/{interest}', [Admin\OpportunityController::class, 'updateInterest'])->name('interests.update');
     });
     Route::middleware('feature:vgi')->prefix('vgi')->name('vgi.')->group(function () {
         Route::get('/', [Admin\VgiController::class, 'index'])->name('index');

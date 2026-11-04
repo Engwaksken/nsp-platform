@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Schedule;
 | `php artisan schedule:run` every minute, and this drains the queue (contact
 | notifications) within about a minute. See docs/deployment.md.
 */
+// Remind people about saved opportunities 3 days before the deadline.
+Schedule::command('opportunities:send-reminders')->dailyAt('08:00')->withoutOverlapping();
+
 // Send registry events to connected systems (no-op unless ims_integration is on).
 Schedule::command('registry:deliver-outbox')->everyMinute()->withoutOverlapping();
 

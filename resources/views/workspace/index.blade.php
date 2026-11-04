@@ -31,6 +31,10 @@
                         <p><span class="badge">Not available yet</span></p>
                     @elseif ($section['key'] === 'registry')
                         <p><a class="btn btn-primary btn-sm" href="{{ route('workspace.startups.index') }}">Open my startups</a></p>
+                    @elseif ($section['key'] === 'opportunities')
+                        <p><a class="btn btn-primary btn-sm" href="{{ $active ? route('workspace.opportunities', $active->startup) : route('opportunities.index') }}">See opportunities</a></p>
+                    @elseif ($section['key'] === 'vgi' && $active)
+                        <p><a class="btn btn-primary btn-sm" href="{{ route('workspace.growth', $active->startup) }}">Open growth</a></p>
                     @endif
                 </section>
             @endforeach

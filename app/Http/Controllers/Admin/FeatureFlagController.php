@@ -12,7 +12,7 @@ use Illuminate\View\View;
 class FeatureFlagController extends Controller
 {
     /** Modules that are not built yet cannot be switched on from the admin screen. */
-    public const NOT_BUILT = ['funding', 'experts', 'talent', 'opportunities', 'ai_assistant'];
+    public const NOT_BUILT = ['funding', 'experts', 'talent', 'ai_assistant'];
 
     public function index(): View
     {

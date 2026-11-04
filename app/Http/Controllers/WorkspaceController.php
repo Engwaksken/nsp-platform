@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\StartupRegistry;
 use App\Exceptions\RegistryUnavailable;
+use App\Registry\ActiveStartup;
 use App\Support\Features;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -25,7 +26,7 @@ class WorkspaceController extends Controller
             ['key' => 'funding', 'title' => 'Funding & Investors', 'text' => 'Funding needs, investor readiness and data room.'],
             ['key' => 'experts', 'title' => 'Experts', 'text' => 'Mentors, consultants and booked sessions.'],
             ['key' => 'talent', 'title' => 'Talent', 'text' => 'Vacancies, internships and candidates.'],
-            ['key' => 'opportunities', 'title' => 'Opportunities', 'text' => 'Grants, events, competitions and the marketplace.'],
+            ['key' => 'opportunities', 'title' => 'Opportunities', 'text' => 'Grants, accelerators, competitions and events matched to your startup.'],
         ];
         foreach ($sections as &$section) {
             $section['available'] = Features::enabled($section['key']);
@@ -42,6 +43,8 @@ class WorkspaceController extends Controller
             }
         }
 
-        return view('workspace.index', compact('user', 'sections', 'startups', 'registryMessage'));
+        $active = Features::enabled('registry') ? ActiveStartup::membership($user) : null;
+
+        return view('workspace.index', compact('user', 'sections', 'startups', 'registryMessage', 'active'));
     }
 }
