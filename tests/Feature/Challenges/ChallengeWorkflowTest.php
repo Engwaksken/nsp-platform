@@ -253,4 +253,24 @@ class ChallengeWorkflowTest extends TestCase
         $reviewer = User::factory()->withRole('platform_admin')->create();
         $this->actingAs($reviewer)->get(route('challenges.evidence.download', [$challenge, $evidence]))->assertOk();
     }
+
+    public function test_evidence_rejects_unsafe_links_and_unsupported_uploads_without_persisting_them(): void
+    {
+        Storage::fake('local');
+        $submitter = User::factory()->withRole('startup_user')->create();
+        $challenge = app(ChallengeWorkflow::class)->saveContent(new Challenge, $this->content('Evidence validation challenge'), $submitter);
+
+        $this->actingAs($submitter)->from(route('challenges.edit', $challenge))
+            ->post(route('challenges.evidence.store', $challenge), [
+                'source_title' => 'Unsafe link', 'evidence_type' => 'research', 'url' => 'javascript:alert(1)',
+            ])->assertSessionHasErrors('url');
+
+        $this->from(route('challenges.edit', $challenge))->post(route('challenges.evidence.store', $challenge), [
+            'source_title' => 'Executable attachment', 'evidence_type' => 'other',
+            'file' => UploadedFile::fake()->create('payload.exe', 10, 'application/x-msdownload'),
+        ])->assertSessionHasErrors('file');
+
+        $this->assertDatabaseCount('challenge_evidence', 0);
+        $this->assertSame([], Storage::disk('local')->allFiles());
+    }
 }
