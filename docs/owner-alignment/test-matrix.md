@@ -23,10 +23,10 @@
 | Knowledge editorial screens and publishing | `php artisan test --filter=KnowledgeEditorialTest` | 3 passed (32 assertions): queue/form/category/version screens render; editor submits draft; uploader cannot self-publish under four-eyes rule; independent reviewer publishes immutable version; non-editors forbidden | Admin route feature tests only; no manual UAT |
 | Knowledge download and licence boundaries | `php artisan test --filter=KnowledgeDownloadLicensingTest` | 4 passed (29 assertions): link-only licence requires source and rejects files; unsupported uploads persist neither resource nor file; link and file downloads record version and increment count; members-only file redirects guests to sign-in; binary response is private/no-store and nosniff | Additional licence combinations and manual UAT remain |
 | Challenge moderation/publication | `php artisan test --filter=ChallengeWorkflowTest` | 9 passed (83 assertions): draft/submitted/rejected/approved/published lifecycle; immutable versions; delayed replacement publication; archive; admin screens/role separation; title/sector search and member visibility; evidence review/private notes; bookmark toggle; proposal privacy, active-team revocation and status moderation; private file download isolation; unsafe link and unsupported upload rejection without persistence | Manual staging/UAT remains |
-| Full suite | `php artisan test` | 261 passed (1899 assertions) | Local-only; no staging/deployment claim |
+| Full suite | `php artisan test` | 262 passed (1906 assertions) | Local-only; no staging/deployment claim |
 | Expert and capital additions | Legacy expert/funding tests pass; new paths not evidenced by those tests | Partial | Add booking/payment sandbox and diligence/pipeline access tests |
 | Dashboards | Legacy analytics tests pass | Partial | Add organization/institution and new queue metric fixture reconciliation and export parity |
-| Deployment | Docker/config files present in working tree | Untested | Build container and smoke test only in safe local environment; staging awaits owner environment decision |
+| Deployment | Static Dockerfile review; explicit `curl` install and unauthenticated `/up` liveness check | Not built or runtime-tested (Docker CLI unavailable) | Build image and smoke-test `/up`, worker, scheduler and migration roles in approved staging; verify secrets, database readiness, storage, backup/restore |
 
 ## Baseline failure detail
 

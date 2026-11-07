@@ -1,11 +1,11 @@
-# Hive NSP application image (directive §4 "Scale"). NOT YET BUILT OR VERIFIED:
-# Docker was not available on the development machine. Build and run it on staging first.
+# Hive NSP application image (directive §4 "Scale"). Not yet built or runtime-verified;
+# Docker was unavailable during local review. Build and run it on staging first.
 # Stateless: sessions, cache and queue live in the database (or Redis, if approved); files on a mounted
 # volume or S3-compatible storage (decision OD7). One image serves web, scheduler and worker roles.
 FROM php:8.2-apache
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends git unzip libicu-dev libzip-dev libpng-dev libxml2-dev \
+ && apt-get install -y --no-install-recommends curl git unzip libicu-dev libzip-dev libpng-dev libxml2-dev \
  && docker-php-ext-install intl pdo_mysql zip gd bcmath opcache \
  && a2enmod rewrite headers \
  && rm -rf /var/lib/apt/lists/*
@@ -25,6 +25,6 @@ RUN composer dump-autoload --optimize --no-dev \
 
 COPY deploy/docker/entrypoint.sh /usr/local/bin/nsp-entrypoint
 RUN chmod +x /usr/local/bin/nsp-entrypoint
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD curl -fsS http://localhost/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD curl -fsS http://localhost/up || exit 1
 ENTRYPOINT ["nsp-entrypoint"]
 CMD ["web"]
