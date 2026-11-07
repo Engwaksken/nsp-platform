@@ -89,4 +89,28 @@ class KnowledgeDownloadLicensingTest extends TestCase
         $this->get(route('knowledge.download', $staffOnly))->assertNotFound();
         $this->assertSame(1, KnowledgeDownload::query()->count());
     }
+
+    public function test_private_file_download_requires_visibility_access_and_logs_the_served_version(): void
+    {
+        Storage::fake('local');
+        $resource = $this->resource('members-file', 'members', ['external_url' => null]);
+        $path = 'knowledge/'.$resource->uuid.'/opaque-document.pdf';
+        Storage::disk('local')->put($path, '%PDF-1.4 private fixture');
+        $resource->forceFill([
+            'file_disk' => 'local', 'file_path' => $path, 'file_name' => 'source.pdf',
+            'file_mime' => 'application/pdf', 'file_size' => 24,
+        ])->save();
+
+        $this->get(route('knowledge.download', $resource))->assertRedirect(route('login'));
+        $user = User::factory()->create();
+        $this->actingAs($user)->get(route('knowledge.download', $resource))->assertOk()
+            ->assertHeader('X-Content-Type-Options', 'nosniff')
+            ->assertHeader('Cache-Control', 'no-store, private');
+
+        $download = KnowledgeDownload::query()->sole();
+        $this->assertSame('file', $download->kind);
+        $this->assertSame(3, $download->version);
+        $this->assertSame(1, $resource->fresh()->download_count);
+        Storage::disk('local')->assertExists($path);
+    }
 }
