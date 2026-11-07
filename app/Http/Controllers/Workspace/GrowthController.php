@@ -107,6 +107,9 @@ class GrowthController extends Controller
         $challengeGuidance = Features::enabled('challenges')
             ? $this->guidance->challengesForVgiGaps($startup, $request->user(), $assessment->result['gaps'] ?? [])
             : [];
+        $opportunityGuidance = Features::enabled('opportunities')
+            ? $this->guidance->opportunitiesForStartup($startup, $request->user())
+            : [];
 
         return view($assessment->status === 'draft' ? 'workspace.growth.form' : 'workspace.growth.result', [
             'startup' => $startup,
@@ -118,6 +121,7 @@ class GrowthController extends Controller
             'builderLinks' => $builderLinks,
             'knowledgeGuidance' => $knowledgeGuidance,
             'challengeGuidance' => $challengeGuidance,
+            'opportunityGuidance' => $opportunityGuidance,
             'guidanceFeedback' => VgiGuidanceFeedback::query()->where('assessment_uuid', $assessment->uuid)
                 ->where('user_id', $request->user()->id)->get()->keyBy('dimension_key'),
         ]);

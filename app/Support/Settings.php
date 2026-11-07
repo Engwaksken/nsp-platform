@@ -8,8 +8,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Site settings (branding, contact details, routing) stored as key/value rows.
- * Defaults are neutral placeholders: the Hive brand palette must be entered
- * by an admin, not hard-coded here.
+ * Defaults use the Hive palette; administrators may override brand colors.
  */
 class Settings
 {
@@ -24,9 +23,9 @@ class Settings
     public const DEFAULTS = [
         'site_name' => 'Hive NSP',
         'site_tagline' => 'Startup growth and ecosystem platform',
-        'primary_color' => '#1d4ed8',
-        'secondary_color' => '#0f766e',
-        'accent_color' => '#b45309',
+        'primary_color' => '#3a3a3c',
+        'secondary_color' => '#f7941d',
+        'accent_color' => '#f1592a',
         'font_family' => 'Poppins',
         'logo_media_id' => null,
         'favicon_media_id' => null,

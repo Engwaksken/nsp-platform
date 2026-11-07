@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\SeoRedirect;
 use App\Support\Contrast;
 use App\Support\PageBlocks;
+use App\Support\Settings;
 use PHPUnit\Framework\TestCase;
 
 class SupportTest extends TestCase
@@ -15,6 +16,15 @@ class SupportTest extends TestCase
         $this->assertEqualsWithDelta(1.0, Contrast::againstWhite('#ffffff'), 0.01);
         $this->assertEqualsWithDelta(6.7, Contrast::againstWhite('#1d4ed8'), 0.1);
         $this->assertSame(0.0, Contrast::againstWhite('red'));
+    }
+
+    public function test_default_branding_uses_hive_palette_with_contrast_safe_primary(): void
+    {
+        $this->assertSame('#3a3a3c', Settings::DEFAULTS['primary_color']);
+        $this->assertSame('#f7941d', Settings::DEFAULTS['secondary_color']);
+        $this->assertSame('#f1592a', Settings::DEFAULTS['accent_color']);
+        $this->assertGreaterThanOrEqual(7, Contrast::againstWhite(Settings::DEFAULTS['primary_color']));
+        $this->assertGreaterThanOrEqual(4.5, Contrast::ratio(Settings::DEFAULTS['primary_color'], Settings::DEFAULTS['secondary_color']));
     }
 
     public function test_safe_url_allows_only_site_paths_and_http_links(): void

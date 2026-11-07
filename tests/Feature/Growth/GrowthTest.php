@@ -10,6 +10,7 @@ use App\Models\Builder\BuilderModule;
 use App\Models\Builder\BuilderStepDefinition;
 use App\Models\Challenges\Challenge;
 use App\Models\Challenges\ChallengeVersion;
+use App\Models\Ecosystem\Opportunity;
 use App\Models\Growth\GrowthAction;
 use App\Models\Growth\VgiAssessment;
 use App\Models\Growth\VgiFramework;
@@ -151,7 +152,7 @@ class GrowthTest extends TestCase
             'body' => 'Test guide body.', 'resource_type' => 'guide', 'license' => 'cc_by', 'visibility' => 'startups',
             'audience' => ['founders'], 'vgi_dimension_keys' => ['problem_clarity'], 'source' => 'Synthetic test source',
         ]);
-        $knowledge->forceFill(['status' => 'published', 'published_at' => now()])->save();
+        $knowledge->forceFill(['status' => 'published', 'published_at' => now(), 'current_version' => 4])->save();
         Features::set('challenges', true, null);
         $challenge = Challenge::query()->create([
             'title' => 'Improve local food storage', 'problem_description' => 'A published challenge about post-harvest storage.',
@@ -178,11 +179,19 @@ class GrowthTest extends TestCase
             'license' => 'all_rights_reserved', 'visibility' => 'staff', 'vgi_dimension_keys' => ['problem_clarity'],
         ]);
         $restricted->forceFill(['status' => 'published', 'published_at' => now()])->save();
+        $opportunity = Opportunity::query()->create([
+            'type' => 'grant', 'title' => 'Open agritech grant', 'summary' => 'Funding for early-stage ventures.',
+            'eligibility' => [], 'status' => 'published', 'deadline_at' => now()->addMonth(),
+        ]);
+        $opportunity->forceFill(['published_at' => now()])->save();
+        Features::set('opportunities', true, null);
         $this->actingAs($this->owner)->get("$base/assessments/{$assessment->uuid}")->assertOk()
             ->assertSee($assessment->band_label)->assertSee('self-assessment')->assertSee('Add to growth plan')
             ->assertSee(route('workspace.builder', $this->startup).'#step-problem_step')
             ->assertSee('Accept suggestion')->assertSee('Dismiss with reason')
             ->assertSee('Problem framing guide')->assertSee('Synthetic test source')->assertDontSee('Restricted problem guide')
+            ->assertSee('published version 4')->assertSee('published version 1')
+            ->assertSee('Open opportunities for Green Fields')->assertSee('Open agritech grant')->assertSee('Open to all startups')
             ->assertSee('Improve local food storage')->assertDontSee('Draft storage challenge');
         $dimension = $assessment->result['gaps'][0]['dimension_key'];
         $feedbackUrl = "$base/assessments/{$assessment->uuid}/guidance/$dimension/feedback";
