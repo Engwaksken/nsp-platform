@@ -29,6 +29,12 @@
                         @if (!empty($builderLinks[$gap['dimension_key'] ?? '']))
                             <p><a href="{{ $builderLinks[$gap['dimension_key']] }}">Open related Venture Builder step</a></p>
                         @endif
+                        @foreach (($knowledgeGuidance[$gap['dimension_key'] ?? ''] ?? []) as $resource)
+                            <p class="meta">Related Knowledge Hub resource for {{ $gap['dimension_title'] }}:
+                                <a href="{{ route('knowledge.show', $resource) }}">{{ $resource->title }}</a>
+                                @if ($resource->source) · source: {{ $resource->source }}@endif
+                            </p>
+                        @endforeach
                         @php($recommendationFeedback = $guidanceFeedback[$gap['dimension_key']] ?? null)
                         @if ($recommendationFeedback)
                             <p class="meta">Your guidance feedback: {{ ucfirst($recommendationFeedback->feedback) }}@if ($recommendationFeedback->explanation) — {{ $recommendationFeedback->explanation }}@endif</p>

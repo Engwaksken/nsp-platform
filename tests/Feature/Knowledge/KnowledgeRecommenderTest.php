@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Knowledge;
 
+use App\Intelligence\GuidanceService;
 use App\Knowledge\Recommender;
 use App\Knowledge\VgiSignals;
+use App\Models\Knowledge\KnowledgeResource;
 use App\Models\User;
 use App\Registry\ActiveStartup;
 use App\Registry\RegistryService;
@@ -35,5 +37,14 @@ class KnowledgeRecommenderTest extends TestCase
         $this->assertSame(['team'], $context['weakest']);
         $this->assertSame('validation', $context['stage']);
         $this->assertNotSame($first->uuid, $second->uuid);
+
+        $resource = KnowledgeResource::query()->create([
+            'slug' => 'first-venture-only', 'title' => 'First venture guide', 'resource_type' => 'guide',
+            'license' => 'cc_by', 'visibility' => 'startups', 'vgi_dimension_keys' => ['problem_clarity'],
+        ]);
+        $resource->forceFill(['status' => 'published', 'published_at' => now()])->save();
+        $this->assertSame([], app(GuidanceService::class)->knowledgeForVgiGaps($first, $user, [
+            ['dimension_key' => 'problem_clarity'],
+        ]));
     }
 }

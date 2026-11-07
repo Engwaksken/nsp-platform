@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Workspace;
 
 use App\Growth\GrowthService;
 use App\Http\Controllers\Controller;
+use App\Intelligence\GuidanceService;
 use App\Models\Builder\BuilderCurriculum;
 use App\Models\Builder\VentureBuilderEnrollment;
 use App\Models\Growth\GrowthAction;
@@ -23,7 +24,7 @@ class GrowthController extends Controller
 {
     use ResolvesMembership;
 
-    public function __construct(private readonly GrowthService $growth) {}
+    public function __construct(private readonly GrowthService $growth, private readonly GuidanceService $guidance) {}
 
     public function index(Request $request, Startup $startup): View
     {
@@ -100,6 +101,9 @@ class GrowthController extends Controller
                 }
             }
         }
+        $knowledgeGuidance = Features::enabled('knowledge')
+            ? $this->guidance->knowledgeForVgiGaps($startup, $request->user(), $assessment->result['gaps'] ?? [])
+            : [];
 
         return view($assessment->status === 'draft' ? 'workspace.growth.form' : 'workspace.growth.result', [
             'startup' => $startup,
@@ -109,6 +113,7 @@ class GrowthController extends Controller
             'responses' => $assessment->responses->keyBy('question_key'),
             'planned' => GrowthAction::query()->where('startup_uuid', $startup->uuid)->whereNotNull('question_key')->pluck('question_key')->all(),
             'builderLinks' => $builderLinks,
+            'knowledgeGuidance' => $knowledgeGuidance,
             'guidanceFeedback' => VgiGuidanceFeedback::query()->where('assessment_uuid', $assessment->uuid)
                 ->where('user_id', $request->user()->id)->get()->keyBy('dimension_key'),
         ]);

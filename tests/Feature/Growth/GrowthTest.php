@@ -11,6 +11,7 @@ use App\Models\Builder\BuilderStepDefinition;
 use App\Models\Growth\GrowthAction;
 use App\Models\Growth\VgiAssessment;
 use App\Models\Growth\VgiFramework;
+use App\Models\Knowledge\KnowledgeResource;
 use App\Models\Registry\OutboxEvent;
 use App\Models\Registry\Startup;
 use App\Models\User;
@@ -29,6 +30,7 @@ class GrowthTest extends TestCase
     {
         parent::setUp();
         $this->seed(VgiStarterSeeder::class);
+        Features::set('knowledge', true, null);
         $this->owner = User::factory()->withRole('startup_user')->create();
         $this->startup = app(RegistryService::class)->createStartup($this->owner, [
             'legal_name' => 'Green Fields Ltd', 'display_name' => 'Green Fields', 'registration_number' => null,
@@ -142,10 +144,22 @@ class GrowthTest extends TestCase
             'title' => 'Clarify the problem', 'fields' => [['key' => 'statement', 'label' => 'Statement', 'type' => 'text']],
             'vgi_dimension_keys' => ['problem_clarity'],
         ]);
+        $knowledge = KnowledgeResource::query()->create([
+            'slug' => 'problem-framing-guide', 'title' => 'Problem framing guide', 'summary' => 'An evidence-based way to define a problem.',
+            'body' => 'Test guide body.', 'resource_type' => 'guide', 'license' => 'cc_by', 'visibility' => 'startups',
+            'audience' => ['founders'], 'vgi_dimension_keys' => ['problem_clarity'], 'source' => 'Synthetic test source',
+        ]);
+        $knowledge->forceFill(['status' => 'published', 'published_at' => now()])->save();
+        $restricted = KnowledgeResource::query()->create([
+            'slug' => 'restricted-problem-guide', 'title' => 'Restricted problem guide', 'resource_type' => 'guide',
+            'license' => 'all_rights_reserved', 'visibility' => 'staff', 'vgi_dimension_keys' => ['problem_clarity'],
+        ]);
+        $restricted->forceFill(['status' => 'published', 'published_at' => now()])->save();
         $this->actingAs($this->owner)->get("$base/assessments/{$assessment->uuid}")->assertOk()
             ->assertSee($assessment->band_label)->assertSee('self-assessment')->assertSee('Add to growth plan')
             ->assertSee(route('workspace.builder', $this->startup).'#step-problem_step')
-            ->assertSee('Accept suggestion')->assertSee('Dismiss with reason');
+            ->assertSee('Accept suggestion')->assertSee('Dismiss with reason')
+            ->assertSee('Problem framing guide')->assertSee('Synthetic test source')->assertDontSee('Restricted problem guide');
         $dimension = $assessment->result['gaps'][0]['dimension_key'];
         $feedbackUrl = "$base/assessments/{$assessment->uuid}/guidance/$dimension/feedback";
         $this->actingAs($this->owner)->post($feedbackUrl, ['feedback' => 'dismissed'])->assertSessionHasErrors('explanation');
