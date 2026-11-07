@@ -29,6 +29,20 @@ class GrowthController extends Controller
         $assessments = VgiAssessment::query()->with('framework')->where('startup_uuid', $startup->uuid)
             ->orderByRaw("CASE status WHEN 'draft' THEN 0 ELSE 1 END")->latest('submitted_at')->get();
         $latest = $assessments->firstWhere('status', 'submitted');
+        $submittedHistory = $assessments->where('status', 'submitted')->values();
+        $previous = $submittedHistory->get(1);
+        $dimensionTrends = collect($latest?->result['dimensions'] ?? [])->map(function (array $dimension) use ($latest, $previous) {
+            $prior = collect($previous?->result['dimensions'] ?? [])->firstWhere('key', $dimension['key']);
+            $comparable = $previous && $latest->framework_id === $previous->framework_id
+                && $dimension['score'] !== null && ($prior['score'] ?? null) !== null;
+            $change = $comparable ? round((float) $dimension['score'] - (float) $prior['score'], 1) : null;
+
+            return [
+                'key' => $dimension['key'], 'title' => $dimension['title'], 'score' => $dimension['score'],
+                'previous' => $comparable ? $prior['score'] : null, 'change' => $change,
+                'direction' => $change === null ? 'not_comparable' : ($change > 0 ? 'increased' : ($change < 0 ? 'decreased' : 'unchanged')),
+            ];
+        })->all();
         $planned = GrowthAction::query()->where('startup_uuid', $startup->uuid)->whereNotNull('question_key')->pluck('question_key')->all();
 
         return view('workspace.growth.index', [
@@ -36,6 +50,7 @@ class GrowthController extends Controller
             'membership' => $membership,
             'framework' => VgiFramework::current(),
             'latest' => $latest,
+            'dimensionTrends' => $dimensionTrends,
             'draft' => $assessments->firstWhere('status', 'draft'),
             'history' => $assessments->where('status', 'submitted'),
             'actions' => GrowthAction::query()->with('owner', 'updates.user')->where('startup_uuid', $startup->uuid)

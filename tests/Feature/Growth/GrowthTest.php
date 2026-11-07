@@ -177,6 +177,38 @@ class GrowthTest extends TestCase
         $this->actingAs($this->owner)->get("$base/assessments/{$theirs->uuid}")->assertNotFound();
     }
 
+    public function test_dimension_trends_compare_only_assessments_on_same_rubric_version(): void
+    {
+        $framework = $this->approveStarter();
+        $service = app(GrowthService::class);
+        foreach ([0, 3] as $index => $position) {
+            if ($index > 0) {
+                $this->travel(1)->seconds();
+            }
+            $assessment = $service->start($this->startup, $this->owner);
+            $answers = $this->answers($framework, $position);
+            $service->saveAnswers($assessment, $this->owner, $answers, $this->requiredEvidence($framework, $answers));
+            $service->submit($assessment, $this->owner);
+        }
+
+        $this->actingAs($this->owner)->get("/workspace/startups/{$this->startup->uuid}/growth")
+            ->assertOk()->assertSee('Dimension-level progress')->assertSee('Previous comparable')
+            ->assertSee('Increased');
+
+        $editor = User::factory()->withRole('ecosystem_manager')->create();
+        $newFramework = $service->createDraft($editor, $framework);
+        $definition = $newFramework->definition;
+        $service->updateDraft($newFramework, $editor, $definition, 'New rubric revision');
+        $service->approve($newFramework, User::factory()->withRole('platform_admin')->create(), 'Reviewed a new version of the rubric.');
+        $assessment = $service->start($this->startup, $this->owner);
+        $answers = $this->answers($newFramework, 2);
+        $service->saveAnswers($assessment, $this->owner, $answers, $this->requiredEvidence($newFramework, $answers));
+        $service->submit($assessment, $this->owner);
+
+        $this->actingAs($this->owner)->get("/workspace/startups/{$this->startup->uuid}/growth")
+            ->assertOk()->assertSee('Dimension-level progress')->assertSee('Not comparable');
+    }
+
     public function test_growth_plan_from_gaps_and_progress_updates(): void
     {
         $framework = $this->approveStarter();
