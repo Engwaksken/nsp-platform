@@ -32,12 +32,16 @@
                         @foreach (($knowledgeGuidance[$gap['dimension_key'] ?? ''] ?? []) as $resource)
                             <p class="meta">Related Knowledge Hub resource for {{ $gap['dimension_title'] }}:
                                 <a href="{{ route('knowledge.show', $resource) }}">{{ $resource->title }}</a>
+                                · published version {{ $resource->current_version ?: 'not recorded' }}
+                                @if ($resource->published_at) · published {{ $resource->published_at->format('j M Y') }}@endif
                                 @if ($resource->source) · source: {{ $resource->source }}@endif
                             </p>
                         @endforeach
                         @foreach (($challengeGuidance[$gap['dimension_key'] ?? ''] ?? []) as $challenge)
                             <p class="meta">Related published challenge:
                                 <a href="{{ route('challenges.show', $challenge) }}">{{ $challenge->publishedVersion->field('title') }}</a>
+                                · published version {{ $challenge->publishedVersion->version }}
+                                @if ($challenge->publishedVersion->published_at) · published {{ $challenge->publishedVersion->published_at->format('j M Y') }}@endif
                                 — matches {{ $gap['dimension_title'] }}
                             </p>
                         @endforeach

@@ -151,7 +151,7 @@ class GrowthTest extends TestCase
             'body' => 'Test guide body.', 'resource_type' => 'guide', 'license' => 'cc_by', 'visibility' => 'startups',
             'audience' => ['founders'], 'vgi_dimension_keys' => ['problem_clarity'], 'source' => 'Synthetic test source',
         ]);
-        $knowledge->forceFill(['status' => 'published', 'published_at' => now()])->save();
+        $knowledge->forceFill(['status' => 'published', 'published_at' => now(), 'current_version' => 4])->save();
         Features::set('challenges', true, null);
         $challenge = Challenge::query()->create([
             'title' => 'Improve local food storage', 'problem_description' => 'A published challenge about post-harvest storage.',
@@ -183,6 +183,7 @@ class GrowthTest extends TestCase
             ->assertSee(route('workspace.builder', $this->startup).'#step-problem_step')
             ->assertSee('Accept suggestion')->assertSee('Dismiss with reason')
             ->assertSee('Problem framing guide')->assertSee('Synthetic test source')->assertDontSee('Restricted problem guide')
+            ->assertSee('published version 4')->assertSee('published version 1')
             ->assertSee('Improve local food storage')->assertDontSee('Draft storage challenge');
         $dimension = $assessment->result['gaps'][0]['dimension_key'];
         $feedbackUrl = "$base/assessments/{$assessment->uuid}/guidance/$dimension/feedback";
