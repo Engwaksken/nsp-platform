@@ -80,6 +80,22 @@
             @endif
         </section>
 
+        @if ($opportunityGuidance)
+            <section class="panel" aria-labelledby="opportunities-heading">
+                <h2 id="opportunities-heading">Open opportunities for {{ $startup->display_name }}</h2>
+                <p class="hint">Matched using the eligibility information available for this startup. Unknown criteria are not treated as confirmed eligibility.</p>
+                @foreach ($opportunityGuidance as $recommendation)
+                    <article class="card" style="margin-bottom:.75rem">
+                        <h3><a href="{{ route('opportunities.show', $recommendation['opportunity']) }}">{{ $recommendation['opportunity']->title }}</a></h3>
+                        @if ($recommendation['reasons'])<p>{{ implode(' · ', $recommendation['reasons']) }}</p>@endif
+                        @if ($recommendation['unknown'])<p class="meta">Check these eligibility details: {{ implode(', ', $recommendation['unknown']) }}.</p>@endif
+                        @if ($recommendation['opportunity']->deadline_at)<p class="meta">Deadline: {{ $recommendation['opportunity']->deadline_at->format('j M Y') }}</p>@endif
+                    </article>
+                @endforeach
+                <a href="{{ route('workspace.opportunities', $startup) }}">See all recommendations</a>
+            </section>
+        @endif
+
         <details class="panel">
             <summary>Your answers</summary>
             @foreach ($definition['dimensions'] as $dimension)

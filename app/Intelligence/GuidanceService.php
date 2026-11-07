@@ -3,7 +3,9 @@
 namespace App\Intelligence;
 
 use App\Challenges\ChallengeSearch;
+use App\Ecosystem\Recommender as OpportunityRecommender;
 use App\Models\Challenges\Challenge;
+use App\Models\Ecosystem\Opportunity;
 use App\Models\Knowledge\KnowledgeResource;
 use App\Models\Registry\Startup;
 use App\Models\User;
@@ -12,6 +14,16 @@ use App\Registry\ActiveStartup;
 /** Deterministic cross-module guidance adapters; never calls an external model. */
 class GuidanceService
 {
+    /** @return list<array{opportunity: Opportunity, reasons: list<string>, unknown: list<string>}> */
+    public function opportunitiesForStartup(Startup $startup, User $user): array
+    {
+        if (! $startup->is($this->activeStartup($user))) {
+            return [];
+        }
+
+        return OpportunityRecommender::forStartup($startup->loadMissing('profile'), $user, 3);
+    }
+
     /**
      * @param  list<array<string, mixed>>  $gaps
      * @return array<string, list<KnowledgeResource>>

@@ -5,6 +5,7 @@ namespace Tests\Feature\Knowledge;
 use App\Intelligence\GuidanceService;
 use App\Knowledge\Recommender;
 use App\Knowledge\VgiSignals;
+use App\Models\Ecosystem\Opportunity;
 use App\Models\Knowledge\KnowledgeResource;
 use App\Models\User;
 use App\Registry\ActiveStartup;
@@ -46,5 +47,33 @@ class KnowledgeRecommenderTest extends TestCase
         $this->assertSame([], app(GuidanceService::class)->knowledgeForVgiGaps($first, $user, [
             ['dimension_key' => 'problem_clarity'],
         ]));
+    }
+
+    public function test_opportunity_guidance_uses_the_selected_startup_and_existing_rules(): void
+    {
+        $user = User::factory()->withRole('startup_user')->create();
+        $registry = app(RegistryService::class);
+        $first = $registry->createStartup($user, [
+            'legal_name' => 'First Venture Ltd', 'display_name' => 'First Venture', 'registration_number' => 'UG-FIRST-2',
+            'country' => 'UG', 'year_founded' => 2024, 'description' => null, 'website' => null,
+        ], []);
+        $second = $registry->createStartup($user, [
+            'legal_name' => 'Second Venture Ltd', 'display_name' => 'Second Venture', 'registration_number' => 'UG-SECOND-2',
+            'country' => 'UG', 'year_founded' => 2023, 'description' => null, 'website' => null,
+        ], []);
+        $opportunity = Opportunity::query()->create([
+            'type' => 'grant', 'title' => 'Open founder grant', 'summary' => 'An open opportunity.',
+            'eligibility' => [], 'status' => 'published', 'deadline_at' => now()->addMonth(),
+        ]);
+        $opportunity->forceFill(['published_at' => now()])->save();
+
+        ActiveStartup::switchTo($second);
+        $guidance = app(GuidanceService::class);
+
+        $recommendations = $guidance->opportunitiesForStartup($second, $user);
+        $this->assertCount(1, $recommendations);
+        $this->assertTrue($recommendations[0]['opportunity']->is($opportunity));
+        $this->assertContains('Open to all startups', $recommendations[0]['reasons']);
+        $this->assertSame([], $guidance->opportunitiesForStartup($first, $user));
     }
 }
