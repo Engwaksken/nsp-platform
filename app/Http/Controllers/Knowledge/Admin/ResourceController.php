@@ -63,7 +63,7 @@ class ResourceController extends Controller
         });
         Audit::log('knowledge.created', $resource, ['title' => $resource->title]);
 
-        return redirect()->route('admin.knowledge.edit', $resource)->with('status', 'Draft saved.');
+        return redirect()->route('admin.knowledge.edit', $resource->uuid)->with('status', 'Draft saved.');
     }
 
     public function edit(Request $request, KnowledgeResource $resource): View
@@ -93,7 +93,7 @@ class ResourceController extends Controller
         });
         Audit::log('knowledge.updated', $resource, ['title' => $resource->title, 'status' => $resource->status]);
 
-        return redirect()->route('admin.knowledge.edit', $resource)->with('status', 'Changes saved.');
+        return redirect()->route('admin.knowledge.edit', $resource->uuid)->with('status', 'Changes saved.');
     }
 
     public function submit(Request $request, KnowledgeResource $resource): RedirectResponse
