@@ -35,6 +35,12 @@
                                 @if ($resource->source) · source: {{ $resource->source }}@endif
                             </p>
                         @endforeach
+                        @foreach (($challengeGuidance[$gap['dimension_key'] ?? ''] ?? []) as $challenge)
+                            <p class="meta">Related published challenge:
+                                <a href="{{ route('challenges.show', $challenge) }}">{{ $challenge->publishedVersion->field('title') }}</a>
+                                — matches {{ $gap['dimension_title'] }}
+                            </p>
+                        @endforeach
                         @php($recommendationFeedback = $guidanceFeedback[$gap['dimension_key']] ?? null)
                         @if ($recommendationFeedback)
                             <p class="meta">Your guidance feedback: {{ ucfirst($recommendationFeedback->feedback) }}@if ($recommendationFeedback->explanation) — {{ $recommendationFeedback->explanation }}@endif</p>

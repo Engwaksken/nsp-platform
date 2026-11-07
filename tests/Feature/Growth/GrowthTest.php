@@ -8,6 +8,8 @@ use App\Growth\Scorer;
 use App\Models\Builder\BuilderCurriculum;
 use App\Models\Builder\BuilderModule;
 use App\Models\Builder\BuilderStepDefinition;
+use App\Models\Challenges\Challenge;
+use App\Models\Challenges\ChallengeVersion;
 use App\Models\Growth\GrowthAction;
 use App\Models\Growth\VgiAssessment;
 use App\Models\Growth\VgiFramework;
@@ -150,6 +152,27 @@ class GrowthTest extends TestCase
             'audience' => ['founders'], 'vgi_dimension_keys' => ['problem_clarity'], 'source' => 'Synthetic test source',
         ]);
         $knowledge->forceFill(['status' => 'published', 'published_at' => now()])->save();
+        Features::set('challenges', true, null);
+        $challenge = Challenge::query()->create([
+            'title' => 'Improve local food storage', 'problem_description' => 'A published challenge about post-harvest storage.',
+            'sector' => 'Agriculture & Agritech', 'priority' => 'high', 'visibility' => 'public',
+            'vgi_dimension_keys' => ['problem_clarity'],
+        ]);
+        $publishedChallengeVersion = ChallengeVersion::query()->create([
+            'challenge_id' => $challenge->id, 'version' => 1, 'title' => 'Improve local food storage',
+            'problem_description' => 'A published challenge about post-harvest storage.', 'priority' => 'high',
+            'visibility' => 'public', 'content' => ['title' => 'Improve local food storage', 'vgi_dimension_keys' => ['problem_clarity'], 'visibility' => 'public'],
+            'published_at' => now(),
+        ]);
+        $challenge->forceFill([
+            'status' => 'published', 'published_version_id' => $publishedChallengeVersion->id, 'published_at' => now(),
+        ])->save();
+        // The working copy may have changed; guidance must still match the public immutable snapshot.
+        $challenge->forceFill(['vgi_dimension_keys' => ['team']])->save();
+        Challenge::query()->create([
+            'title' => 'Draft storage challenge', 'problem_description' => 'Draft content must not be recommended.',
+            'sector' => 'Agriculture & Agritech', 'vgi_dimension_keys' => ['problem_clarity'],
+        ]);
         $restricted = KnowledgeResource::query()->create([
             'slug' => 'restricted-problem-guide', 'title' => 'Restricted problem guide', 'resource_type' => 'guide',
             'license' => 'all_rights_reserved', 'visibility' => 'staff', 'vgi_dimension_keys' => ['problem_clarity'],
@@ -159,7 +182,8 @@ class GrowthTest extends TestCase
             ->assertSee($assessment->band_label)->assertSee('self-assessment')->assertSee('Add to growth plan')
             ->assertSee(route('workspace.builder', $this->startup).'#step-problem_step')
             ->assertSee('Accept suggestion')->assertSee('Dismiss with reason')
-            ->assertSee('Problem framing guide')->assertSee('Synthetic test source')->assertDontSee('Restricted problem guide');
+            ->assertSee('Problem framing guide')->assertSee('Synthetic test source')->assertDontSee('Restricted problem guide')
+            ->assertSee('Improve local food storage')->assertDontSee('Draft storage challenge');
         $dimension = $assessment->result['gaps'][0]['dimension_key'];
         $feedbackUrl = "$base/assessments/{$assessment->uuid}/guidance/$dimension/feedback";
         $this->actingAs($this->owner)->post($feedbackUrl, ['feedback' => 'dismissed'])->assertSessionHasErrors('explanation');
