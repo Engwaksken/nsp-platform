@@ -13,8 +13,8 @@
 | Curriculum seeding, admin publishing and complete journey | `php artisan test --filter=BuilderCurriculumPublishingTest` | 2 passed (21 assertions): idempotent draft-only seed, malformed 23-step draft refused, authorized admin publish, new draft version, all 24 steps submitted and validated to 100% | Staging and owner approval not performed |
 | Venture Builder journey/review/evidence/documents | `php artisan test --filter=VentureBuilderTest` | 5 passed (54 assertions): enrollment/resume, prerequisite locks, stale writes, review/revision, private evidence, template generation/edit/version/export and stale document edit refusal | Curriculum admin/versioning and full 24-step journey remain |
 | VGI → Builder mapping | `php artisan test --filter=GrowthTest` | 9 passed (80 assertions), including gap-to-dimension mapped link | Link is a navigation aid; content remains provisional |
-| Full suite | `php artisan test` | 236 passed (1636 assertions) | Local-only; no staging/deployment claim |
-| Organizations | Existing feature suite had no identified coverage in baseline run | Not verified | Add authorization, portfolio scope and immediate revocation tests |
+| Full suite | `php artisan test` | 237 passed (1643 assertions) | Local-only; no staging/deployment claim |
+| Organizations portfolio boundary | `php artisan test --filter=PortfolioAccessTest` | 1 passed (7 assertions): startup consent scopes are enforced, analyst/member role rights apply, revocation immediately removes per-startup and portfolio-list access | Invitation expiry, grant expiry, suspension and every consuming dashboard need broader coverage |
 | Intelligence, challenges, knowledge | Existing feature suite had no identified coverage in baseline run | Not verified | Add fallback, moderation, restricted search, feedback and cross-tenant tests |
 | Expert and capital additions | Legacy expert/funding tests pass; new paths not evidenced by those tests | Partial | Add booking/payment sandbox and diligence/pipeline access tests |
 | Dashboards | Legacy analytics tests pass | Partial | Add organization/institution and new queue metric fixture reconciliation and export parity |
