@@ -407,6 +407,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
 });
 
 /*
+| Owner-alignment modules: one route file per module in routes/modules/
+| (organizations, builder, challenges, knowledge, intelligence, dashboards ...).
+| Loaded before the CMS catch-all so module routes win.
+*/
+foreach (glob(__DIR__.'/modules/*.php') ?: [] as $moduleRoutes) {
+    require $moduleRoutes;
+}
+
+/*
 | CMS pages: keep last so application routes win.
 */
 Route::get('/{slug}', [Site\PageController::class, 'show'])

@@ -41,16 +41,30 @@ class RolesAndPermissionsSeeder extends Seeder
         'manage-communications' => 'Send announcements and see the email delivery log',
         'view-insights' => 'See ecosystem KPIs and download aggregate reports',
         'view-system-health' => 'See system health (scheduler, queue, email, backups, disk)',
+        // Owner-alignment modules
+        'manage-organizations' => 'Create organizations (universities, ESOs, investors, partners, corporates) and manage their members',
+        'manage-builder-curricula' => 'Edit draft Venture Builder curricula (modules, steps, fields, checklists)',
+        'publish-builder-curricula' => 'Publish a Venture Builder curriculum version for founders',
+        'review-builder-steps' => 'Review submitted Venture Builder steps, request changes and validate them',
+        'manage-challenges' => 'Create and edit challenges in the Challenge Exchange',
+        'review-challenges' => 'Review, approve, reject and publish challenges',
+        'manage-knowledge' => 'Upload and edit Knowledge Hub resources (drafts)',
+        'publish-knowledge' => 'Review and publish Knowledge Hub resources',
+        'manage-intelligence' => 'Edit recommendation rules and document templates; see guidance feedback',
+        'manage-payments' => 'See the payment ledger, refunds and disputes for expert bookings',
     ];
 
     public const ROLES = [
         'super_admin' => [], // passes every check through Gate::before
         'platform_admin' => ['*'],
         'ecosystem_manager' => ['manage-pages', 'manage-posts', 'publish-content', 'manage-media', 'manage-menus',
-            'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'review-assessments', 'manage-opportunities', 'verify-investors', 'manage-experts', 'manage-talent', 'moderate-marketplace', 'manage-communications', 'view-insights'],
-        'content_editor' => ['manage-pages', 'manage-posts', 'manage-media', 'manage-menus', 'manage-site-content'],
+            'manage-site-content', 'manage-redirects', 'manage-contact-messages', 'manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'review-assessments', 'manage-opportunities', 'verify-investors', 'manage-experts', 'manage-talent', 'moderate-marketplace', 'manage-communications', 'view-insights',
+            'manage-organizations', 'manage-builder-curricula', 'review-builder-steps', 'manage-challenges', 'review-challenges', 'manage-knowledge', 'publish-knowledge', 'manage-intelligence'],
+        'content_editor' => ['manage-pages', 'manage-posts', 'manage-media', 'manage-menus', 'manage-site-content', 'manage-challenges', 'manage-knowledge'],
         'support' => ['manage-contact-messages'],
         'auditor' => ['view-audit-log', 'view-insights', 'view-system-health'],
+        // Validates Venture Builder steps for startups they are assigned to (mentors, programme staff).
+        'builder_reviewer' => ['review-builder-steps'],
         'investor' => [],
         'expert' => [],
         'consultant' => [],

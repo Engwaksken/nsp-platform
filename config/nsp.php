@@ -17,6 +17,12 @@ return [
         'talent' => ['default' => (bool) env('NSP_TALENT_ENABLED', true), 'label' => 'Talent and jobs', 'description' => 'Vacancies, candidate profiles with consent, applications, shortlisting and interviews.'],
         'opportunities' => ['default' => (bool) env('NSP_OPPORTUNITIES_ENABLED', true), 'label' => 'Opportunities and events', 'description' => 'Grants, accelerators, competitions, events and calls with eligibility, saving, registration and recommendations.'],
         'marketplace' => ['default' => (bool) env('NSP_MARKETPLACE_ENABLED', true), 'label' => 'Marketplace and showcase', 'description' => 'Public startup directory (with consent), offers, requests to buy, partnerships, inquiry messages and disputes.'],
+        // Owner-alignment modules (docs/owner-alignment). Methodology content stays provisional until the owner approves it.
+        'organizations' => ['default' => (bool) env('NSP_ORGANIZATIONS_ENABLED', true), 'label' => 'Organizations and portfolios', 'description' => 'Universities, ESOs, investors, development partners and corporates; memberships and startup-approved portfolio access.'],
+        'venture_builder' => ['default' => (bool) env('NSP_VENTURE_BUILDER_ENABLED', true), 'label' => 'Venture Builder', 'description' => 'Six modules and 24 steps with evidence, review, documents and progress (curriculum is provisional until the owner approves it).'],
+        'intelligence' => ['default' => (bool) env('NSP_INTELLIGENCE_ENABLED', true), 'label' => 'Venture Intelligence', 'description' => 'Rules-first guidance from VGI and Builder gaps, feedback and versioned planning documents. External AI stays behind the AI assistant flag.'],
+        'challenges' => ['default' => (bool) env('NSP_CHALLENGES_ENABLED', true), 'label' => 'Challenge Exchange', 'description' => 'Moderated innovation and market challenges with evidence, review, versions and solution proposals.'],
+        'knowledge' => ['default' => (bool) env('NSP_KNOWLEDGE_ENABLED', true), 'label' => 'Knowledge Hub', 'description' => 'Research, policy briefs, templates and toolkits with review, search, bookmarks and download tracking.'],
         'ai_assistant' => ['default' => (bool) env('NSP_AI_ASSISTANT_ENABLED', false), 'label' => 'AI assistant', 'description' => 'Optional writing help for founders (opt-in, labelled, rate-limited). Can be switched on only with an API key and recorded legal approval.'],
     ],
 

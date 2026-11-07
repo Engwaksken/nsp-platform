@@ -54,6 +54,7 @@
                     @if (\App\Support\Features::enabled('ims_integration'))@can('manage-integrations') {!! $navLink('admin.integrations.index', 'Integrations', 'admin.integrations.*') !!} @endcan @endif
                 </ul>
             @endif
+            @includeIf('admin.partials.owner-modules-nav')
             @if ($user->canAny(['manage-contact-messages', 'manage-redirects', 'manage-communications']))
                 <p class="nav-heading">Engagement</p>
                 <ul>

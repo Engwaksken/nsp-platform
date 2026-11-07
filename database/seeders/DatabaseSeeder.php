@@ -17,5 +17,17 @@ class DatabaseSeeder extends Seeder
             StarterContentSeeder::class,
             VgiStarterSeeder::class,
         ]);
+        // Owner-alignment seeders (provisional content, clearly labelled). Each is added by its module.
+        foreach ([
+            'Database\Seeders\BuilderCurriculumSeeder',
+            'Database\Seeders\VgiOwnerDimensionsSeeder',
+            'Database\Seeders\KnowledgeTaxonomySeeder',
+            'Database\Seeders\ExpertCategoriesSeeder',
+            'Database\Seeders\IntelligenceRulesSeeder',
+        ] as $seeder) {
+            if (class_exists($seeder)) {
+                $this->call($seeder);
+            }
+        }
     }
 }
