@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Organizations;
 
+use App\Models\Organizations\OrganizationMembership;
 use App\Models\User;
 use App\Organizations\OrganizationException;
 use App\Organizations\OrganizationService;
@@ -131,5 +132,45 @@ class PortfolioAccessTest extends TestCase
         $this->assertTrue($access->canView($organization, $startup, 'profile_summary'));
         $this->assertFalse($access->canView($organization, $startup, 'funding_summary'));
         $this->assertSame(['profile_summary'], $requested->fresh()->scopes);
+    }
+
+    public function test_invitation_email_and_single_use_and_last_admin_rules_hold_through_routes(): void
+    {
+        Features::set('organizations', true, null);
+        $staff = User::factory()->withRole('platform_admin')->create();
+        $service = app(OrganizationService::class);
+        $organization = $service->createOrganization($staff, ['name' => 'Membership ESO', 'type' => 'eso']);
+        $service->changeStatus($organization, $staff, 'verify');
+
+        $admin = User::factory()->create();
+        $token = $service->inviteMember($organization, $staff, $admin->email, 'org_admin', true);
+        $otherUser = User::factory()->create();
+        $this->actingAs($otherUser)->get(route('organizations.invitations.show', $token))
+            ->assertOk()->assertSee('sent to a different email address');
+        $this->actingAs($otherUser)->post(route('organizations.invitations.accept', $token))
+            ->assertRedirect(route('organizations.index'));
+        $this->assertDatabaseHas('organization_memberships', ['organization_id' => $organization->id, 'status' => 'invited', 'user_id' => null]);
+
+        $this->actingAs($admin)->post(route('organizations.invitations.accept', $token))
+            ->assertRedirect(route('organizations.show', $organization));
+        $membership = $organization->membershipOf($admin);
+        $this->assertNotNull($membership);
+        $this->actingAs($admin)->post(route('organizations.invitations.accept', $token))
+            ->assertRedirect(route('organizations.index'));
+
+        $this->actingAs($admin)->put(route('organizations.members.role', [$organization, $membership]), ['role' => 'analyst'])
+            ->assertSessionHasErrors('role');
+        $this->actingAs($admin)->from(route('organizations.members', $organization))->delete(route('organizations.members.remove', [$organization, $membership]))
+            ->assertRedirect(route('organizations.members', $organization))->assertSessionHasErrors('member');
+        $this->assertSame('active', $membership->fresh()->status);
+
+        $member = User::factory()->create();
+        $memberToken = $service->inviteMember($organization, $admin, $member->email, 'member');
+        $service->acceptInvitation($memberToken, $member);
+        $this->actingAs($member)->delete(route('organizations.members.remove', [$organization, $organization->membershipOf($member)]))
+            ->assertRedirect(route('organizations.index'));
+        $this->assertSame('revoked', $organization->memberships()->where('user_id', $member->id)->firstOrFail()->status);
+
+        $this->assertInstanceOf(OrganizationMembership::class, $membership);
     }
 }
