@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BuilderCurriculumController;
 use App\Http\Controllers\Workspace\BuilderController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,3 +18,16 @@ Route::middleware(['auth', 'feature:venture_builder'])->prefix('workspace/startu
     Route::put('/steps/{submission}/document/{document}', [BuilderController::class, 'saveDocument'])->whereNumber('submission')->whereNumber('document')->name('.step.document.save');
     Route::get('/steps/{submission}/document/{document}/export', [BuilderController::class, 'exportDocument'])->whereNumber('submission')->whereNumber('document')->name('.step.document.export');
 });
+
+Route::middleware(['auth', 'admin', 'mfa', 'feature:venture_builder'])
+    ->prefix('admin/builder')->name('admin.builder.')
+    ->group(function () {
+        Route::middleware('can:manage-builder-curricula')->group(function () {
+            Route::get('/', [BuilderCurriculumController::class, 'index'])->name('index');
+            Route::post('/new', [BuilderCurriculumController::class, 'createDraft'])->name('create');
+            Route::get('/{curriculum}/edit', [BuilderCurriculumController::class, 'edit'])->name('edit');
+            Route::put('/{curriculum}', [BuilderCurriculumController::class, 'update'])->name('update');
+        });
+        Route::post('/{curriculum}/publish', [BuilderCurriculumController::class, 'publish'])
+            ->middleware('can:publish-builder-curricula')->name('publish');
+    });
