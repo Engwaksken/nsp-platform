@@ -119,7 +119,7 @@ return new class extends Migration
             $table->timestamp('decided_at')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            $table->unique(['startup_a_uuid', 'startup_b_uuid']);
+            $table->unique(['startup_a_uuid', 'startup_b_uuid'], 'startup_duplicate_pair_unique');
         });
 
         Schema::create('startup_merges', function (Blueprint $table) {

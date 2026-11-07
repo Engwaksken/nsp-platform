@@ -122,7 +122,7 @@ return new class extends Migration
             $table->string('rating', 20); // useful, not_useful
             $table->string('reason', 500)->nullable();
             $table->timestamps();
-            $table->unique(['startup_uuid', 'investor_user_id', 'side']);
+            $table->unique(['startup_uuid', 'investor_user_id', 'side'], 'investor_match_feedback_side_unique');
         });
 
         Schema::create('investor_interactions', function (Blueprint $table) {
