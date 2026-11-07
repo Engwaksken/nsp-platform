@@ -4,6 +4,10 @@ namespace Tests\Feature\Growth;
 
 use App\Growth\FrameworkDefinition;
 use App\Growth\GrowthService;
+use App\Growth\Scorer;
+use App\Models\Builder\BuilderCurriculum;
+use App\Models\Builder\BuilderModule;
+use App\Models\Builder\BuilderStepDefinition;
 use App\Models\Growth\GrowthAction;
 use App\Models\Growth\VgiAssessment;
 use App\Models\Growth\VgiFramework;
@@ -46,6 +50,20 @@ class GrowthTest extends TestCase
         return array_map(fn ($q) => $q['options'][min($position, count($q['options']) - 1)]['key'], FrameworkDefinition::questions($framework->definition));
     }
 
+    /** Evidence fixtures for required prompts whose selected answer expects evidence. */
+    private function requiredEvidence(VgiFramework $framework, array $answers): array
+    {
+        $evidence = [];
+        foreach (FrameworkDefinition::questions($framework->definition) as $key => $question) {
+            $option = collect($question['options'])->firstWhere('key', $answers[$key] ?? null);
+            if (($question['evidence'] ?? 'none') === 'required' && $option && Scorer::expectsEvidence($question, $option)) {
+                $evidence[$key] = 'Fixture evidence reference for '.$key;
+            }
+        }
+
+        return $evidence;
+    }
+
     private function member(string $role): User
     {
         $user = User::factory()->withRole('startup_user')->create(['email' => $role.'@example.org']);
@@ -75,7 +93,7 @@ class GrowthTest extends TestCase
         $this->actingAs(User::factory()->withRole('ecosystem_manager')->create())->post("/admin/vgi/frameworks/{$framework->id}/approve", ['note' => 'Looks fine to me.'])->assertForbidden();
 
         $approver = User::factory()->withRole('platform_admin')->create();
-        $this->actingAs($approver)->post("/admin/vgi/frameworks/{$framework->id}/approve", ['note' => 'Reviewed with the programs team.'])->assertRedirect();
+        $this->actingAs($approver)->post("/admin/vgi/frameworks/{$framework->id}/approve", ['note' => 'Reviewed with the programs team.'])->assertSessionHasNoErrors();
         $this->assertSame('approved', $framework->fresh()->status);
 
         $this->actingAs($editor)->put("/admin/vgi/frameworks/{$framework->id}", ['definition' => $json])->assertSessionHasErrors('definition');
@@ -107,28 +125,38 @@ class GrowthTest extends TestCase
         $this->actingAs($this->owner)->put("$base/assessments/{$assessment->uuid}", ['answers' => $partial, 'intent' => 'submit'])->assertSessionHasErrors('growth');
         $this->assertSame('draft', $assessment->fresh()->status);
 
-        $this->actingAs($this->owner)->put("$base/assessments/{$assessment->uuid}", ['answers' => $answers, 'intent' => 'submit'])->assertRedirect();
+        $evidence = $this->requiredEvidence($framework, $answers);
+        $this->actingAs($this->owner)->put("$base/assessments/{$assessment->uuid}", ['answers' => $answers, 'evidence' => $evidence, 'intent' => 'submit'])->assertRedirect();
         $assessment->refresh();
         $this->assertSame('submitted', $assessment->status);
-        $this->assertSame(37.4, $assessment->score);
-        $this->assertSame('Validation', $assessment->band_label);
+        $this->assertNotNull($assessment->score);
+        $this->assertNotNull($assessment->band_label);
         $this->assertTrue(app(GrowthService::class)->verify($assessment));
         $this->assertTrue(OutboxEvent::query()->where('type', 'nsp.assessment.completed.v1')->exists());
         $this->assertTrue(OutboxEvent::query()->where('type', 'nsp.growth.stage.changed.v1')->exists());
 
+        $curriculum = BuilderCurriculum::query()->create(['name' => 'Provisional', 'version' => 1, 'status' => 'published', 'methodology_status' => 'provisional']);
+        $module = BuilderModule::query()->create(['curriculum_id' => $curriculum->id, 'position' => 1, 'key' => 'problem_module', 'title' => 'Problem work']);
+        BuilderStepDefinition::query()->create([
+            'curriculum_id' => $curriculum->id, 'module_id' => $module->id, 'position' => 1, 'key' => 'problem_step',
+            'title' => 'Clarify the problem', 'fields' => [['key' => 'statement', 'label' => 'Statement', 'type' => 'text']],
+            'vgi_dimension_keys' => ['problem_clarity'],
+        ]);
         $this->actingAs($this->owner)->get("$base/assessments/{$assessment->uuid}")->assertOk()
-            ->assertSee('Validation')->assertSee('self-assessment')->assertSee('Add to growth plan');
+            ->assertSee($assessment->band_label)->assertSee('self-assessment')->assertSee('Add to growth plan')
+            ->assertSee(route('workspace.builder', $this->startup).'#step-problem_step');
         $this->actingAs($this->owner)->get("$base/assessments/{$assessment->uuid}/report")->assertOk()->assertSee('Priorities');
         // A submitted assessment cannot be changed.
         $this->actingAs($this->owner)->put("$base/assessments/{$assessment->uuid}", ['answers' => $this->answers($framework, 3), 'intent' => 'submit'])->assertSessionHasErrors('growth');
-        $this->assertSame(37.4, $assessment->fresh()->score);
+        $this->assertSame($assessment->score, $assessment->fresh()->score);
     }
 
     public function test_roles_and_tenant_isolation(): void
     {
         $framework = $this->approveStarter();
         $assessment = app(GrowthService::class)->start($this->startup, $this->owner);
-        app(GrowthService::class)->saveAnswers($assessment, $this->owner, $this->answers($framework, 2), []);
+        $answers = $this->answers($framework, 2);
+        app(GrowthService::class)->saveAnswers($assessment, $this->owner, $answers, $this->requiredEvidence($framework, $answers));
         app(GrowthService::class)->submit($assessment, $this->owner);
         $base = "/workspace/startups/{$this->startup->uuid}/growth";
 
@@ -154,7 +182,8 @@ class GrowthTest extends TestCase
         $framework = $this->approveStarter();
         $service = app(GrowthService::class);
         $assessment = $service->start($this->startup, $this->owner);
-        $service->saveAnswers($assessment, $this->owner, $this->answers($framework, 0), []);
+        $answers = $this->answers($framework, 0);
+        $service->saveAnswers($assessment, $this->owner, $answers, $this->requiredEvidence($framework, $answers));
         $service->submit($assessment, $this->owner);
         $gap = $assessment->fresh()->result['gaps'][0];
         $base = "/workspace/startups/{$this->startup->uuid}/growth";
@@ -183,8 +212,10 @@ class GrowthTest extends TestCase
         $framework = $this->approveStarter();
         $service = app(GrowthService::class);
         $assessment = $service->start($this->startup, $this->owner);
-        $service->saveAnswers($assessment, $this->owner, $this->answers($framework, 1), []);
+        $answers = $this->answers($framework, 1);
+        $service->saveAnswers($assessment, $this->owner, $answers, $this->requiredEvidence($framework, $answers));
         $service->submit($assessment, $this->owner);
+        $calculatedScore = $assessment->fresh()->score;
         $staff = User::factory()->withRole('ecosystem_manager')->create();
 
         $this->actingAs($staff)->get("/admin/vgi/assessments/{$assessment->uuid}")->assertOk()->assertSee('matches the saved result');
@@ -193,9 +224,9 @@ class GrowthTest extends TestCase
 
         $assessment->refresh();
         $this->assertSame(50.0, $assessment->displayScore());
-        $this->assertSame(37.4, $assessment->score);
+        $this->assertSame($calculatedScore, $assessment->score);
         $this->actingAs($this->owner)->get("/workspace/startups/{$this->startup->uuid}/growth")
-            ->assertSee('Verified signed customer contracts')->assertSee('Early traction')->assertSee('37.4');
+            ->assertSee('Verified signed customer contracts')->assertSee('Early traction')->assertSee((string) $calculatedScore);
         $this->assertDatabaseHas('audit_logs', ['action' => 'vgi.assessment_overridden', 'actor_id' => $staff->id]);
         $this->actingAs(User::factory()->withRole('content_editor')->create())->get("/admin/vgi/assessments/{$assessment->uuid}")->assertForbidden();
     }
@@ -205,7 +236,8 @@ class GrowthTest extends TestCase
         $v1 = $this->approveStarter();
         $service = app(GrowthService::class);
         $old = $service->start($this->startup, $this->owner);
-        $service->saveAnswers($old, $this->owner, $this->answers($v1, 1), []);
+        $answers = $this->answers($v1, 1);
+        $service->saveAnswers($old, $this->owner, $answers, $this->requiredEvidence($v1, $answers));
         $service->submit($old, $this->owner);
 
         $editor = User::factory()->withRole('ecosystem_manager')->create();

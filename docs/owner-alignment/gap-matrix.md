@@ -1,0 +1,29 @@
+# Owner-alignment gap matrix
+
+**Audit date:** 7 November 2026
+**Branch:** `owner-alignment`
+**Evidence basis:** repository inspection and `php artisan test` in this workspace. No staging/production systems were accessed.
+
+Statuses describe current local code: `implemented+tested`, `implemented+untested`, `partial`, `missing`, `blocked`. Modules with new files in the working tree are not presumed complete merely because code exists.
+
+| ID / requirement | Existing evidence | Status | Remaining gap / risk | Next backlog action | Acceptance evidence |
+|---|---|---|---|---|---|
+| M01 Identity, orgs, tenant access | OIDC/MFA, canonical UUID, memberships, consent and audit in `app/Registry`, `app/Services/Oidc`; new `app/Organizations`, migration and routes | partial | Organization portfolio entitlements and full denial/revocation coverage need end-to-end verification; IMS IdP is still externally dependent | ORG-01, test organization access grants, membership/revocation and dashboards | Feature tests for allowed/revoked/cross-tenant access; retain registry tests |
+| M02 Venture Builder (6 × 24) | `app/Builder/CurriculumDefinition.php`, `app/Builder/VentureBuilderService.php`, `app/Http/Controllers/Workspace/BuilderController.php`, `routes/modules/builder.php`, Builder views and provisional curriculum | partial | Enrollment/draft/resume/dependencies/review/evidence/template documents and VGI links tested; curriculum seeder/admin publishing and full 24-step journey remain | VB-05, then curriculum seed/admin publishing | Focused Builder suite 5 passed; Growth suite 9 passed; full suite 231 passed; continue 24-step journey and curriculum management |
+| M03 Ten-dimension VGI | `app/Growth/OwnerDimensions.php`, scoring/service/models, migration and provisional draft data | implemented+tested (local) | Weights, questions and stage bands are provisional; owner readiness thresholds remain unconfigured; dedicated insufficiency edge tests remain | VGI-02: add insufficiency/readiness tests and obtain methodology signoff | Growth suite 9 passed; full suite 224 passed; exact owner dimension validation remains enabled |
+| M04 Venture Intelligence Engine | Existing `app/AI` writing assistant; new `app/Intelligence` code | partial | Existing AI is optional and locked; deterministic cross-module guidance, feedback, versioned documents and scoped context need verified flows | INTEL-01 | Rule fallback, VGI-to-builder link, feedback and tenant isolation tests |
+| M05 Challenge Exchange | New `app/Challenges`, controllers, views, migration and routes | partial | Verify moderation/versioning/filtering and public-only published visibility end-to-end | CH-01 | Draft/review/publish/revise/publication-access feature tests |
+| M06 Knowledge Hub | New `app/Knowledge`, models, migration and routes | partial | Verify repository UX, license/visibility, search fallback, bookmarks/download tracking and restricted exclusion | KH-01 | Search and role/visibility tests, bookmark/download behavior |
+| M07 Expert Marketplace | Existing expert engagements plus new booking, availability, messaging, contracts, payment models/services | partial | Integration surface appears staged but no evidenced end-to-end tests found in baseline suite; gateway remains sandbox/mock pending owner terms | EXP-01 | Booking conflict/time-zone, messaging authorization, completed-only review, idempotent mock ledger tests |
+| M08 Capital Exchange | Existing funding/data-room/matching plus new `app/Capital`, migration, controller | partial | Due diligence, scoped grants, pipeline history and report flows need end-to-end tests | CAP-01 | Grant expiry/revocation, unrelated startup isolation, audited pipeline tests |
+| M09 Stakeholder dashboards/analytics | Existing founder/investor/admin analytics, KPIs and exports; organization module new | partial | Institution portfolio dashboard and new module queues/metrics absent or unverified; metric definitions/low-count protections need review | ANA-01 | Fixture reconciliation, tenant-safe filters/exports and role dashboards |
+| Single startup identity / Hive IMS | `app/Registry`, `app/Services/Registry`, integration docs and feature tests | implemented+tested (local) | SSO/registry production endpoints and actual IMS deployment are not confirmed; preserve canonical UUID and consent | INT-IMS-01 | Existing registry/integration suites; staged joint smoke test blocked on environment/owner |
+| Deployment / delivery | New `Dockerfile`, compose and deploy files; existing operations docs | partial | No container build/health/restore evidence or hosted environment; deployment target is owner decision | OPS-01 | Build and smoke test container, document target, staged restore drill |
+
+## Baseline verification
+
+Command: `php artisan test` (7 November 2026), after VGI fixture alignment: **224 passed (1537 assertions)**. Focused `php artisan test --filter=GrowthTest`: **9 passed (79 assertions)**. Local-only evidence; no deployment or owner approval implied.
+
+## Decisions still requiring owner input
+
+Official builder labels/content; VGI questions, weights, cutoffs and readiness mapping; organization access/consent policy; AI provider and data handling; payment provider/fees/refunds/contracts; investor diligence obligations; cloud/search/storage target; branding; commercialization-rate definitions; warranty/support duration; IMS/registry operational ownership. Until decided, implementation content and financial workflows must remain clearly provisional/sandboxed.

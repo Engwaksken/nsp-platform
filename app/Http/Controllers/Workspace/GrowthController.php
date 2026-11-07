@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Workspace;
 
 use App\Growth\GrowthService;
 use App\Http\Controllers\Controller;
+use App\Models\Builder\BuilderCurriculum;
+use App\Models\Builder\VentureBuilderEnrollment;
 use App\Models\Growth\GrowthAction;
 use App\Models\Growth\VgiAssessment;
 use App\Models\Growth\VgiFramework;
 use App\Models\Registry\Startup;
 use App\Registry\RegistryException;
+use App\Support\Features;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\View\View;
 
 class GrowthController extends Controller
@@ -60,6 +64,26 @@ class GrowthController extends Controller
         abort_unless($assessment->startup_uuid === $startup->uuid, 404);
         $assessment->load('framework', 'responses', 'submitter', 'overrider');
 
+        $builderLinks = [];
+        if ($assessment->status === 'submitted' && Features::enabled('venture_builder') && Route::has('workspace.builder')) {
+            $curriculum = BuilderCurriculum::current();
+            if ($curriculum) {
+                $enrollment = VentureBuilderEnrollment::activeFor($startup);
+                $submissions = $enrollment?->submissions()->get()->keyBy('step_key') ?? collect();
+                $gapDimensionKeys = array_values(array_unique(array_column($assessment->result['gaps'] ?? [], 'dimension_key')));
+                foreach ($curriculum->orderedSteps() as $step) {
+                    foreach ($step->vgi_dimension_keys ?? [] as $dimensionKey) {
+                        if (in_array($dimensionKey, $gapDimensionKeys, true) && ! isset($builderLinks[$dimensionKey])) {
+                            $submission = $submissions->get($step->key);
+                            $builderLinks[$dimensionKey] = $submission
+                                ? route('workspace.builder.step', [$startup, $submission])
+                                : route('workspace.builder', $startup).'#step-'.$step->key;
+                        }
+                    }
+                }
+            }
+        }
+
         return view($assessment->status === 'draft' ? 'workspace.growth.form' : 'workspace.growth.result', [
             'startup' => $startup,
             'membership' => $membership,
@@ -67,6 +91,7 @@ class GrowthController extends Controller
             'definition' => $assessment->framework->definition,
             'responses' => $assessment->responses->keyBy('question_key'),
             'planned' => GrowthAction::query()->where('startup_uuid', $startup->uuid)->whereNotNull('question_key')->pluck('question_key')->all(),
+            'builderLinks' => $builderLinks,
         ]);
     }
 

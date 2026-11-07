@@ -17,12 +17,14 @@ class VgiStarterSeeder extends Seeder
         if (VgiFramework::query()->exists()) {
             return;
         }
-        $definition = require database_path('data/vgi_starter_draft.php');
+        // The old six-area draft remains in the repository as historical
+        // reference; new work must start from the owner's exact ten dimensions.
+        $definition = require database_path('data/vgi_owner_dimensions_draft.php');
         VgiFramework::query()->create([
             'name' => 'Hive Venture Growth Index',
             'version' => 1,
             'status' => 'draft',
-            'description' => 'Starter rubric proposed for Hive review. Edit the questions, weights and bands, then have another administrator approve it.',
+            'description' => 'Provisional owner-dimension rubric for Hive review. Questions, weights, bands and readiness rules are not owner-approved; edit and obtain sign-off before presenting methodology as official.',
             'definition' => $definition,
             'definition_hash' => FrameworkDefinition::hash($definition),
         ]);

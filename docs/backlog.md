@@ -1,7 +1,31 @@
-# Backlog (Phases 2-7)
+# Backlog (legacy phases plus owner-alignment work)
 
-**Date:** 4 November 2026
-**Status:** Planning only. No item below is started. Estimates: S = up to 2 days, M = 3-5 days, L = 1-2 weeks, for one developer. Owner roles: backend, frontend, security, QA, DevOps, data, docs, PM.
+**Date:** 7 November 2026 (owner-alignment update)
+**Status:** Mixed: legacy work below records prior plan; owner-alignment code is already in progress on `owner-alignment`. See `docs/owner-alignment/gap-matrix.md`; the working tree must be preserved. Estimates: S = up to 2 days, M = 3-5 days, L = 1-2 weeks, for one developer. Owner roles: backend, frontend, security, QA, DevOps, data, docs, PM.
+
+## Owner-alignment implementation backlog (prioritized, additive)
+
+| ID | Priority | Work item | Status / dependencies | Acceptance criteria |
+|---|---|---|---|---|
+| OA-00 | P0 | Complete evidence-based audit, current state, gap matrix, decisions and test matrix | In progress; initial audit recorded in `docs/owner-alignment/` | Every owner module has status, code evidence, tests, risks and next action; no production claims |
+| VGI-01 | P0 | Repair VGI owner-dimension integration and legacy test fixtures/approval flow | Done locally; exact ten dimensions retained | Focused Growth tests and full suite pass; provisional methodology clearly labelled; historical rubric snapshots remain immutable |
+| VGI-02 | P1 | Add explicit insufficient-information, dimension-trend and readiness-not-configured edge tests | Next; depends on VGI-01 | Missing evidence never produces invented certainty; readiness remains `not_configured` without owner-approved rules |
+| ORG-01 | P0 | Complete organization memberships, scoped startup relationships/grants, revocation and role dashboard | Partial; depends on new organization migration/services | authorized institution portfolio only; revoked access immediately denied; cross-tenant tests pass |
+| VB-01 | P0 | Verify metadata-driven curriculum invariant and provisional 6-module/24-step content | Done locally; scaffold plus invariant tests | Published curriculum has exactly six modules and 24 active ordered steps; provisional status explicitly disclosed; wrong active count is rejected |
+| VB-02 | P0 | Builder enrolment, step response/draft autosave, dependencies, progress and resume | Done locally for core journey | Enrollment pins published version; drafts resume; prerequisites lock/unlock; required fields/checklist gate submission; stale version is refused |
+| VB-03 | P0 | Evidence, checklists, validator/reviewer permissions, feedback and state history | Core workflow done locally; advanced controls remain | Required evidence and checklist gate submission; private upload/link; reviewer permission; changes-requested/revise/validate; append-only revisions/events |
+| VB-04 | P1 | Editable/versioned builder artifacts and exports; VGI recommendation deep links | Done locally for template outputs and VGI links | Step output generated from configured template is editable/versioned/exportable; stale edits refused; VGI gap links to a mapped step or anchored provisional curriculum location |
+| VB-05 | P0 | Seed/version management for provisional curriculum and full 24-step journey regression | Next; requires curriculum publishing/admin path | Seed creates a draft only; authorized publication enforces 6/24; seeded founder journey exercises all steps and records each status without presenting provisional labels as owner-approved |
+| INTEL-01 | P1 | Rules-first Venture Intelligence Engine across VGI, builder, challenges, knowledge and services | Partial; existing optional AI remains gated | useful fallback without provider; explainable accept/dismiss feedback; no cross-venture context leakage |
+| CH-01 | P1 | Challenge moderation lifecycle, evidence, revisions, filters, bookmark/interest | Partial | only approved published records public/searchable; review actions audited |
+| KH-01 | P1 | Knowledge repository, taxonomy/licensing/visibility, keyword search, bookmarks/download tracking | Partial | restricted resources excluded; keyword fallback works without semantic service |
+| EXP-01 | P1 | Expert profiles/categories/verification, bookings, conflict/timezone, messaging, contracts and sandbox ledger | Partial; payment terms/provider blocked for production | private messaging and booking access tests; no gateway settlement claims |
+| CAP-01 | P1 | Capital diligence checklist/document request, scoped data-room grants, investor pipeline history/report | Partial | granular consent and expiry/revocation enforced; no unrelated startup access |
+| ANA-01 | P1 | Founder, institution, investor and admin role dashboards for new modules | Partial | authorized data only; metric definitions, freshness and export parity tested |
+| IMS-01 | P1 | Preserve registry/IMS boundary and verify both journeys when approved integration environment exists | Local NSP side tested; staging blocked | stable canonical `startup_uuid`; no reviewer notes/scores exposed; idempotency/reconciliation evidence |
+| OPS-01 | P2 | Container/deploy hardening, API docs, backup/restore, accessibility/security/UAT and training artifacts | Docker files present; deployment target and environment blocked | reproducible build, health check and staging evidence; no production release without signoff |
+
+**Owner gates:** Do not make provisional builder/VGI content official, activate real payments, expose investor diligence material, choose production infrastructure or change IMS production data without the corresponding owner approval.
 
 IMS items (marked **IMS**) change the IMS codebase and need separate owner authorization before work starts.
 

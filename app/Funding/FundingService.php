@@ -101,9 +101,10 @@ class FundingService
      * Explainable fit between an investor's thesis and a funding request.
      *
      * @param  array<string, string|null>|null  $stages  stages already looked up with Eligibility::stagesFor() (lists)
+     * @param  array|null  $vgi  a VGI summary the founders shared with this investor (Capital Exchange vgi_summary scope), else null
      * @return array{fits: bool, reasons: list<string>, misses: list<string>}
      */
-    public function fit(InvestorProfile $investor, Startup $startup, FundingRequest $request, ?array $stages = null): array
+    public function fit(InvestorProfile $investor, Startup $startup, FundingRequest $request, ?array $stages = null, ?array $vgi = null): array
     {
         $reasons = [];
         $misses = [];
@@ -129,6 +130,11 @@ class FundingService
         if (($investor->ticket_min || $investor->ticket_max) && $investor->currency === $request->currency) {
             $inRange = (! $investor->ticket_min || $request->amount >= $investor->ticket_min) && (! $investor->ticket_max || $request->amount <= $investor->ticket_max);
             $inRange ? $reasons[] = 'Amount within ticket size' : $misses[] = 'Ticket size';
+        }
+
+        // Only signals the founders authorised: the VGI summary appears with its rubric version and provisional label.
+        if ($vgi && ($vgi['version'] ?? null)) {
+            $reasons[] = 'Shared VGI v'.$vgi['version'].($vgi['stage'] ? ': '.$vgi['stage'] : '').(($vgi['provisional'] ?? true) ? ' (provisional)' : '');
         }
 
         return ['fits' => $misses === [], 'reasons' => $reasons, 'misses' => $misses];

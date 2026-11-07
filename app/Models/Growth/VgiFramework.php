@@ -12,7 +12,29 @@ class VgiFramework extends Model
 
     protected function casts(): array
     {
-        return ['definition' => 'array', 'approved_at' => 'datetime', 'version' => 'integer'];
+        return ['definition' => 'array', 'approved_at' => 'datetime', 'version' => 'integer',
+            'owner_signed_on' => 'date', 'owner_signoff_recorded_at' => 'datetime'];
+    }
+
+    public const METHODOLOGY = ['provisional' => 'Provisional methodology', 'owner_approved' => 'Owner-approved methodology'];
+
+    /**
+     * Hive approval makes a version usable; only a recorded owner sign-off makes
+     * its methodology official. Until then stages and readiness are provisional.
+     */
+    public function isProvisional(): bool
+    {
+        return ($this->methodology_status ?? 'provisional') !== 'owner_approved';
+    }
+
+    public function methodologyLabel(): string
+    {
+        return self::METHODOLOGY[$this->methodology_status ?? 'provisional'] ?? self::METHODOLOGY['provisional'];
+    }
+
+    public function signoffRecorder(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_signoff_recorded_by');
     }
 
     /** The approved version founders use now (the most recently approved). */

@@ -72,6 +72,21 @@ class Engagement extends Model
         return $this->hasOne(ExpertReview::class, 'engagement_uuid');
     }
 
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(ExpertBooking::class, 'engagement_uuid')->orderBy('start_at');
+    }
+
+    public function conversation(): HasOne
+    {
+        return $this->hasOne(ExpertConversation::class, 'engagement_uuid');
+    }
+
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(ExpertContract::class, 'engagement_uuid')->latest('id');
+    }
+
     public function isOpen(): bool
     {
         return in_array($this->status, ['requested', 'active'], true);

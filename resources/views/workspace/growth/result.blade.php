@@ -26,6 +26,9 @@
                         <p class="meta">{{ $gap['dimension_title'] }} · score {{ $gap['score'] }}</p>
                         <p><strong>{{ $gap['tip'] ?: 'Improve this area' }}</strong></p>
                         <p class="meta">Because you answered “{{ $gap['answer'] }}” to “{{ $gap['prompt'] }}”</p>
+                        @if (!empty($builderLinks[$gap['dimension_key'] ?? '']))
+                            <p><a href="{{ $builderLinks[$gap['dimension_key']] }}">Open related Venture Builder step</a></p>
+                        @endif
                         @if (in_array($gap['question_key'], $planned, true))
                             <span class="badge badge-on">In your growth plan</span>
                         @elseif ($membership->canEdit())

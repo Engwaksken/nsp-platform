@@ -50,6 +50,11 @@ class VgiAssessment extends Model
         return $this->hasMany(VgiResponse::class, 'assessment_uuid');
     }
 
+    public function overrideLogs(): HasMany
+    {
+        return $this->hasMany(VgiOverrideLog::class, 'assessment_uuid')->orderBy('id');
+    }
+
     public function submitter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'submitted_by');
@@ -75,5 +80,11 @@ class VgiAssessment extends Model
     public function answers(): array
     {
         return $this->responses->pluck('option_key', 'question_key')->filter()->all();
+    }
+
+    /** @return array<string, bool> question key => evidence note given */
+    public function evidenceFlags(): array
+    {
+        return $this->responses->mapWithKeys(fn ($r) => [$r->question_key => filled($r->evidence_note)])->filter()->all();
     }
 }
