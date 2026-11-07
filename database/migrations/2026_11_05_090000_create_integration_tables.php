@@ -82,7 +82,7 @@ return new class extends Migration
             $table->date('program_end_date')->nullable();
             $table->boolean('enrolled')->default(false);
             $table->timestamps();
-            $table->unique(['source_system', 'external_application_id']);
+            $table->unique(['source_system', 'external_application_id'], 'startup_prog_source_external_unique');
         });
     }
 
