@@ -3,6 +3,7 @@
 namespace Tests\Feature\Organizations;
 
 use App\Models\User;
+use App\Organizations\OrganizationException;
 use App\Organizations\OrganizationService;
 use App\Organizations\PortfolioAccess;
 use App\Registry\RegistryService;
@@ -45,8 +46,59 @@ class PortfolioAccessTest extends TestCase
         $service->changeRole($organization, $staff, $organization->membershipOf($member), 'analyst', true);
         $this->assertTrue($access->userCanView($member, $organization, $startup, 'profile_summary'));
 
+        $this->actingAs($member)->get(route('organizations.show', $organization))
+            ->assertOk()->assertSee('Consent Boundary')->assertSee('Portfolio');
+
         $service->revoke($relationship, $owner);
         $this->assertFalse($access->canView($organization, $startup, 'profile_summary'));
         $this->assertSame([], $access->startupUuids($organization, 'profile_summary'));
+        $this->actingAs($member)->get(route('organizations.show', $organization))
+            ->assertOk()->assertSee('No startups have shared information');
+        $this->actingAs($member)->get(route('organizations.startup', [$organization, $startup]))->assertNotFound();
+    }
+
+    public function test_expired_invitation_and_grant_and_suspended_organization_are_denied(): void
+    {
+        Features::set('organizations', true, null);
+        Features::set('registry', true, null);
+
+        $owner = User::factory()->withRole('startup_user')->create();
+        $startup = app(RegistryService::class)->createStartup($owner, [
+            'legal_name' => 'Expiry Boundary Ltd', 'display_name' => 'Expiry Boundary', 'registration_number' => null,
+            'country' => 'UG', 'year_founded' => 2024, 'description' => null, 'website' => null,
+        ], []);
+        $staff = User::factory()->withRole('platform_admin')->create();
+        $service = app(OrganizationService::class);
+        $organization = $service->createOrganization($staff, ['name' => 'Expiry ESO', 'type' => 'eso']);
+        $service->changeStatus($organization, $staff, 'verify');
+
+        $invitee = User::factory()->create();
+        $expiredToken = $service->inviteMember($organization, $staff, $invitee->email, 'analyst', true);
+        $this->travel(8)->days();
+        try {
+            $service->acceptInvitation($expiredToken, $invitee);
+            $this->fail('Expired invitations must not be accepted.');
+        } catch (OrganizationException $exception) {
+            $this->assertStringContainsString('no longer valid', $exception->getMessage());
+        }
+
+        $this->travelBack();
+        $token = $service->inviteMember($organization, $staff, $invitee->email, 'org_admin', true);
+        $service->acceptInvitation($token, $invitee);
+        $relationship = $service->share($startup, $owner, $organization, 'portfolio', ['profile_summary'], now()->addDay(), 'One-day test grant.');
+        $access = app(PortfolioAccess::class);
+        $this->assertTrue($access->canView($organization, $startup, 'profile_summary'));
+        $this->travel(2)->days();
+        $this->assertFalse($access->canView($organization, $startup, 'profile_summary'));
+        $this->assertSame('expired', $relationship->fresh()->displayStatus());
+        $this->actingAs($invitee)->get(route('organizations.show', $organization))
+            ->assertOk()->assertSee('No startups have shared information');
+
+        $this->travelBack();
+        $service->changeStatus($organization, $staff, 'suspend');
+        $this->assertFalse($access->canView($organization, $startup, 'profile_summary'));
+        $this->assertSame([], $access->startupUuids($organization, 'profile_summary'));
+        $this->actingAs($invitee)->get(route('organizations.show', $organization))
+            ->assertOk()->assertSee('Portfolio access is paused');
     }
 }
