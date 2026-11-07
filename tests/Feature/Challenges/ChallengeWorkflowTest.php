@@ -4,6 +4,8 @@ namespace Tests\Feature\Challenges;
 
 use App\Challenges\ChallengeWorkflow;
 use App\Models\Challenges\Challenge;
+use App\Models\Challenges\ChallengeEvidence;
+use App\Models\Challenges\ChallengeSolutionSubmission;
 use App\Models\User;
 use App\Support\Features;
 use Illuminate\Validation\ValidationException;
@@ -143,5 +145,61 @@ class ChallengeWorkflowTest extends TestCase
         $this->actingAs($viewer)->get('/challenges?q=Food')->assertOk()
             ->assertSee('Food storage resilience')->assertSee('Food transport network');
         $this->assertNotSame($public->uuid, $members->uuid);
+    }
+
+    public function test_evidence_validation_and_bookmark_toggle_preserve_public_boundaries(): void
+    {
+        $submitter = User::factory()->withRole('startup_user')->create();
+        $reviewer = User::factory()->withRole('platform_admin')->create();
+        $workflow = app(ChallengeWorkflow::class);
+        $challenge = $workflow->saveContent(new Challenge, $this->content('Cold chain challenge'), $submitter);
+
+        $this->actingAs($submitter)->post(route('challenges.evidence.store', $challenge), [
+            'source_title' => 'Agriculture research note',
+            'evidence_type' => array_key_first(config('challenges.evidence_types')),
+            'url' => 'https://example.org/research',
+        ])->assertRedirect();
+        $evidence = ChallengeEvidence::query()->sole();
+        $this->assertFalse($evidence->validated);
+
+        $workflow->submit($challenge->fresh(), $submitter);
+        $workflow->review($challenge->fresh(), $reviewer, 'approve', 'Clear problem and source.', null, 'Source not yet independently validated.');
+        $workflow->publish($challenge->fresh(), $reviewer);
+        $this->get(route('challenges.show', $challenge))->assertOk()
+            ->assertSee('Agriculture research note')->assertSee('Not yet reviewed');
+
+        $this->actingAs($reviewer)->post(route('admin.challenges.evidence.validate', [$challenge, $evidence]), [
+            'validated' => true,
+            'validation_note' => 'Internal validation detail; do not disclose publicly.',
+        ])->assertRedirect();
+        $this->get(route('challenges.show', $challenge))->assertOk()
+            ->assertSee('Evidence reviewed on')->assertDontSee('Internal validation detail');
+
+        $this->actingAs($submitter)->post(route('challenges.bookmark', $challenge))->assertRedirect();
+        $this->assertDatabaseHas('challenge_bookmarks', ['user_id' => $submitter->id, 'challenge_id' => $challenge->id]);
+        $this->actingAs($submitter)->post(route('challenges.bookmark', $challenge))->assertRedirect();
+        $this->assertDatabaseMissing('challenge_bookmarks', ['user_id' => $submitter->id, 'challenge_id' => $challenge->id]);
+    }
+
+    public function test_proposals_are_private_and_reviewers_can_update_status(): void
+    {
+        $challenge = $this->publishChallenge('Community water monitoring');
+        $submitter = User::factory()->withRole('startup_user')->create();
+        $this->actingAs($submitter)->post(route('challenges.propose', $challenge), [
+            'summary' => 'We can deploy local water testing sensors with community partners.',
+            'approach' => 'Work with existing community water committees.',
+            'confirm' => '1',
+        ])->assertRedirect();
+        $proposal = ChallengeSolutionSubmission::query()->sole();
+
+        $this->actingAs($submitter)->get(route('challenges.proposals.show', $proposal))->assertOk()
+            ->assertSee('local water testing sensors');
+        $this->actingAs(User::factory()->create())->get(route('challenges.proposals.show', $proposal))->assertNotFound();
+
+        $reviewer = User::factory()->withRole('platform_admin')->create();
+        $this->actingAs($reviewer)->get(route('challenges.proposals.show', $proposal))->assertOk();
+        $this->actingAs($reviewer)->put(route('admin.challenges.proposals.update', [$challenge, $proposal]), ['status' => 'shortlisted'])
+            ->assertRedirect();
+        $this->assertSame('shortlisted', $proposal->fresh()->status);
     }
 }
