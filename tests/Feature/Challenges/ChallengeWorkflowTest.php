@@ -6,8 +6,12 @@ use App\Challenges\ChallengeWorkflow;
 use App\Models\Challenges\Challenge;
 use App\Models\Challenges\ChallengeEvidence;
 use App\Models\Challenges\ChallengeSolutionSubmission;
+use App\Models\Registry\StartupMembership;
 use App\Models\User;
+use App\Registry\RegistryService;
 use App\Support\Features;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -201,5 +205,52 @@ class ChallengeWorkflowTest extends TestCase
         $this->actingAs($reviewer)->put(route('admin.challenges.proposals.update', [$challenge, $proposal]), ['status' => 'shortlisted'])
             ->assertRedirect();
         $this->assertSame('shortlisted', $proposal->fresh()->status);
+    }
+
+    public function test_proposal_visibility_follows_active_startup_membership(): void
+    {
+        $challenge = $this->publishChallenge('Community water monitoring');
+        $founder = User::factory()->withRole('startup_user')->create();
+        $startup = app(RegistryService::class)->createStartup($founder, [
+            'legal_name' => 'Water Monitoring Ltd', 'display_name' => 'Water Monitoring', 'registration_number' => 'UG-WATER-42',
+            'country' => 'UG', 'year_founded' => 2023, 'description' => null, 'website' => null,
+        ], ['sector' => 'Agriculture & Agritech']);
+        $submitter = User::factory()->withRole('startup_user')->create();
+        StartupMembership::query()->create([
+            'startup_uuid' => $startup->uuid, 'user_id' => $submitter->id, 'role' => 'team_member', 'status' => 'active',
+        ]);
+        $this->actingAs($submitter)->post(route('challenges.propose', $challenge), [
+            'startup_uuid' => $startup->uuid,
+            'summary' => 'We can deploy local water testing sensors with community partners.',
+            'confirm' => '1',
+        ])->assertRedirect();
+        $proposal = ChallengeSolutionSubmission::query()->sole();
+
+        $teammate = User::factory()->create();
+        $membership = StartupMembership::query()->create([
+            'startup_uuid' => $startup->uuid, 'user_id' => $teammate->id, 'role' => 'viewer', 'status' => 'active',
+        ]);
+        $this->actingAs($teammate)->get(route('challenges.proposals.show', $proposal))->assertOk();
+        $membership->update(['status' => 'revoked']);
+        $this->get(route('challenges.proposals.show', $proposal))->assertNotFound();
+    }
+
+    public function test_private_evidence_download_is_limited_to_submitter_and_challenge_staff(): void
+    {
+        Storage::fake('local');
+        $submitter = User::factory()->withRole('startup_user')->create();
+        $challenge = app(ChallengeWorkflow::class)->saveContent(new Challenge, $this->content('Private research challenge'), $submitter);
+        $this->actingAs($submitter)->post(route('challenges.evidence.store', $challenge), [
+            'source_title' => 'Confidential field report',
+            'evidence_type' => 'survey',
+            'file' => UploadedFile::fake()->create('field-report.pdf', 20, 'application/pdf'),
+        ])->assertRedirect();
+        $evidence = ChallengeEvidence::query()->sole();
+        Storage::disk('local')->assertExists($evidence->path);
+
+        $this->actingAs(User::factory()->create())->get(route('challenges.evidence.download', [$challenge, $evidence]))->assertNotFound();
+        $this->actingAs($submitter)->get(route('challenges.evidence.download', [$challenge, $evidence]))->assertOk();
+        $reviewer = User::factory()->withRole('platform_admin')->create();
+        $this->actingAs($reviewer)->get(route('challenges.evidence.download', [$challenge, $evidence]))->assertOk();
     }
 }
