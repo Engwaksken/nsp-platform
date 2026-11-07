@@ -29,6 +29,26 @@
                         @if (!empty($builderLinks[$gap['dimension_key'] ?? '']))
                             <p><a href="{{ $builderLinks[$gap['dimension_key']] }}">Open related Venture Builder step</a></p>
                         @endif
+                        @php($recommendationFeedback = $guidanceFeedback[$gap['dimension_key']] ?? null)
+                        @if ($recommendationFeedback)
+                            <p class="meta">Your guidance feedback: {{ ucfirst($recommendationFeedback->feedback) }}@if ($recommendationFeedback->explanation) — {{ $recommendationFeedback->explanation }}@endif</p>
+                        @endif
+                        @if ($membership->canEdit())
+                            <div class="actions" aria-label="Guidance feedback for {{ $gap['dimension_title'] }}">
+                                <form method="post" action="{{ route('workspace.growth.guidance.feedback', [$startup, $assessment, $gap['dimension_key']]) }}">
+                                    @csrf
+                                    <input type="hidden" name="feedback" value="accepted">
+                                    <button type="submit" class="btn btn-secondary btn-sm">Accept suggestion</button>
+                                </form>
+                                <form method="post" action="{{ route('workspace.growth.guidance.feedback', [$startup, $assessment, $gap['dimension_key']]) }}" class="actions">
+                                    @csrf
+                                    <input type="hidden" name="feedback" value="dismissed">
+                                    <label for="guidance-reason-{{ $gap['dimension_key'] }}" class="visually-hidden">Why is this suggestion not relevant?</label>
+                                    <input id="guidance-reason-{{ $gap['dimension_key'] }}" name="explanation" type="text" minlength="5" maxlength="1000" placeholder="Why not relevant?" required>
+                                    <button type="submit" class="btn btn-secondary btn-sm">Dismiss with reason</button>
+                                </form>
+                            </div>
+                        @endif
                         @if (in_array($gap['question_key'], $planned, true))
                             <span class="badge badge-on">In your growth plan</span>
                         @elseif ($membership->canEdit())

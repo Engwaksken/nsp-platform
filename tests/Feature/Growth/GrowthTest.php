@@ -144,7 +144,24 @@ class GrowthTest extends TestCase
         ]);
         $this->actingAs($this->owner)->get("$base/assessments/{$assessment->uuid}")->assertOk()
             ->assertSee($assessment->band_label)->assertSee('self-assessment')->assertSee('Add to growth plan')
-            ->assertSee(route('workspace.builder', $this->startup).'#step-problem_step');
+            ->assertSee(route('workspace.builder', $this->startup).'#step-problem_step')
+            ->assertSee('Accept suggestion')->assertSee('Dismiss with reason');
+        $dimension = $assessment->result['gaps'][0]['dimension_key'];
+        $feedbackUrl = "$base/assessments/{$assessment->uuid}/guidance/$dimension/feedback";
+        $this->actingAs($this->owner)->post($feedbackUrl, ['feedback' => 'dismissed'])->assertSessionHasErrors('explanation');
+        $this->actingAs($this->owner)->post($feedbackUrl, ['feedback' => 'dismissed', 'explanation' => 'Not relevant this quarter.'])->assertRedirect();
+        $this->assertDatabaseHas('vgi_guidance_feedback', [
+            'startup_uuid' => $this->startup->uuid, 'assessment_uuid' => $assessment->uuid,
+            'user_id' => $this->owner->id, 'dimension_key' => $dimension, 'feedback' => 'dismissed',
+            'explanation' => 'Not relevant this quarter.',
+        ]);
+        $this->actingAs($this->owner)->post($feedbackUrl, ['feedback' => 'accepted'])->assertRedirect();
+        $this->assertDatabaseHas('vgi_guidance_feedback', [
+            'assessment_uuid' => $assessment->uuid, 'user_id' => $this->owner->id,
+            'dimension_key' => $dimension, 'feedback' => 'accepted', 'explanation' => null,
+        ]);
+        $stranger = User::factory()->withRole('startup_user')->create();
+        $this->actingAs($stranger)->post($feedbackUrl, ['feedback' => 'accepted'])->assertNotFound();
         $this->actingAs($this->owner)->get("$base/assessments/{$assessment->uuid}/report")->assertOk()->assertSee('Priorities');
         // A submitted assessment cannot be changed.
         $this->actingAs($this->owner)->put("$base/assessments/{$assessment->uuid}", ['answers' => $this->answers($framework, 3), 'intent' => 'submit'])->assertSessionHasErrors('growth');

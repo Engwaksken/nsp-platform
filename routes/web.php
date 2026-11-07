@@ -135,6 +135,7 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::get('/', [Workspace\GrowthController::class, 'index'])->name('');
         Route::post('/assessments', [Workspace\GrowthController::class, 'start'])->name('.start');
         Route::get('/assessments/{assessment}', [Workspace\GrowthController::class, 'show'])->name('.assessment');
+        Route::post('/assessments/{assessment}/guidance/{dimension}/feedback', [Workspace\GrowthController::class, 'guidanceFeedback'])->name('.guidance.feedback');
         Route::put('/assessments/{assessment}', [Workspace\GrowthController::class, 'update'])->name('.save');
         Route::get('/assessments/{assessment}/report', [Workspace\GrowthController::class, 'report'])->name('.report');
         Route::post('/actions', [Workspace\GrowthActionController::class, 'store'])->name('.actions.store');

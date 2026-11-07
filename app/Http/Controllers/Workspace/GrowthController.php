@@ -9,8 +9,10 @@ use App\Models\Builder\VentureBuilderEnrollment;
 use App\Models\Growth\GrowthAction;
 use App\Models\Growth\VgiAssessment;
 use App\Models\Growth\VgiFramework;
+use App\Models\Growth\VgiGuidanceFeedback;
 use App\Models\Registry\Startup;
 use App\Registry\RegistryException;
+use App\Support\Audit;
 use App\Support\Features;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -107,7 +109,36 @@ class GrowthController extends Controller
             'responses' => $assessment->responses->keyBy('question_key'),
             'planned' => GrowthAction::query()->where('startup_uuid', $startup->uuid)->whereNotNull('question_key')->pluck('question_key')->all(),
             'builderLinks' => $builderLinks,
+            'guidanceFeedback' => VgiGuidanceFeedback::query()->where('assessment_uuid', $assessment->uuid)
+                ->where('user_id', $request->user()->id)->get()->keyBy('dimension_key'),
         ]);
+    }
+
+    public function guidanceFeedback(Request $request, Startup $startup, VgiAssessment $assessment, string $dimension): RedirectResponse
+    {
+        $membership = $this->membershipOr404($request, $startup);
+        abort_unless($membership->canEdit(), 403, 'Only startup editors can respond to guidance.');
+        abort_unless($assessment->startup_uuid === $startup->uuid && $assessment->status === 'submitted', 404);
+        abort_unless(collect($assessment->result['gaps'] ?? [])->contains('dimension_key', $dimension), 404);
+
+        $data = $request->validate([
+            'feedback' => ['required', 'in:accepted,dismissed'],
+            'explanation' => ['nullable', 'string', 'required_if:feedback,dismissed', 'min:5', 'max:1000'],
+        ]);
+        $feedback = VgiGuidanceFeedback::query()->updateOrCreate(
+            ['user_id' => $request->user()->id, 'assessment_uuid' => $assessment->uuid, 'dimension_key' => $dimension],
+            [
+                'startup_uuid' => $startup->uuid,
+                'feedback' => $data['feedback'],
+                'explanation' => isset($data['explanation']) ? trim($data['explanation']) : null,
+            ],
+        );
+        Audit::log('growth.guidance_feedback', $feedback, [
+            'startup_uuid' => $startup->uuid, 'assessment_uuid' => $assessment->uuid,
+            'dimension_key' => $dimension, 'feedback' => $feedback->feedback,
+        ]);
+
+        return back()->with('status', 'Thanks. Your guidance feedback has been saved.');
     }
 
     public function update(Request $request, Startup $startup, VgiAssessment $assessment): RedirectResponse

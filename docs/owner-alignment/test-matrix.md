@@ -16,7 +16,8 @@
 | Full suite | `php artisan test` | 241 passed (1700 assertions) | Local-only; no staging/deployment claim |
 | Organization portfolio and membership lifecycle | `php artisan test --filter=PortfolioAccessTest` | 5 passed (64 assertions): scope/role boundaries; expiry/suspension/revocation; cross-tenant 404; scope narrowing; wrong-email and single-use invitations; decline/reinvite invalidates stale tokens; self-role changes and last-admin departure blocked; member self-leave succeeds | Local functional tests; no staging/UAT evidence |
 | Knowledge VGI recommendation tenant context | `php artisan test --filter=KnowledgeRecommenderTest` | 1 passed (5 assertions): only selected startup's VGI signals are requested when user belongs to multiple startups | Rules-based local test; no AI/provider used |
-| Full suite | `php artisan test` | 242 passed (1705 assertions) | Local-only; no staging/deployment claim |
+| VGI guidance feedback | `php artisan test --filter=GrowthTest` | 10 passed (96 assertions): VGI gap feedback is startup-scoped; dismiss requires explanation; accept/dismiss choices persist per user and assessment | Provisional guidance; no generated or external AI output |
+| Full suite | `php artisan test` | 242 passed (1714 assertions) | Local-only; no staging/deployment claim |
 | Intelligence, challenges, knowledge | Existing feature suite had no identified coverage in baseline run | Not verified | Add fallback, moderation, restricted search, feedback and cross-tenant tests |
 | Expert and capital additions | Legacy expert/funding tests pass; new paths not evidenced by those tests | Partial | Add booking/payment sandbox and diligence/pipeline access tests |
 | Dashboards | Legacy analytics tests pass | Partial | Add organization/institution and new queue metric fixture reconciliation and export parity |
