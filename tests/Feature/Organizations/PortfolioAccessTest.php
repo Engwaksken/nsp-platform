@@ -173,4 +173,36 @@ class PortfolioAccessTest extends TestCase
 
         $this->assertInstanceOf(OrganizationMembership::class, $membership);
     }
+
+    public function test_decline_and_reinvite_invalidate_old_invitation_tokens(): void
+    {
+        Features::set('organizations', true, null);
+        $staff = User::factory()->withRole('platform_admin')->create();
+        $service = app(OrganizationService::class);
+        $organization = $service->createOrganization($staff, ['name' => 'Invitation Lifecycle ESO', 'type' => 'eso']);
+        $service->changeStatus($organization, $staff, 'verify');
+        $invitee = User::factory()->create();
+        $other = User::factory()->create();
+
+        $declineToken = $service->inviteMember($organization, $staff, $invitee->email, 'analyst', true);
+        $this->actingAs($other)->post(route('organizations.invitations.decline', $declineToken))
+            ->assertRedirect(route('organizations.index'));
+        $this->assertDatabaseHas('organization_memberships', [
+            'organization_id' => $organization->id, 'status' => 'invited', 'invited_email' => $invitee->email,
+        ]);
+        $this->actingAs($invitee)->post(route('organizations.invitations.decline', $declineToken))
+            ->assertRedirect(route('organizations.index'));
+        $this->actingAs($invitee)->get(route('organizations.invitations.show', $declineToken))
+            ->assertOk()->assertSee('no longer valid');
+
+        $oldToken = $service->inviteMember($organization, $staff, $invitee->email, 'analyst', true);
+        $replacementToken = $service->inviteMember($organization, $staff, strtoupper($invitee->email), 'manager', true);
+        $this->actingAs($invitee)->get(route('organizations.invitations.show', $oldToken))
+            ->assertOk()->assertSee('no longer valid');
+        $this->actingAs($invitee)->get(route('organizations.invitations.show', $replacementToken))
+            ->assertOk()->assertSee('as')->assertSee('Manager');
+        $this->actingAs($invitee)->post(route('organizations.invitations.accept', $replacementToken))
+            ->assertRedirect(route('organizations.show', $organization));
+        $this->assertSame('manager', $organization->membershipOf($invitee)->role);
+    }
 }
