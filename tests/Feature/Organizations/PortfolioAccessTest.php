@@ -101,4 +101,35 @@ class PortfolioAccessTest extends TestCase
         $this->actingAs($invitee)->get(route('organizations.show', $organization))
             ->assertOk()->assertSee('Portfolio access is paused');
     }
+
+    public function test_tenant_portal_hides_other_organizations_and_request_approval_can_only_narrow_scopes(): void
+    {
+        Features::set('organizations', true, null);
+        Features::set('registry', true, null);
+
+        $owner = User::factory()->withRole('startup_user')->create();
+        $startup = app(RegistryService::class)->createStartup($owner, [
+            'legal_name' => 'Request Boundary Ltd', 'display_name' => 'Request Boundary', 'registration_number' => null,
+            'country' => 'UG', 'year_founded' => 2024, 'description' => null, 'website' => null,
+        ], []);
+        $staff = User::factory()->withRole('platform_admin')->create();
+        $service = app(OrganizationService::class);
+        $organization = $service->createOrganization($staff, ['name' => 'Requesting ESO', 'type' => 'eso']);
+        $service->changeStatus($organization, $staff, 'verify');
+        $anotherOrganization = $service->createOrganization($staff, ['name' => 'Separate ESO', 'type' => 'eso']);
+        $service->changeStatus($anotherOrganization, $staff, 'verify');
+        $member = User::factory()->create();
+        $token = $service->inviteMember($organization, $staff, $member->email, 'manager', true);
+        $service->acceptInvitation($token, $member);
+
+        $this->actingAs($member)->get(route('organizations.show', $anotherOrganization))->assertNotFound();
+        $this->actingAs($member)->get(route('organizations.members', $anotherOrganization))->assertNotFound();
+
+        $requested = $service->requestAccess($organization, $member, $startup, 'portfolio', ['profile_summary', 'funding_summary'], 'Please share a summary.');
+        $service->decide($requested, $owner, true, ['profile_summary'], null);
+        $access = app(PortfolioAccess::class);
+        $this->assertTrue($access->canView($organization, $startup, 'profile_summary'));
+        $this->assertFalse($access->canView($organization, $startup, 'funding_summary'));
+        $this->assertSame(['profile_summary'], $requested->fresh()->scopes);
+    }
 }
