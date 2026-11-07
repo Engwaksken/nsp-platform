@@ -4,6 +4,7 @@ namespace App\Knowledge;
 
 use App\Models\Knowledge\KnowledgeResource;
 use App\Models\User;
+use App\Registry\ActiveStartup;
 use Illuminate\Support\Collection;
 
 /**
@@ -47,14 +48,12 @@ class Recommender
         $audiences = [];
         $weakest = [];
         $stage = null;
-        $startups = KnowledgeAccess::activeStartups($user);
-        if ($startups->isNotEmpty()) {
+        $membership = ActiveStartup::membership($user);
+        if ($membership?->startup) {
             $audiences[] = 'founders';
-            foreach ($startups as $startup) {
-                $signals = $this->vgi->for($startup);
-                $weakest = array_merge($weakest, $signals['weakest']);
-                $stage ??= $signals['stage'];
-            }
+            $signals = $this->vgi->for($membership->startup);
+            $weakest = $signals['weakest'];
+            $stage = $signals['stage'];
         }
         if ($user->hasRole('investor')) {
             $audiences[] = 'investors';
