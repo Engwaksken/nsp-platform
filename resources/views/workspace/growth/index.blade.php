@@ -34,6 +34,26 @@
                 @endif
             </section>
 
+            @if ($latest && $dimensionTrends)
+                <section class="panel" aria-labelledby="dimension-trends-heading">
+                    <h2 id="dimension-trends-heading">Dimension-level progress</h2>
+                    <p class="hint">Only assessments using the same rubric version are compared. Missing information is not treated as a score change.</p>
+                    <div class="table-wrap" tabindex="0" role="region" aria-label="VGI dimension score trends">
+                        <table>
+                            <caption>Latest VGI dimension scores and change from the prior comparable assessment</caption>
+                            <thead><tr><th scope="col">Dimension</th><th scope="col">Latest</th><th scope="col">Previous comparable</th><th scope="col">Change</th></tr></thead>
+                            <tbody>@foreach ($dimensionTrends as $trend)
+                                <tr><th scope="row">{{ $trend['title'] }}</th>
+                                    <td>{{ $trend['score'] === null ? 'Insufficient information' : number_format($trend['score'], 1) }}</td>
+                                    <td>{{ $trend['previous'] === null ? '—' : number_format($trend['previous'], 1) }}</td>
+                                    <td>{{ $trend['change'] === null ? 'Not comparable' : ucfirst($trend['direction']).' ('.($trend['change'] > 0 ? '+' : '').number_format($trend['change'], 1).')' }}</td>
+                                </tr>
+                            @endforeach</tbody>
+                        </table>
+                    </div>
+                </section>
+            @endif
+
             <section class="panel" aria-labelledby="plan-heading">
                 <h2 id="plan-heading">Growth plan</h2>
                 @if ($actions->isEmpty())

@@ -1,0 +1,32 @@
+# Local/staging composition (NOT production; not yet run — Docker was unavailable on the dev machine).
+# Secrets come from .env (never committed). Production hosting is decision OD7/D10.
+services:
+  app:
+    build: .
+    image: hive-nsp:local
+    env_file: .env
+    environment: { DB_CONNECTION: mysql, DB_HOST: db, DB_DATABASE: nsp, DB_USERNAME: nsp }
+    ports: ["8080:80"]
+    volumes: ["storage:/var/www/html/storage/app"]
+    depends_on: [db]
+  worker:
+    image: hive-nsp:local
+    command: worker
+    env_file: .env
+    environment: { DB_CONNECTION: mysql, DB_HOST: db, DB_DATABASE: nsp, DB_USERNAME: nsp }
+    volumes: ["storage:/var/www/html/storage/app"]
+    depends_on: [app]
+  scheduler:
+    image: hive-nsp:local
+    command: scheduler
+    env_file: .env
+    environment: { DB_CONNECTION: mysql, DB_HOST: db, DB_DATABASE: nsp, DB_USERNAME: nsp }
+    volumes: ["storage:/var/www/html/storage/app"]
+    depends_on: [app]
+  db:
+    image: mysql:8.0
+    environment: { MYSQL_DATABASE: nsp, MYSQL_USER: nsp, MYSQL_PASSWORD: "${DB_PASSWORD}", MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}" }
+    volumes: ["db:/var/lib/mysql"]
+volumes:
+  storage:
+  db:

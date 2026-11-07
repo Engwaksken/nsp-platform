@@ -135,6 +135,7 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::get('/', [Workspace\GrowthController::class, 'index'])->name('');
         Route::post('/assessments', [Workspace\GrowthController::class, 'start'])->name('.start');
         Route::get('/assessments/{assessment}', [Workspace\GrowthController::class, 'show'])->name('.assessment');
+        Route::post('/assessments/{assessment}/guidance/{dimension}/feedback', [Workspace\GrowthController::class, 'guidanceFeedback'])->name('.guidance.feedback');
         Route::put('/assessments/{assessment}', [Workspace\GrowthController::class, 'update'])->name('.save');
         Route::get('/assessments/{assessment}/report', [Workspace\GrowthController::class, 'report'])->name('.report');
         Route::post('/actions', [Workspace\GrowthActionController::class, 'store'])->name('.actions.store');
@@ -405,6 +406,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
         Route::post('merges/{merge}/undo', [Admin\DuplicateController::class, 'undo'])->name('merges.undo');
     });
 });
+
+/*
+| Owner-alignment modules: one route file per module in routes/modules/
+| (organizations, builder, challenges, knowledge, intelligence, dashboards ...).
+| Loaded before the CMS catch-all so module routes win.
+*/
+foreach (glob(__DIR__.'/modules/*.php') ?: [] as $moduleRoutes) {
+    require $moduleRoutes;
+}
 
 /*
 | CMS pages: keep last so application routes win.

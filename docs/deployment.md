@@ -80,3 +80,10 @@ Do this on staging first. The full rules are in `integration-contract-v1.md`.
 1. Put `ANTHROPIC_API_KEY=...` in the server's `.env` (never in git), and set `NSP_AI_LEGAL_APPROVED=true` once the review is signed.
 2. Run `php artisan config:cache`, then switch on **AI assistant** under **Admin › Features**.
 3. To stop it at once, set `NSP_AI_LEGAL_APPROVED=false` (or switch the flag off) and run `php artisan config:cache` again.
+
+## Containers (owner alignment, directive §4) — not yet built or verified
+`Dockerfile`, `docker-compose.yml` and `deploy/docker/` describe one stateless image with four roles: `web` (Apache, health check on `/health`), `worker` (`queue:work`), `scheduler` (`schedule:work`, replaces cron) and `migrate` (one-off release step). Docker was not available on the development machine, so **the image has not been built or run**; build it on staging first.
+
+- Statelessness: sessions, cache and queue use the database by default; uploaded files live on the `storage` volume. For more than one web container, the files must move to shared or S3-compatible storage and sessions/cache to the database or Redis (decision OD7/D10). Until then do not describe the deployment as horizontally scalable.
+- The scheduler also drains the queue every minute (`routes/console.php`); with a dedicated `worker` that is redundant but harmless.
+- Release: build image → run `migrate` once → roll `web`, `worker`, `scheduler`. Rollback: redeploy the previous image tag; migrations in this repository are additive, but restore the pre-release backup if a migration must be undone (`operations-runbook.md`).

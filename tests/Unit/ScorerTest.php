@@ -89,4 +89,51 @@ class ScorerTest extends TestCase
         $definition = require __DIR__.'/../../database/data/vgi_starter_draft.php';
         $this->assertSame([], FrameworkDefinition::validate($definition));
     }
+
+    public function test_insufficient_answers_do_not_create_a_total_or_readiness_claim(): void
+    {
+        $unknown = ['key' => 'unknown', 'label' => 'We do not know yet', 'insufficient' => true];
+        $definition = [
+            'dimensions' => [
+                ['key' => 'alpha', 'title' => 'Alpha', 'weight' => 1, 'questions' => [
+                    ['key' => 'a1', 'prompt' => 'Alpha one?', 'weight' => 1, 'options' => [$unknown, ['key' => 'low', 'label' => 'Low', 'score' => 20]]],
+                    ['key' => 'a2', 'prompt' => 'Alpha two?', 'weight' => 1, 'options' => [$unknown, ['key' => 'high', 'label' => 'High', 'score' => 80]]],
+                ]],
+                ['key' => 'beta', 'title' => 'Beta', 'weight' => 1, 'questions' => [
+                    ['key' => 'b1', 'prompt' => 'Beta one?', 'weight' => 1, 'options' => [$unknown, ['key' => 'low', 'label' => 'Low', 'score' => 20]]],
+                ]],
+            ],
+            'bands' => [['min' => 0, 'max' => 100, 'label' => 'Provisional']],
+            'scoring' => ['min_answered_share' => 0.5, 'min_scored_weight_share' => 0.7],
+        ];
+
+        $result = Scorer::score($definition, ['a1' => 'unknown', 'a2' => 'high', 'b1' => 'unknown']);
+
+        $this->assertSame(80.0, $result['dimensions'][0]['score']);
+        $this->assertNull($result['dimensions'][1]['score']);
+        $this->assertSame(['beta'], $result['insufficient_dimensions']);
+        $this->assertNull($result['score']);
+        $this->assertNull($result['band']['label']);
+        $this->assertSame(2, $result['coverage']['unknown_answers']);
+        $this->assertSame('not_configured', $result['readiness']['investment']['status']);
+        $this->assertSame('not_configured', $result['readiness']['commercialization']['status']);
+    }
+
+    public function test_missing_required_evidence_is_reported_without_changing_the_score(): void
+    {
+        $definition = [
+            'dimensions' => [[
+                'key' => 'evidence_area', 'title' => 'Evidence area', 'weight' => 1, 'questions' => [[
+                    'key' => 'proof', 'prompt' => 'What supports this?', 'weight' => 1, 'evidence' => 'required',
+                    'options' => [['key' => 'some', 'label' => 'Some evidence exists', 'score' => 40]],
+                ]],
+            ]],
+            'bands' => [['min' => 0, 'max' => 100, 'label' => 'Provisional']],
+        ];
+
+        $result = Scorer::score($definition, ['proof' => 'some'], ['proof' => false]);
+
+        $this->assertSame(40.0, $result['score']);
+        $this->assertSame(['status' => 'none', 'expected' => 1, 'provided' => 0, 'required_missing' => 1], $result['dimensions'][0]['evidence']);
+    }
 }

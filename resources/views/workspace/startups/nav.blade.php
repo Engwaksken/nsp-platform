@@ -6,7 +6,11 @@
         'workspace.startups.team' => 'Team',
         'workspace.startups.consents' => 'Data sharing',
         'workspace.startups.history' => 'Change history',
-    ] + (\App\Support\Features::enabled('vgi') ? ['workspace.growth' => 'Growth'] : [])
+    ] + (\App\Support\Features::enabled('intelligence') && \Illuminate\Support\Facades\Route::has('workspace.dashboard') ? ['workspace.dashboard' => 'Dashboard'] : [])
+      + (\App\Support\Features::enabled('venture_builder') && \Illuminate\Support\Facades\Route::has('workspace.builder') ? ['workspace.builder' => 'Venture Builder'] : [])
+      + (\App\Support\Features::enabled('vgi') ? ['workspace.growth' => 'Growth'] : [])
+      + (\App\Support\Features::enabled('intelligence') && \Illuminate\Support\Facades\Route::has('workspace.intelligence') ? ['workspace.intelligence' => 'Guidance'] : [])
+      + (\App\Support\Features::enabled('organizations') && \Illuminate\Support\Facades\Route::has('workspace.organizations') ? ['workspace.organizations' => 'Organizations'] : [])
       + (\App\Support\Features::enabled('opportunities') ? ['workspace.opportunities' => 'Opportunities'] : [])
       + (\App\Support\Features::enabled('funding') ? ['workspace.funding' => 'Funding'] : [])
       + (\App\Support\Features::enabled('experts') ? ['workspace.experts' => 'Experts'] : [])

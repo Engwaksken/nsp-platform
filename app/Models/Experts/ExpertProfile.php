@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ExpertProfile extends Model
 {
@@ -14,13 +16,13 @@ class ExpertProfile extends Model
     public const LANGUAGES = ['en' => 'English', 'lg' => 'Luganda', 'sw' => 'Swahili', 'fr' => 'French', 'rw' => 'Kinyarwanda', 'other' => 'Other'];
 
     protected $fillable = ['headline', 'bio', 'kind', 'expertise', 'sectors', 'languages', 'website', 'availability',
-        'offers_free', 'rate_note', 'max_active', 'is_listed'];
+        'offers_free', 'rate_note', 'max_active', 'is_listed', 'location', 'is_remote', 'time_zone'];
 
     protected function casts(): array
     {
         return [
             'expertise' => 'array', 'sectors' => 'array', 'languages' => 'array',
-            'offers_free' => 'boolean', 'is_listed' => 'boolean', 'verified_at' => 'datetime', 'max_active' => 'integer',
+            'offers_free' => 'boolean', 'is_listed' => 'boolean', 'is_remote' => 'boolean', 'verified_at' => 'datetime', 'max_active' => 'integer',
         ];
     }
 
@@ -32,6 +34,29 @@ class ExpertProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(ExpertCategory::class, 'expert_category_profile');
+    }
+
+    public function verifications(): HasMany
+    {
+        return $this->hasMany(ExpertVerification::class)->latest();
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(ServicePackage::class, 'expert_user_id', 'user_id');
+    }
+
+    /** The expert's IANA time zone (falls back to the platform default). */
+    public function timezone(): string
+    {
+        $zone = (string) ($this->time_zone ?: config('experts-marketplace.default_timezone', 'Africa/Kampala'));
+
+        return in_array($zone, timezone_identifiers_list(), true) ? $zone : 'UTC';
     }
 
     public function scopeVerified(Builder $query): Builder

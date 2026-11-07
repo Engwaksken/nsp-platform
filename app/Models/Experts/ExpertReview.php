@@ -3,6 +3,7 @@
 namespace App\Models\Experts;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,7 +14,13 @@ class ExpertReview extends Model
 
     protected function casts(): array
     {
-        return ['rating' => 'integer', 'helped' => 'boolean'];
+        return ['rating' => 'integer', 'helped' => 'boolean', 'hidden_at' => 'datetime'];
+    }
+
+    /** Reviews staff have not hidden after a dispute. */
+    public function scopeVisible(Builder $query): Builder
+    {
+        return $query->whereNull('hidden_at');
     }
 
     public function engagement(): BelongsTo

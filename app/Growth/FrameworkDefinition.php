@@ -10,11 +10,19 @@ namespace App\Growth;
  *     "key": "team", "title": "Team", "description": "...", "weight": 20,
  *     "questions": [{
  *       "key": "team_roles", "prompt": "...", "help": "...", "weight": 1, "evidence": "none|optional|required",
- *       "options": [{"key": "a", "label": "...", "score": 0, "tip": "What to do next"}]
- *     }]
+ *       "evidence_hint": "What counts as evidence (optional)",
+ *       "options": [{"key": "a", "label": "...", "score": 0, "tip": "What to do next"},
+ *                   {"key": "unknown", "label": "We don't know yet", "insufficient": true, "tip": "How to find out"}]
+ *     }],
+ *     "anchors": {"0": "What a low score looks like", "100": "What a strong score looks like"}   (optional)
  *   }],
- *   "bands": [{"min": 0, "max": 24.9, "label": "Idea", "description": "..."}]
+ *   "bands": [{"min": 0, "max": 24.9, "label": "Idea", "description": "..."}],
+ *   "scoring": {"min_answered_share": 0.5, "min_scored_weight_share": 0.5, "gap_below": 50, "strength_from": 70}   (optional)
+ *   "readiness": {"investment": {"label": "...", "dimensions": ["..."], "threshold": 70, "min_each": 50}}   (optional)
  * }
+ *
+ * An option marked "insufficient" (for example "We don't know yet") is never
+ * scored. Readiness indicators exist only when a rubric defines them.
  */
 class FrameworkDefinition
 {
@@ -93,7 +101,11 @@ class FrameworkDefinition
 
                     continue;
                 }
+                if (array_key_exists('evidence_hint', $question) && ! is_string($question['evidence_hint'])) {
+                    $errors[] = "$qWhere: evidence_hint must be text.";
+                }
                 $optionKeys = [];
+                $insufficient = 0;
                 foreach (array_values($options) as $o => $option) {
                     $oWhere = "$qWhere, option ".($o + 1);
                     if (! is_array($option) || ! is_string($option['key'] ?? null) || ! preg_match('/^[a-z0-9_]{1,30}$/', $option['key'])) {
@@ -108,12 +120,41 @@ class FrameworkDefinition
                     if (! is_string($option['label'] ?? null) || trim($option['label']) === '') {
                         $errors[] = "$oWhere needs a label.";
                     }
+                    if (($option['insufficient'] ?? false) === true) {
+                        // "We don't know yet": not scored, so it needs no score.
+                        $insufficient++;
+
+                        continue;
+                    }
+                    if (array_key_exists('insufficient', $option) && ! is_bool($option['insufficient'])) {
+                        $errors[] = "$oWhere: insufficient must be true or false.";
+                    }
                     if (! is_numeric($option['score'] ?? null) || $option['score'] < 0 || $option['score'] > 100) {
                         $errors[] = "$oWhere needs a score from 0 to 100.";
                     }
                 }
+                if ($insufficient > 1) {
+                    $errors[] = "$qWhere can have only one \"don't know\" (insufficient) option.";
+                }
+                if ($insufficient >= count($options)) {
+                    $errors[] = "$qWhere needs at least one scored option.";
+                }
+            }
+            if (array_key_exists('anchors', $dimension)) {
+                $anchors = $dimension['anchors'];
+                $valid = is_array($anchors) && $anchors !== [];
+                foreach ($valid ? $anchors : [] as $at => $text) {
+                    if (! is_numeric($at) || $at < 0 || $at > 100 || ! is_string($text) || trim($text) === '') {
+                        $valid = false;
+                    }
+                }
+                if (! $valid) {
+                    $errors[] = "$where: anchors must map scores 0–100 to a short description (for example {\"0\": \"...\", \"100\": \"...\"}).";
+                }
             }
         }
+
+        $errors = array_merge($errors, self::validateScoring($definition['scoring'] ?? null), self::validateReadiness($definition['readiness'] ?? null, $dimensionKeys));
 
         $bands = $definition['bands'] ?? null;
         if (! is_array($bands) || $bands === []) {
@@ -144,6 +185,98 @@ class FrameworkDefinition
 
         return $errors;
     }
+
+    /** Scoring rules of a rubric, with defaults for rubrics written before they existed. */
+    public static function scoring(array $definition): array
+    {
+        $scoring = is_array($definition['scoring'] ?? null) ? $definition['scoring'] : [];
+
+        return [
+            'min_answered_share' => (float) ($scoring['min_answered_share'] ?? self::DEFAULT_SCORING['min_answered_share']),
+            'min_scored_weight_share' => (float) ($scoring['min_scored_weight_share'] ?? self::DEFAULT_SCORING['min_scored_weight_share']),
+            'gap_below' => (float) ($scoring['gap_below'] ?? self::DEFAULT_SCORING['gap_below']),
+            'strength_from' => (float) ($scoring['strength_from'] ?? self::DEFAULT_SCORING['strength_from']),
+        ];
+    }
+
+    public const DEFAULT_SCORING = [
+        // A dimension needs at least this share of its questions answered with a scored option.
+        'min_answered_share' => 0.5,
+        // The overall score needs scored dimensions carrying at least this share of the total weight.
+        'min_scored_weight_share' => 0.5,
+        // Answers and dimensions below this are gaps; dimensions at or above strength_from are strengths.
+        'gap_below' => 50,
+        'strength_from' => 70,
+    ];
+
+    /** @return list<string> */
+    private static function validateScoring(mixed $scoring): array
+    {
+        if ($scoring === null) {
+            return [];
+        }
+        if (! is_array($scoring)) {
+            return ['"scoring" must be an object.'];
+        }
+        $errors = [];
+        foreach (['min_answered_share', 'min_scored_weight_share'] as $share) {
+            if (array_key_exists($share, $scoring) && (! is_numeric($scoring[$share]) || $scoring[$share] <= 0 || $scoring[$share] > 1)) {
+                $errors[] = "scoring.$share must be a share above 0 and at most 1 (for example 0.5).";
+            }
+        }
+        foreach (['gap_below', 'strength_from'] as $limit) {
+            if (array_key_exists($limit, $scoring) && (! is_numeric($scoring[$limit]) || $scoring[$limit] < 0 || $scoring[$limit] > 100)) {
+                $errors[] = "scoring.$limit must be from 0 to 100.";
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Optional readiness indicators. Only a rubric that defines them gets them:
+     * {"investment": {"label": "...", "dimensions": ["..."], "threshold": 70, "min_each": 50}, "commercialization": {...}}
+     *
+     * @param  list<string>  $dimensionKeys
+     * @return list<string>
+     */
+    private static function validateReadiness(mixed $readiness, array $dimensionKeys): array
+    {
+        if ($readiness === null) {
+            return [];
+        }
+        if (! is_array($readiness)) {
+            return ['"readiness" must be an object with "investment" and/or "commercialization".'];
+        }
+        $errors = [];
+        foreach ($readiness as $key => $indicator) {
+            $where = "Readiness \"$key\"";
+            if (! in_array($key, self::READINESS, true)) {
+                $errors[] = "$where is not supported (use investment or commercialization).";
+
+                continue;
+            }
+            if (! is_array($indicator)) {
+                $errors[] = "$where must be an object.";
+
+                continue;
+            }
+            $dims = $indicator['dimensions'] ?? null;
+            if (! is_array($dims) || $dims === [] || array_diff($dims, $dimensionKeys) !== []) {
+                $errors[] = "$where needs a list of existing dimension keys.";
+            }
+            if (! is_numeric($indicator['threshold'] ?? null) || $indicator['threshold'] < 0 || $indicator['threshold'] > 100) {
+                $errors[] = "$where needs a threshold from 0 to 100.";
+            }
+            if (array_key_exists('min_each', $indicator) && (! is_numeric($indicator['min_each']) || $indicator['min_each'] < 0 || $indicator['min_each'] > 100)) {
+                $errors[] = "$where: min_each must be from 0 to 100.";
+            }
+        }
+
+        return $errors;
+    }
+
+    public const READINESS = ['investment', 'commercialization'];
 
     public static function hash(array $definition): string
     {

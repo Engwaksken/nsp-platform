@@ -32,6 +32,12 @@
                 @if (\App\Support\Features::enabled('opportunities'))
                     <li><a href="{{ route('opportunities.index') }}" @if (request()->routeIs('opportunities.*')) aria-current="page" @endif>Opportunities</a></li>
                 @endif
+                @if (\App\Support\Features::enabled('challenges') && \Illuminate\Support\Facades\Route::has('challenges.index'))
+                    <li><a href="{{ route('challenges.index') }}" @if (request()->routeIs('challenges.*')) aria-current="page" @endif>Challenges</a></li>
+                @endif
+                @if (\App\Support\Features::enabled('knowledge') && \Illuminate\Support\Facades\Route::has('knowledge.index'))
+                    <li><a href="{{ route('knowledge.index') }}" @if (request()->routeIs('knowledge.*')) aria-current="page" @endif>Knowledge</a></li>
+                @endif
                 @if (\App\Support\Features::enabled('marketplace'))
                     <li><a href="{{ route('directory.index') }}" @if (request()->routeIs('directory.*')) aria-current="page" @endif>Startups</a></li>
                     <li><a href="{{ route('marketplace.index') }}" @if (request()->routeIs('marketplace.*')) aria-current="page" @endif>Marketplace</a></li>

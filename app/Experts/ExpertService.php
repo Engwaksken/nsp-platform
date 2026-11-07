@@ -78,7 +78,7 @@ class ExpertService
     {
         $min = (int) config('nsp.experts.min_reviews_shown', 3);
 
-        return ExpertReview::query()->whereIn('expert_user_id', $expertUserIds)
+        return ExpertReview::query()->visible()->whereIn('expert_user_id', $expertUserIds)
             ->selectRaw('expert_user_id, avg(rating) as average, count(*) as total')->groupBy('expert_user_id')->get()
             ->filter(fn ($row) => $row->total >= $min)
             ->mapWithKeys(fn ($row) => [$row->expert_user_id => ['average' => round((float) $row->average, 1), 'count' => (int) $row->total]])
@@ -244,8 +244,9 @@ class ExpertService
         if ($side['expert']) {
             throw new RegistryException('Experts cannot review themselves.');
         }
-        if ($engagement->status !== 'completed') {
-            throw new RegistryException('You can give feedback once the engagement is completed.');
+        $completedBooking = $engagement->bookings()->where('status', 'completed')->exists();
+        if ($engagement->status !== 'completed' && ! $completedBooking) {
+            throw new RegistryException('You can give feedback once the engagement or a booked session is completed.');
         }
         if ($engagement->review()->exists()) {
             throw new RegistryException('Feedback was already given.');

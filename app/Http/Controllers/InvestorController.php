@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Capital\CapitalService;
+use App\Capital\VentureSignals;
 use App\Ecosystem\Eligibility;
 use App\Funding\FundingService;
+use App\Models\Capital\PipelineItem;
+use App\Models\Capital\WatchlistEntry;
 use App\Models\Funding\DataRoomAccessLog;
 use App\Models\Funding\DataRoomFile;
 use App\Models\Funding\DataRoomGrant;
@@ -26,7 +30,7 @@ use Illuminate\View\View;
 /** The investor area. Only Hive-verified investors see startups; everything else answers "not found". */
 class InvestorController extends Controller
 {
-    public function __construct(private readonly FundingService $funding) {}
+    public function __construct(private readonly FundingService $funding, private readonly CapitalService $capital) {}
 
     public function apply(Request $request): View
     {
@@ -88,7 +92,8 @@ class InvestorController extends Controller
             ->whereHas('startup', fn ($q) => $q->where('status', 'active'))->latest()->get();
         $filter = $request->query('show', 'fits');
         $stages = Eligibility::stagesFor($requests->pluck('startup_uuid'));
-        $startups = $requests->map(fn (FundingRequest $fr) => ['request' => $fr, 'startup' => $fr->startup] + $this->funding->fit($profile, $fr->startup, $fr, $stages))
+        $sharedVgi = $this->capital->sharedVgiFor($request->user(), $requests->pluck('startup'));
+        $startups = $requests->map(fn (FundingRequest $fr) => ['request' => $fr, 'startup' => $fr->startup] + $this->funding->fit($profile, $fr->startup, $fr, $stages, $sharedVgi[$fr->startup_uuid] ?? null))
             ->filter(fn ($row) => $filter === 'all' || $row['fits'])
             ->sortByDesc(fn ($row) => count($row['reasons']))->values();
 
@@ -101,6 +106,7 @@ class InvestorController extends Controller
             'incoming' => $introductions->where('status', 'requested')->where('requested_by', 'founder'),
             'pipeline' => $introductions->whereIn('status', ['requested', 'accepted'])->reject(fn ($i) => $i->status === 'requested' && $i->requested_by === 'founder'),
             'grants' => DataRoomGrant::query()->active()->with('startup')->where('investor_user_id', $userId)->get(),
+            'funnel' => $this->capital->funnel($request->user()),
         ]);
     }
 
@@ -111,6 +117,8 @@ class InvestorController extends Controller
         $introduction = Introduction::query()->where('startup_uuid', $startup->uuid)->where('investor_user_id', $user->id)->latest()->first();
         $connected = $introduction?->status === 'accepted';
         $grant = $this->funding->activeGrant($startup, $user);
+        $this->capital->record($startup->uuid, $user->id, 'viewed_startup', $user, [], oncePerDay: true);
+        $scopes = $this->capital->scopesFor($startup, $user);
 
         return view('investors.startup', [
             'startup' => $startup,
@@ -123,7 +131,11 @@ class InvestorController extends Controller
                 ->whereIn('role', StartupMembership::EDITOR_ROLES)->get() : collect(),
             'grant' => $grant,
             'files' => $grant ? DataRoomFile::query()->where('startup_uuid', $startup->uuid)->orderBy('category')->orderBy('title')->get() : collect(),
-            'fit' => ($open = $this->funding->openRequest($startup)) ? $this->funding->fit($this->funding->investorProfile($user), $startup, $open) : null,
+            'fit' => ($open = $this->funding->openRequest($startup)) ? $this->funding->fit($this->funding->investorProfile($user), $startup, $open, null,
+                in_array('vgi_summary', $scopes, true) ? app(VentureSignals::class)->vgi($startup) : null) : null,
+            'scopes' => $scopes,
+            'watched' => WatchlistEntry::query()->where('investor_user_id', $user->id)->where('startup_uuid', $startup->uuid)->exists(),
+            'pipelineItem' => PipelineItem::query()->where('investor_user_id', $user->id)->where('startup_uuid', $startup->uuid)->first(),
         ]);
     }
 
@@ -133,6 +145,7 @@ class InvestorController extends Controller
         $data = $request->validate(['message' => ['required', 'string', 'max:2000']]);
         try {
             $this->funding->expressInterest($startup, $request->user(), $data['message']);
+            $this->capital->record($startup->uuid, $request->user()->id, 'expressed_interest', $request->user());
         } catch (RegistryException $exception) {
             return back()->withErrors(['interest' => $exception->getMessage()]);
         }
@@ -179,6 +192,7 @@ class InvestorController extends Controller
         ]);
         if ($access === 'investor') {
             Audit::log('funding.file_downloaded', $file, ['title' => $file->title]);
+            $this->capital->record($file->startup_uuid, $user->id, 'downloaded_document', $user, ['title' => $file->title]);
         }
 
         return Storage::disk($file->disk)->download($file->path, $file->original_name, [
