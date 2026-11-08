@@ -14,7 +14,7 @@
     </nav>
     <form method="get" class="filters" role="search" aria-label="Search challenges">
         <input type="hidden" name="tab" value="{{ $tab }}">
-        <label for="challenge-q">Title contains</label><input id="challenge-q" name="q" value="{{ request('q') }}" maxlength="100">
+        <label for="challenge-q">Title contains</label><input id="challenge-q" name="q" value="{{ request('q') }}" maxlength="100" placeholder="Search challenges by title…">
         <button class="btn btn-secondary" type="submit">Search</button>
     </form>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Challenge moderation queue">

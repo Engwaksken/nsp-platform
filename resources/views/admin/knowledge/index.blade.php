@@ -14,7 +14,7 @@
     </nav>
     <form method="get" class="filters" role="search" aria-label="Search editorial resources">
         @if ($status)<input type="hidden" name="status" value="{{ $status }}">@endif
-        <label for="knowledge-admin-q">Title</label><input id="knowledge-admin-q" name="q" value="{{ request('q') }}" maxlength="100">
+        <label for="knowledge-admin-q">Title</label><input id="knowledge-admin-q" name="q" value="{{ request('q') }}" maxlength="100" placeholder="Search resources by title…">
         <button class="btn btn-secondary" type="submit">Search</button>
     </form>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Knowledge resource records">

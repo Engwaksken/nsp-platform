@@ -15,7 +15,7 @@
         <p>Innovation and market challenges from government, industry, partners and communities. Every challenge listed here was reviewed by Hive before publication; only sources marked as reviewed have been checked.</p>
 
         <form method="get" class="filters" role="search" aria-label="Search and filter challenges">
-            <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ $criteria['q'] }}" maxlength="100"></div>
+            <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ $criteria['q'] }}" placeholder="Search challenges…" maxlength="100"></div>
             <div class="form-group"><label for="sector">Sector</label>
                 <select id="sector" name="sector"><option value="">Any sector</option>
                     @foreach (\App\Models\Registry\StartupProfile::SECTORS as $option)<option value="{{ $option }}" @selected($criteria['sector'] === $option)>{{ $option }}</option>@endforeach

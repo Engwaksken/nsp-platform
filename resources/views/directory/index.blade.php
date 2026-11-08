@@ -6,7 +6,7 @@
         <p>Startups in the Hive ecosystem that chose to be listed. Each startup decides what appears here.</p>
 
         <form method="get" class="filters" role="search" aria-label="Filter startups">
-            <div class="form-group"><label for="q">Name or keyword</label><input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" maxlength="100"></div>
+            <div class="form-group"><label for="q">Name or keyword</label><input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search startups by name or keyword…" maxlength="100"></div>
             <div class="form-group"><label for="sector">Sector</label>
                 <select id="sector" name="sector"><option value="">All</option>
                     @foreach (\App\Models\Registry\StartupProfile::SECTORS as $sector)<option value="{{ $sector }}" @selected(($filters['sector'] ?? '') === $sector)>{{ $sector }}</option>@endforeach

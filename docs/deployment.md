@@ -9,13 +9,29 @@ Nothing has been deployed. This is the intended procedure for staging and then p
 - No Node.js is needed. CSS and JS are plain files in `public/`.
 - Cron, every minute.
 
+## Releases for shared hosting (`production` branch)
+The live server never runs Composer or Node.js. Every library is installed on the development machine and shipped in git:
+
+- Development branches (`main`, `owner-alignment`, …) ignore `vendor/` as usual.
+- `deploy/build-release.sh` (run locally) copies a commit into the `production` branch, runs `composer install --no-dev --optimize-autoloader` there, commits the code **with** `vendor/`, and pushes it.
+- The server only pulls `production` and runs `deploy/update-live.sh` (migrate, seed permissions, rebuild caches).
+- Fonts (Poppins, Outfit) are self-hosted in `public/fonts`; CSS and JS are plain files in `public/`. Pages make no requests to third-party CDNs.
+
+```
+# On your computer, after committing:
+deploy/build-release.sh            # releases HEAD; or: deploy/build-release.sh main
+
+# On the server (cPanel Terminal or SSH), in ~/nsp:
+bash deploy/update-live.sh
+```
+If the host has no terminal, use cPanel **Git Version Control** to pull the `production` branch, then run the commands from `deploy/update-live.sh` through cPanel Cron Jobs once.
+
 ## First install (cPanel)
 1. Create the database and user in cPanel. **Never reuse the IMS database or its user.**
-2. Upload the code, without `vendor/`, `.env` or `database/database.sqlite`, to a folder **outside** `public_html`, for example `~/nsp`.
+2. Clone the release branch to a folder **outside** `public_html`, for example `~/nsp`: `git clone -b production https://github.com/Engwaksken/nsp-platform.git ~/nsp` (for a private repository use a read-only deploy key or a fine-grained token; cPanel **Git Version Control** can do the clone too). It already contains `vendor/`; never upload `.env` or `database/database.sqlite`.
 3. Point the subdomain's document root to `~/nsp/public`. If cPanel can't, symlink `public_html/nsp` → `~/nsp/public`.
-4. In `~/nsp`:
+4. In `~/nsp` (no `composer install` needed):
    ```
-   composer install --no-dev --optimize-autoloader
    cp .env.example .env      # then edit: APP_ENV=production, APP_DEBUG=false, APP_URL, DB_*, MAIL_*
    php artisan key:generate
    php artisan migrate --force
@@ -41,14 +57,12 @@ Add one cron job:
 
 ## Updates
 1. Back up first: `mysqldump` the NSP database and archive `storage/app/public` and `storage/app/private`.
-2. Run `php artisan down --retry=60`.
-3. Upload the new code, then run `composer install --no-dev --optimize-autoloader` and `php artisan migrate --force`.
-4. Run `php artisan db:seed --class=RolesAndPermissionsSeeder --force` when a release adds permissions (it is safe to repeat; Phase 5b added `verify-investors`, 5c added `manage-experts`, 5d added `manage-talent`, 5e added `moderate-marketplace`, 6a added `manage-communications`, 6b added `view-insights`, 7a added `view-system-health`).
-5. Run `php artisan config:cache && php artisan route:cache && php artisan view:cache`, then `php artisan up`.
+2. Locally run `deploy/build-release.sh`, then on the server run `bash deploy/update-live.sh`. It puts the site in maintenance mode, fast-forwards to the new `production` commit, runs `php artisan migrate --force` and `php artisan db:seed --class=RolesAndPermissionsSeeder --force` (safe to repeat; it adds any new permissions), rebuilds the config, route and view caches, and brings the site back up.
+3. The deployed source commit is in the `RELEASE` file at the app root.
 
 Data-room files (`storage/app/private/data-room`) and candidate CVs (`storage/app/private/talent`) live (the private `local` disk). Include that folder in backups; never link it into `public`.
 
-**Rollback:** restore the previous code folder, restore the database dump if a migration ran, then clear and rebuild the caches.
+**Rollback:** `git reset --hard <previous production commit>` (see `git log --oneline -5`), restore the database dump if a migration ran, then clear and rebuild the caches.
 
 ## After deploying
 - Set `NSP_BACKUP_PASSWORD` (store it in the password manager), run `php artisan nsp:backup` once, and arrange the daily off-server copy (`operations-runbook.md` §3).

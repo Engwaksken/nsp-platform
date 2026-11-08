@@ -25,7 +25,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('website')->nullable();
             $table->string('website_domain')->nullable()->index();
-            $table->string('status', 20)->default('active')->index(); // active, archived, merged
+            $table->string('status', 20)->default('active')->index();
             $table->uuid('merged_into_uuid')->nullable()->index();
             $table->unsignedInteger('version')->default(1);
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
@@ -59,8 +59,8 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             // Shared IdP subject once single sign-on is live; null for local accounts.
             $table->string('user_subject')->nullable();
-            $table->string('role', 20); // owner, founder, admin, team_member, viewer
-            $table->string('status', 20); // invited, requested, active, declined, revoked
+            $table->string('role', 20);
+            $table->string('status', 20);
             $table->string('invited_email')->nullable();
             $table->string('invite_token_hash', 64)->nullable()->unique();
             $table->timestamp('invite_expires_at')->nullable();
@@ -114,20 +114,24 @@ return new class extends Migration
             $table->uuid('startup_b_uuid');
             $table->unsignedTinyInteger('score');
             $table->json('evidence');
-            $table->string('status', 20)->default('pending')->index(); // pending, not_duplicate, merged
+            $table->string('status', 20)->default('pending')->index();
             $table->foreignId('decided_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('decided_at')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            $table->unique(['startup_a_uuid', 'startup_b_uuid'], 'startup_duplicate_pair_unique');
+            $table->unique(
+                ['startup_a_uuid', 'startup_b_uuid'],
+                'startup_duplicate_pair_unique'
+            );
         });
 
         Schema::create('startup_merges', function (Blueprint $table) {
             $table->id();
             $table->uuid('source_uuid')->index();
             $table->uuid('target_uuid')->index();
-            $table->foreignId('candidate_id')->nullable()->constrained('startup_duplicate_candidates')->nullOnDelete();
-            $table->json('journal'); // what moved, so the merge can be undone
+            $table->foreignId('candidate_id')->nullable()
+                ->constrained('startup_duplicate_candidates')->nullOnDelete();
+            $table->json('journal');
             $table->text('reason');
             $table->foreignId('merged_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('merged_at');
@@ -167,8 +171,18 @@ return new class extends Migration
 
     public function down(): void
     {
-        foreach (['registry_outbox_events', 'data_sharing_consents', 'startup_merges', 'startup_duplicate_candidates', 'startup_aliases',
-            'startup_field_changes', 'startup_founders', 'startup_memberships', 'startup_profiles', 'startups'] as $table) {
+        foreach ([
+            'registry_outbox_events',
+            'data_sharing_consents',
+            'startup_merges',
+            'startup_duplicate_candidates',
+            'startup_aliases',
+            'startup_field_changes',
+            'startup_founders',
+            'startup_memberships',
+            'startup_profiles',
+            'startups',
+        ] as $table) {
             Schema::dropIfExists($table);
         }
     }

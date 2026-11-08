@@ -10,7 +10,7 @@
         <p>Grants, accelerators, competitions, events and calls from Hive and partners. Sign in to save opportunities, get deadline reminders and see whether your startup qualifies.</p>
 
         <form method="get" class="filters" role="search" aria-label="Filter opportunities">
-            <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}"></div>
+            <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Search opportunities…"></div>
             <div class="form-group"><label for="type">Type</label>
                 <select id="type" name="type"><option value="">All types</option>
                     @foreach (\App\Models\Ecosystem\Opportunity::TYPES as $value => $label)<option value="{{ $value }}" @selected($type === $value)>{{ $label }}</option>@endforeach

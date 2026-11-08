@@ -134,7 +134,7 @@ class AdminPermissionsTest extends TestCase
             'accent_color' => '#b45309', 'font_family' => 'Outfit',
         ])->assertRedirect();
 
-        $this->get('/')->assertSee('Hive Growth')->assertSee('--brand-primary: #123456', false)->assertSee('family=Outfit', false);
+        $this->get('/')->assertSee('Hive Growth')->assertSee('--brand-primary: #123456', false)->assertSee('fonts/outfit/outfit-latin.woff2', false)->assertDontSee('fonts.googleapis.com', false);
         $this->assertDatabaseHas('audit_logs', ['action' => 'settings.updated']);
     }
 

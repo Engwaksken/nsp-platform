@@ -7,7 +7,7 @@
             @auth <a href="{{ route('marketplace.inbox') }}">My messages</a>@endauth</p>
 
         <form method="get" class="filters" role="search" aria-label="Filter the marketplace">
-            <div class="form-group"><label for="q">Keyword</label><input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" maxlength="100"></div>
+            <div class="form-group"><label for="q">Keyword</label><input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search products and services…" maxlength="100"></div>
             <div class="form-group"><label for="kind">Type</label>
                 <select id="kind" name="kind"><option value="">All</option>
                     @foreach (\App\Models\Marketplace\Listing::KINDS as $value => $label)<option value="{{ $value }}" @selected(($filters['kind'] ?? '') === $value)>{{ $label }}</option>@endforeach

@@ -7,7 +7,7 @@
         <a class="btn btn-primary" href="{{ route('admin.posts.create') }}">New post</a>
     </div>
     <form method="get" class="filters" role="search">
-        <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}"></div>
+        <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Search news by title…"></div>
         <button class="btn btn-secondary" type="submit">Search</button>
     </form>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">

@@ -17,7 +17,7 @@
                             <td colspan="4">
                                 <form method="post" action="{{ route('admin.menus.items.update', [$menu, $item]) }}" class="form-row" id="item-{{ $item->id }}">
                                     @csrf @method('PUT')
-                                    <div><label for="label-{{ $item->id }}" class="visually-hidden">Label</label><input id="label-{{ $item->id }}" type="text" name="label" value="{{ $item->label }}" required maxlength="80"></div>
+                                    <div><label for="label-{{ $item->id }}" class="visually-hidden">Label</label><input id="label-{{ $item->id }}" type="text" name="label" value="{{ $item->label }}" required maxlength="80" placeholder="Menu label"></div>
                                     <div>
                                         <label for="page-{{ $item->id }}" class="visually-hidden">Page</label>
                                         <select id="page-{{ $item->id }}" name="page_id"><option value="">Custom link</option>
@@ -48,7 +48,7 @@
             <h3>Add a link</h3>
             <form method="post" action="{{ route('admin.menus.items.store', $menu) }}" class="form-row">
                 @csrf
-                <div><label for="new-label-{{ $menu->id }}">Label</label><input id="new-label-{{ $menu->id }}" type="text" name="label" required maxlength="80"></div>
+                <div><label for="new-label-{{ $menu->id }}">Label</label><input id="new-label-{{ $menu->id }}" type="text" name="label" required maxlength="80" placeholder="e.g. About us"></div>
                 <div>
                     <label for="new-page-{{ $menu->id }}">Page</label>
                     <select id="new-page-{{ $menu->id }}" name="page_id"><option value="">Custom link</option>
