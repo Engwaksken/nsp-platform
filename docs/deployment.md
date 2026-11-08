@@ -37,7 +37,9 @@ If the host has no terminal, use cPanel **Git Version Control** to pull the `pro
    php artisan migrate --force
    php artisan db:seed --force          # roles, permissions, draft placeholder pages
    php artisan storage:link
-   php artisan nsp:create-admin you@hive.example   # asks for the password; never pass it on the command line
+   php artisan nsp:create-admin you@hive.example   # asks for the password twice; never pass it on the command line
+   # Forgot it or mistyped it? An existing account keeps its password unless you add --reset-password:
+   # php artisan nsp:create-admin you@hive.example --reset-password
    php artisan config:cache && php artisan route:cache && php artisan view:cache
    ```
 5. The first admin signs in and must set up two-factor sign-in straight away. Keep `NSP_MFA_ENFORCE=true` (the default) on every server. Password reset emails need working `MAIL_*` settings, so send yourself a test reset before go-live.

@@ -12,9 +12,34 @@ use Illuminate\Validation\Rules\Password;
 
 class CreateAdmin extends Command
 {
-    protected $signature = 'nsp:create-admin {email} {--name=} {--role=super_admin}';
+    protected $signature = 'nsp:create-admin {email} {--name=} {--role=super_admin} {--reset-password : Set a new password for an existing account}';
 
-    protected $description = 'Create (or promote) an admin account. The password is asked for interactively and never stored in shell history.';
+    protected $description = 'Create (or promote) an admin account, or reset its password. The password is asked for interactively (twice) and never stored in shell history.';
+
+    /** Ask for the password twice and validate it; null when it is rejected. */
+    private function askPassword(string $email): ?string
+    {
+        $password = (string) $this->secret('Password (at least 12 characters, letters and numbers; typing is hidden)');
+        $repeat = (string) $this->secret('Repeat the password');
+        if (! hash_equals($password, $repeat)) {
+            $this->error('The two passwords do not match. Nothing was changed.');
+
+            return null;
+        }
+        $validator = Validator::make(
+            ['email' => $email, 'password' => $password],
+            ['email' => ['required', 'email'], 'password' => ['required', Password::min(12)->letters()->numbers()]]
+        );
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $message) {
+                $this->error($message);
+            }
+
+            return null;
+        }
+
+        return $password;
+    }
 
     public function handle(): int
     {
@@ -28,28 +53,28 @@ class CreateAdmin extends Command
         $this->callSilently('db:seed', ['--class' => RolesAndPermissionsSeeder::class, '--force' => true]);
 
         $user = User::query()->where('email', $email)->first();
-        if (! $user) {
-            $password = (string) $this->secret('Password (at least 12 characters, letters and numbers)');
-            $validator = Validator::make(
-                ['email' => $email, 'password' => $password],
-                ['email' => ['required', 'email'], 'password' => ['required', Password::min(12)->letters()->numbers()]]
-            );
-            if ($validator->fails()) {
-                foreach ($validator->errors()->all() as $message) {
-                    $this->error($message);
-                }
-
+        if (! $user || $this->option('reset-password')) {
+            $password = $this->askPassword($email);
+            if ($password === null) {
                 return self::FAILURE;
             }
-            $user = new User;
-            $user->forceFill([
-                'name' => $this->option('name') ?: Str::before($email, '@'),
-                'email' => $email,
-                'password' => $password,
-                'is_active' => true,
-                'email_verified_at' => now(),
-            ])->save();
-            $this->info("Created {$email}.");
+            if (! $user) {
+                $user = new User;
+                $user->forceFill([
+                    'name' => $this->option('name') ?: Str::before($email, '@'),
+                    'email' => $email,
+                    'email_verified_at' => now(),
+                ]);
+            }
+            $created = ! $user->exists;
+            // Re-activate on reset too, so a locked-out admin can always get back in from the server.
+            $user->forceFill(['password' => $password, 'is_active' => true])->save();
+            $this->info($created ? "Created {$email}." : "Password reset for {$email}.");
+            if (! $created) {
+                Audit::log('user.password_reset_cli', $user);
+            }
+        } else {
+            $this->line("{$email} already exists; its password was not changed (use --reset-password to set a new one).");
         }
 
         $user->assignRole($role);
