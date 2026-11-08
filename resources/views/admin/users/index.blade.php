@@ -4,7 +4,7 @@
 @section('content')
     <div class="page-head">
         <h1>Users and roles</h1>
-        <a class="btn btn-primary" href="{{ route('admin.users.create') }}">Add user</a>
+        <a class="btn btn-primary" href="{{ route('admin.users.create') }}" data-modal>Add user</a>
     </div>
     <form method="get" class="filters" role="search">
         <div class="form-group"><label for="q">Name or email</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Search by name or email…"></div>
@@ -22,7 +22,7 @@
             <tbody>
             @forelse ($users as $user)
                 <tr>
-                    <td><a href="{{ route('admin.users.edit', $user) }}">{{ $user->name }}</a></td>
+                    <td><a href="{{ route('admin.users.edit', $user) }}" data-modal>{{ $user->name }}</a></td>
                     <td>{{ $user->email }}</td>
                     <td>{{ $user->roles->pluck('name')->join(', ') ?: '—' }}</td>
                     <td>{{ collect([$user->oidc_subject ? 'Hive SSO' : null, $user->password ? 'Password' : null])->filter()->join(', ') ?: '—' }}</td>

@@ -15,7 +15,8 @@
         <div class="alert alert-warning"><strong>Fix before approving:</strong><ul>@foreach ($problems as $problem)<li>{{ $problem }}</li>@endforeach</ul></div>
     @endif
 
-    <section class="panel" aria-labelledby="preview-heading">
+    <div data-tabs="Rubric version" data-tabs-key="vgi-edit">
+    <section class="panel" data-tab="Preview" aria-labelledby="preview-heading">
         <h2 id="preview-heading">Preview</h2>
         <p class="hint">How founders will see it. Scores and tips are only visible to staff here; founders see tips on their results for weak answers (score below 50).</p>
         @foreach ($definition['dimensions'] ?? [] as $dimension)
@@ -37,29 +38,31 @@
 
     @if ($framework->status === 'draft')
         @can('edit-vgi-frameworks')
-            <form method="post" action="{{ route('admin.vgi.update', $framework) }}" class="panel">
+            <form method="post" action="{{ route('admin.vgi.update', $framework) }}" class="panel" data-tab="Edit">
                 @csrf @method('PUT')
                 <h2>Edit</h2>
                 <p class="hint">The rubric is JSON. Each dimension has a weight (relative), questions (key, prompt, weight, evidence: none/optional/required) and 2–7 options (key, label, score 0–100, optional tip). Bands must cover 0–100 in steps of 0.1 (for example 0–24.9, 25–44.9 …). Founders’ scores are recalculated only from the approved version they used.</p>
                 @include('partials.field', ['name' => 'description', 'label' => 'Description', 'type' => 'textarea', 'rows' => 2, 'value' => $framework->description])
                 <div class="form-group">
                     <label for="definition">Rubric (JSON)</label>
-                    <textarea id="definition" name="definition" rows="28" spellcheck="false" style="font-family:monospace;font-size:.85rem" @error('definition') aria-invalid="true" @enderror>{{ $json }}</textarea>
+                    <textarea id="definition" name="definition" rows="28" spellcheck="false" class="code-input" @error('definition') aria-invalid="true" @enderror>{{ $json }}</textarea>
                     @error('definition')<p class="error">{{ $message }}</p>@enderror
                 </div>
-                <button type="submit" class="btn btn-primary">Save draft</button>
+                <div class="actions"><button type="submit" class="btn btn-primary">Save draft</button></div>
             </form>
         @endcan
         @can('approve-vgi-frameworks')
-            <form method="post" action="{{ route('admin.vgi.approve', $framework) }}" class="panel" data-confirm="Approve this version? Founders will use it for all new assessments, and it can no longer be edited.">
+            <form method="post" action="{{ route('admin.vgi.approve', $framework) }}" class="panel" data-tab="Approve" data-confirm="Approve this version? Founders will use it for all new assessments, and it can no longer be edited.">
                 @csrf
                 <h2>Approve</h2>
                 <p class="hint">Someone other than the last editor ({{ $framework->editor?->name ?? 'the seeded starter draft' }}) must approve. Approving replaces the current version for new assessments; existing results keep the version they used.</p>
                 @include('partials.field', ['name' => 'note', 'label' => 'Approval note', 'type' => 'textarea', 'rows' => 2, 'required' => true, 'hint' => 'What was reviewed and by whom, for example: “Reviewed by the programs team on 6 Nov.”'])
-                <button type="submit" class="btn btn-primary">Approve version {{ $framework->version }}</button>
+                <div class="actions"><button type="submit" class="btn btn-primary">Approve version {{ $framework->version }}</button></div>
             </form>
         @endcan
-    @else
+    @endif
+    </div>
+    @if ($framework->status !== 'draft')
         <p class="hint">This version is {{ $framework->status }} and cannot be edited. To change the rubric, create a new draft version from the overview.</p>
     @endif
 @endsection

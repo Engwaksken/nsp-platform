@@ -4,7 +4,7 @@
 @section('content')
     <div class="page-head">
         <h1>Challenge Exchange</h1>
-        @can('manage-challenges')<a class="btn btn-primary" href="{{ route('admin.challenges.create') }}">New challenge</a>@endcan
+        @can('manage-challenges')<a class="btn btn-primary" href="{{ route('admin.challenges.create') }}" data-modal="lg">New challenge</a>@endcan
     </div>
     @include('partials.flash')
     <nav class="filters" aria-label="Filter challenge records">
@@ -24,7 +24,7 @@
                     <td>{{ \Illuminate\Support\Str::headline($challenge->status) }}</td><td>{{ $challenge->submitter?->name ?? 'Hive staff' }}</td>
                     <td>{{ $challenge->publishedVersion?->version ? 'v'.$challenge->publishedVersion->version : '—' }}</td>
                     <td class="actions"><a class="btn btn-secondary btn-sm" href="{{ route('admin.challenges.show', $challenge) }}">Review</a>
-                        @can('manage-challenges')<a class="btn btn-secondary btn-sm" href="{{ route('admin.challenges.edit', $challenge) }}">Edit</a>@endcan
+                        @can('manage-challenges')<a class="btn btn-secondary btn-sm" href="{{ route('admin.challenges.edit', $challenge) }}" data-modal="lg">Edit</a>@endcan
                     </td></tr>
             @empty<tr><td colspan="5" class="empty">No challenges in this queue.</td></tr>@endforelse
         </tbody></table>
