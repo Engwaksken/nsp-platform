@@ -4,7 +4,7 @@
 @section('content')
     <div class="page-head">
         <h1>Opportunities</h1>
-        <a class="btn btn-primary" href="{{ route('admin.opportunities.create') }}">New opportunity</a>
+        <a class="btn btn-primary" href="{{ route('admin.opportunities.create') }}" data-modal="lg">New opportunity</a>
     </div>
     <nav class="filters" aria-label="Filter opportunities">
         @foreach (['published' => 'Open', 'pending_review' => 'To review ('.$pendingCount.')', 'draft' => 'Drafts', 'closed' => 'Closed', 'rejected' => 'Rejected', 'archived' => 'Archived'] as $value => $label)
@@ -17,14 +17,14 @@
             <tbody>
             @forelse ($opportunities as $opportunity)
                 <tr>
-                    <td><a href="{{ route('admin.opportunities.edit', $opportunity) }}">{{ $opportunity->title }}</a>
+                    <td><a href="{{ route('admin.opportunities.edit', $opportunity) }}" data-modal="lg">{{ $opportunity->title }}</a>
                         @if ($opportunity->submitted_by)<br><span class="meta">Shared by a user</span>@endif</td>
                     <td>{{ \App\Models\Ecosystem\Opportunity::TYPES[$opportunity->type] }}</td>
                     <td>{{ ($opportunity->deadline_at ?? $opportunity->starts_at)?->format('j M Y') ?? '—' }}</td>
                     <td>@if ($opportunity->accepts_interest)<a href="{{ route('admin.opportunities.interests', $opportunity) }}">{{ $opportunity->interests_count }}</a>@else — @endif</td>
                     <td class="actions">
                         <a class="btn btn-secondary btn-sm" href="{{ route('opportunities.show', $opportunity) }}" target="_blank" rel="noopener">View</a>
-                        @if ($opportunity->status === 'pending_review')<a class="btn btn-primary btn-sm" href="{{ route('admin.opportunities.edit', $opportunity) }}">Review</a>@endif
+                        @if ($opportunity->status === 'pending_review')<a class="btn btn-primary btn-sm" href="{{ route('admin.opportunities.edit', $opportunity) }}" data-modal="lg">Review</a>@endif
                     </td>
                 </tr>
             @empty

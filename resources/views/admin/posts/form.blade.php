@@ -12,7 +12,8 @@
     <form method="post" action="{{ $post->exists ? route('admin.posts.update', $post) : route('admin.posts.store') }}">
         @csrf
         @if ($post->exists) @method('PUT') @endif
-        <section class="panel">
+        <div data-tabs="Post settings" data-tabs-key="post-form">
+        <section class="panel" data-tab="Article">
             @include('partials.field', ['name' => 'title', 'label' => 'Title', 'value' => $post->title, 'required' => true, 'maxlength' => 200, 'attrs' => 'data-slug-source'])
             @include('partials.field', ['name' => 'slug', 'label' => 'Address (slug)', 'value' => $post->slug, 'required' => true, 'maxlength' => 120, 'attrs' => 'data-slug-target'])
             @include('partials.field', ['name' => 'excerpt', 'label' => 'Short summary', 'type' => 'textarea', 'rows' => 3, 'value' => $post->excerpt])
@@ -28,8 +29,9 @@
                 @endforelse
             </fieldset>
         </section>
-        @include('admin.partials.publishing', ['item' => $post])
-        @include('admin.partials.seo', ['item' => $post])
+        <div data-tab="Publishing">@include('admin.partials.publishing', ['item' => $post])</div>
+        <div data-tab="SEO">@include('admin.partials.seo', ['item' => $post])</div>
+        </div>
         <div class="actions">
             <button type="submit" class="btn btn-primary">Save post</button>
             <a class="btn btn-secondary" href="{{ route('admin.posts.index') }}">Cancel</a>
@@ -37,9 +39,10 @@
     </form>
 
     @if ($post->exists)
-        <form method="post" action="{{ route('admin.posts.destroy', $post) }}" data-confirm="Move this post to the trash?" class="panel">
+        <form method="post" action="{{ route('admin.posts.destroy', $post) }}" data-confirm="Move “{{ $post->title }}” to the trash? You can restore it later." class="panel danger-zone">
             @csrf @method('DELETE')
-            <button type="submit" class="btn btn-danger">Delete post</button>
+            <p class="meta">Remove this post from the website.</p>
+            <button type="submit" class="btn btn-danger btn-sm">Delete post</button>
         </form>
     @endif
 @endsection

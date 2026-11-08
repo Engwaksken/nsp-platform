@@ -16,7 +16,8 @@
         <div class="alert alert-info">Shared by {{ $opportunity->submitter?->name ?? 'a user' }} ({{ $opportunity->submitter?->email }}). Check the details and link before publishing.</div>
     @endif
 
-    <form method="post" action="{{ $opportunity->exists ? route('admin.opportunities.update', $opportunity) : route('admin.opportunities.store') }}">
+    <div data-tabs="Opportunity" data-tabs-key="opportunity-form">
+    <form method="post" data-tab="Details" action="{{ $opportunity->exists ? route('admin.opportunities.update', $opportunity) : route('admin.opportunities.store') }}">
         @csrf
         @if ($opportunity->exists) @method('PUT') @endif
         @include('site.opportunities.fields', ['staff' => true])
@@ -27,7 +28,7 @@
     </form>
 
     @if ($opportunity->exists)
-        <form method="post" action="{{ route('admin.opportunities.moderate', $opportunity) }}" class="panel">
+        <form method="post" action="{{ route('admin.opportunities.moderate', $opportunity) }}" class="panel" data-tab="Status and review">
             @csrf
             <h2>Status</h2>
             @include('partials.field', ['name' => 'note', 'label' => 'Note (required when rejecting; shown to the submitter)', 'type' => 'textarea', 'rows' => 2, 'value' => $opportunity->moderation_note])
@@ -39,4 +40,5 @@
             </div>
         </form>
     @endif
+    </div>
 @endsection

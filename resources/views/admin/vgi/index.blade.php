@@ -19,7 +19,8 @@
         <p>Founders use <strong>{{ $current->name }} v{{ $current->version }}</strong>, approved {{ $current->approved_at->format('j M Y') }} by {{ $current->approver?->name ?? '—' }}.</p>
     @endif
 
-    <section class="panel" aria-labelledby="versions-heading">
+    <div data-tabs="Growth assessments" data-tabs-key="vgi-index">
+    <section class="panel" data-tab="Rubric versions" data-tab-count="{{ count($frameworks) }}" aria-labelledby="versions-heading">
         <h2 id="versions-heading">Rubric versions</h2>
         <div class="table-wrap" tabindex="0" role="region" aria-label="Rubric versions">
             <table>
@@ -32,7 +33,7 @@
                         <td>{{ $framework->questionCount() }}</td>
                         <td>{{ $framework->editor?->name ?? 'Seeded starter draft' }}</td>
                         <td>{{ $framework->approved_at?->format('j M Y') ?? '—' }}@if ($framework->approval_note)<br><span class="meta">{{ $framework->approval_note }}</span>@endif</td>
-                        <td><a class="btn btn-secondary btn-sm" href="{{ route('admin.vgi.edit', $framework) }}">{{ $framework->status === 'draft' ? 'Review and edit' : 'View' }}</a></td>
+                        <td><a class="btn btn-secondary btn-sm" href="{{ route('admin.vgi.edit', $framework) }}" data-modal="lg">{{ $framework->status === 'draft' ? 'Review and edit' : 'View' }}</a></td>
                     </tr>
                 @endforeach
                 </tbody>
@@ -41,7 +42,7 @@
     </section>
 
     @if ($assessments)
-        <section class="panel" aria-labelledby="assessments-heading">
+        <section class="panel" data-tab="Submitted assessments" data-tab-count="{{ $assessments->total() }}" aria-labelledby="assessments-heading">
             <h2 id="assessments-heading">Submitted assessments</h2>
             <div class="table-wrap" tabindex="0" role="region" aria-label="Submitted assessments">
                 <table>
@@ -64,4 +65,5 @@
             {{ $assessments->links() }}
         </section>
     @endif
+    </div>
 @endsection

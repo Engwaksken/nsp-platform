@@ -8,7 +8,8 @@
 
 @section('content')
     <div class="page-head"><h1>{{ $user->exists ? 'Edit: ' . $user->name : 'Add user' }}</h1></div>
-    <form method="post" action="{{ $user->exists ? route('admin.users.update', $user) : route('admin.users.store') }}" class="panel">
+    <div data-tabs="User" data-tabs-key="user-form">
+    <form method="post" action="{{ $user->exists ? route('admin.users.update', $user) : route('admin.users.store') }}" class="panel" data-tab="Account and roles">
         @csrf
         @if ($user->exists) @method('PUT') @endif
         @include('partials.field', ['name' => 'name', 'label' => 'Name', 'value' => $user->name, 'required' => true, 'autocomplete' => 'off'])
@@ -32,7 +33,7 @@
     </form>
 
     @if ($user->exists)
-        <section class="panel" aria-labelledby="mfa-heading">
+        <section class="panel" data-tab="Two-factor sign-in" aria-labelledby="mfa-heading">
             <h2 id="mfa-heading">Two-factor sign-in</h2>
             @if ($user->hasMfa())
                 <p>On since {{ $user->mfa_enabled_at->format('j M Y') }}. {{ $user->recoveryCodesLeft() }} recovery codes left.</p>
@@ -48,4 +49,5 @@
             @endif
         </section>
     @endif
+    </div>
 @endsection

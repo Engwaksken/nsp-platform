@@ -16,7 +16,9 @@
     </nav>
     <p class="hint">From {{ $from->format('j M Y') }} to today. Counts only: no names or contact details. Definitions are in <code>docs/kpi-definitions.md</code>. Downloads are recorded in the audit log.</p>
 
+    <div data-tabs="KPI groups" data-tabs-key="insights">
     @foreach ($kpis as $group => $items)
+        <section data-tab="{{ $group }}" data-tab-count="{{ count($items) }}" aria-label="{{ $group }}">
         <h2>{{ $group }}</h2>
         <div class="grid">
             @foreach ($items as $key => $kpi)
@@ -27,8 +29,10 @@
                 </section>
             @endforeach
         </div>
+        </section>
     @endforeach
 
+    <section data-tab="Monthly trend" aria-label="New accounts and startups by month">
     <h2>New accounts and startups by month</h2>
     <div class="table-wrap" tabindex="0" role="region" aria-label="New accounts and startups by month">
         <table>
@@ -39,5 +43,7 @@
             @endforeach
             </tbody>
         </table>
+    </div>
+    </section>
     </div>
 @endsection

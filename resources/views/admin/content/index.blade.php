@@ -4,7 +4,7 @@
 @section('content')
     <div class="page-head">
         <h1>{{ $definition['plural'] }}</h1>
-        <a class="btn btn-primary" href="{{ route('admin.content.create', $definition['key']) }}">Add {{ $definition['singular'] }}</a>
+        <a class="btn btn-primary" href="{{ route('admin.content.create', $definition['key']) }}" data-modal>Add {{ $definition['singular'] }}</a>
     </div>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
@@ -17,8 +17,8 @@
                     <td>{{ $item->sort_order }}</td>
                     <td><span class="badge badge-{{ $item->is_published ? 'on' : 'off' }}">{{ $item->is_published ? 'Yes' : 'No' }}</span></td>
                     <td class="actions">
-                        <a class="btn btn-secondary btn-sm" href="{{ route('admin.content.edit', [$definition['key'], $item->id]) }}">Edit</a>
-                        <form method="post" action="{{ route('admin.content.destroy', [$definition['key'], $item->id]) }}" data-confirm="Delete this {{ $definition['singular'] }}?">
+                        <a class="btn btn-secondary btn-sm" href="{{ route('admin.content.edit', [$definition['key'], $item->id]) }}" data-modal>Edit<span class="visually-hidden"> {{ $item->{$definition['title']} }}</span></a>
+                        <form method="post" action="{{ route('admin.content.destroy', [$definition['key'], $item->id]) }}" data-confirm="Delete this {{ $definition['singular'] }}? This cannot be undone.">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                         </form>

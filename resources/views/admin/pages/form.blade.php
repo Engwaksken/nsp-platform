@@ -22,7 +22,8 @@
         @csrf
         @if ($page->exists) @method('PUT') @endif
 
-        <section class="panel" aria-labelledby="details-heading">
+        <div data-tabs="Page settings" data-tabs-key="page-form">
+        <section class="panel" data-tab="Details" aria-labelledby="details-heading">
             <h2 id="details-heading">Details</h2>
             @include('partials.field', ['name' => 'title', 'label' => 'Title', 'value' => $page->title, 'required' => true, 'maxlength' => 200, 'attrs' => 'data-slug-source'])
             @include('partials.field', ['name' => 'slug', 'label' => 'Address (slug)', 'value' => $page->slug, 'required' => true, 'maxlength' => 120, 'attrs' => 'data-slug-target',
@@ -31,7 +32,7 @@
             @include('partials.field', ['name' => 'summary', 'label' => 'Summary', 'type' => 'textarea', 'rows' => 3, 'value' => $page->summary, 'hint' => 'Shown under the title when the page has no hero section.'])
         </section>
 
-        <section class="panel" aria-labelledby="sections-heading">
+        <section class="panel" data-tab="Sections" data-tab-count="{{ count(old('blocks', $page->blocks ?? [])) ?: '' }}" aria-labelledby="sections-heading">
             <h2 id="sections-heading">Sections</h2>
             <p class="hint">Build the page from sections. Text uses Markdown; HTML is not allowed.</p>
             <div id="blocks">
@@ -54,14 +55,17 @@
             <noscript><p class="hint">Adding and reordering sections needs JavaScript. You can still edit existing sections.</p></noscript>
         </section>
 
-        @include('admin.partials.publishing', ['item' => $page])
-        @include('admin.partials.seo', ['item' => $page])
-        <section class="panel">
-            @include('admin.partials.media-select', ['name' => 'og_image_id', 'label' => 'Sharing image', 'value' => $page->og_image_id, 'media' => $media])
+        <div data-tab="Publishing">
+            @include('admin.partials.publishing', ['item' => $page])
             @if ($page->exists)
                 @include('partials.field', ['name' => 'revision_note', 'label' => 'Note for this revision (optional)', 'maxlength' => 200])
             @endif
-        </section>
+        </div>
+        <div data-tab="SEO and sharing">
+            @include('admin.partials.seo', ['item' => $page])
+            @include('admin.partials.media-select', ['name' => 'og_image_id', 'label' => 'Sharing image', 'value' => $page->og_image_id, 'media' => $media])
+        </div>
+        </div>
 
         <div class="actions">
             <button type="submit" class="btn btn-primary">Save page</button>
@@ -70,9 +74,10 @@
     </form>
 
     @if ($page->exists && $page->slug !== 'home')
-        <form method="post" action="{{ route('admin.pages.destroy', $page) }}" data-confirm="Move this page to the trash?" class="panel">
+        <form method="post" action="{{ route('admin.pages.destroy', $page) }}" data-confirm="Move “{{ $page->title }}” to the trash? You can restore it later." class="panel danger-zone">
             @csrf @method('DELETE')
-            <button type="submit" class="btn btn-danger">Delete page</button>
+            <p class="meta">Remove this page from the website.</p>
+            <button type="submit" class="btn btn-danger btn-sm">Delete page</button>
         </form>
     @endif
 

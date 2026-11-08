@@ -23,13 +23,14 @@
     <link rel="stylesheet" href="{{ asset('css/fonts.css') }}?v=1">
 @endif
 <link rel="stylesheet" href="{{ asset('css/palette-hive.css') }}?v=1">
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=4">
+<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=5">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};
         --brand-secondary: {{ $brand['secondary_color'] }};
         --brand-accent: {{ $brand['accent_color'] }};
-        --brand-font: {!! e($brandFont) !!};
+        {{-- From the fixed Settings::FONTS list; e() would turn the quotes into &#039; and break the CSS. --}}
+        --brand-font: {!! str_replace(['<', '>', '{', '}', ';'], '', $brandFont) !!};
     }
 </style>
-<script src="{{ asset('js/nsp.js') }}?v=2" defer></script>
+<script src="{{ asset('js/nsp.js') }}?v=3" defer></script>

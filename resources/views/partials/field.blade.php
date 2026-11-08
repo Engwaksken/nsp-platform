@@ -4,6 +4,7 @@
 
     Placeholders:
     - select:          'placeholder' => 'Choose…' adds an empty first option (unchanged behaviour; none is added otherwise).
+    - 'inputClass' => 'otp-input' adds a class to an <input>.
     - input/textarea:  a helpful placeholder is derived from the label and type. Pass 'placeholder' => 'e.g. …' to set it,
                        or 'placeholder' => false to show none.
 --}}
@@ -41,7 +42,7 @@
                @if ($maxlength ?? false) maxlength="{{ $maxlength }}" @endif
                @if ($inputPlaceholder && !str_contains($attrs ?? '', 'placeholder=')) placeholder="{{ $inputPlaceholder }}" @endif
                @if ($attrs ?? false) {!! $attrs !!} @endif {{-- developer-supplied attributes only, never user input --}}
-               @class(['is-invalid' => $errors->has($errorKey)])
+               @class([$inputClass ?? '' => filled($inputClass ?? null), 'is-invalid' => $errors->has($errorKey)])
                @if ($describedBy) aria-describedby="{{ $describedBy }}" @endif @if ($errors->has($errorKey)) aria-invalid="true" @endif>
     @endif
     @isset($hint)<p class="hint" id="{{ $id }}-hint">{{ $hint }}</p>@endisset

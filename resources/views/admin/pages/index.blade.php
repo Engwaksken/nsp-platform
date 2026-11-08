@@ -4,7 +4,7 @@
 @section('content')
     <div class="page-head">
         <h1>Pages</h1>
-        <a class="btn btn-primary" href="{{ route('admin.pages.create') }}">New page</a>
+        <a class="btn btn-primary" href="{{ route('admin.pages.create') }}" data-modal="lg">New page</a>
     </div>
 
     <form method="get" class="filters" role="search">
@@ -28,13 +28,13 @@
             <tbody>
             @forelse ($pages as $page)
                 <tr>
-                    <td><a href="{{ route('admin.pages.edit', $page) }}">{{ $page->title }}</a></td>
+                    <td><a href="{{ route('admin.pages.edit', $page) }}" data-modal="lg">{{ $page->title }}</a></td>
                     <td>/{{ $page->slug === 'home' ? '' : $page->slug }}</td>
                     <td><span class="badge badge-{{ $page->displayStatus() }}">{{ ucfirst($page->displayStatus()) }}</span>
                         @if ($page->displayStatus() === 'scheduled')<br><span class="meta">{{ $page->published_at->format('j M Y H:i') }}</span>@endif</td>
                     <td>{{ $page->updated_at->diffForHumans() }}</td>
                     <td class="actions">
-                        <a class="btn btn-secondary btn-sm" href="{{ route('admin.pages.edit', $page) }}">Edit<span class="visually-hidden"> {{ $page->title }}</span></a>
+                        <a class="btn btn-secondary btn-sm" href="{{ route('admin.pages.edit', $page) }}" data-modal="lg">Edit<span class="visually-hidden"> {{ $page->title }}</span></a>
                         <a class="btn btn-secondary btn-sm" href="{{ route('admin.pages.preview', $page) }}" target="_blank" rel="noopener">Preview</a>
                     </td>
                 </tr>
