@@ -463,6 +463,14 @@
       });
       box.insertBefore(list, panels[0]);
       box.classList.add('is-tabbed');
+      // Fade the edge of a tab row that scrolls sideways (narrow screens), so it is clear there is more.
+      var edge = function () {
+        list.classList.toggle('has-overflow', list.scrollWidth > list.clientWidth + 2);
+        list.classList.toggle('at-end', list.scrollLeft + list.clientWidth >= list.scrollWidth - 2);
+      };
+      list.addEventListener('scroll', edge, { passive: true });
+      window.addEventListener('resize', edge);
+      window.setTimeout(edge, 0);
 
       function select(index, focus) {
         tabs.forEach(function (tab, i) {
@@ -648,8 +656,39 @@
     });
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Tables: label every cell with its column heading so phones can show */
+  /* each row as a card (see .is-stacked in nsp.css).                    */
+  /* ------------------------------------------------------------------ */
+  function initTables(root) {
+    qsa(root, '.table-wrap').forEach(function (wrap) {
+      var table = wrap.querySelector('table');
+      if (!table || wrap.__nspStacked || wrap.hasAttribute('data-no-stack')) return;
+      var head = table.tHead && table.tHead.rows[table.tHead.rows.length - 1];
+      if (!head) return;
+      var labels = [];
+      Array.prototype.forEach.call(head.cells, function (cell) {
+        var text = visibleText(cell);
+        for (var i = 0; i < (cell.colSpan || 1); i++) labels.push(text);
+      });
+      Array.prototype.forEach.call(table.tBodies, function (body) {
+        Array.prototype.forEach.call(body.rows, function (row) {
+          var column = 0;
+          Array.prototype.forEach.call(row.cells, function (cell) {
+            var span = cell.colSpan || 1;
+            if (span === 1 && labels[column] && !cell.hasAttribute('data-label')) cell.setAttribute('data-label', labels[column]);
+            column += span;
+          });
+        });
+      });
+      wrap.__nspStacked = true;
+      wrap.classList.add('is-stacked');
+    });
+  }
+
   NSP.enhance = function (root) {
     root = root || document;
+    initTables(root);
     initTabs(root);
     initInlineModals(root);
     initAlerts(root);
