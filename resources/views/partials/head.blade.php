@@ -18,12 +18,12 @@
     <link rel="icon" href="{{ $brandFavicon->url() }}">
 @endif
 @if (in_array($brand['font_family'], ['Poppins', 'Outfit'], true))
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family={{ $brand['font_family'] }}:wght@400;500;600;700&display=swap">
+    {{-- Brand fonts are self-hosted (public/fonts) so pages make no third-party requests. --}}
+    <link rel="preload" href="{{ asset('fonts/'.strtolower($brand['font_family']).'/'.strtolower($brand['font_family']).($brand['font_family'] === 'Outfit' ? '' : '-400').'-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ asset('css/fonts.css') }}?v=1">
 @endif
 <link rel="stylesheet" href="{{ asset('css/palette-hive.css') }}?v=1">
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=3">
+<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=4">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};

@@ -7,7 +7,7 @@
         @can('review-duplicates')<a class="btn btn-secondary" href="{{ route('admin.duplicates.index') }}">Review possible duplicates</a>@endcan
     </div>
     <form method="get" class="filters" role="search">
-        <div class="form-group"><label for="q">Name or registration number</label><input id="q" type="search" name="q" value="{{ request('q') }}"></div>
+        <div class="form-group"><label for="q">Name or registration number</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Startup name or registration number"></div>
         <div class="form-group"><label for="status">Status</label>
             <select id="status" name="status">
                 @foreach (['active' => 'Active', 'archived' => 'Archived', 'merged' => 'Merged'] as $value => $label)

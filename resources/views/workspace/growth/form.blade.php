@@ -27,7 +27,7 @@
                             @endforeach
                             @if (($question['evidence'] ?? 'none') !== 'none')
                                 <label for="evidence-{{ $question['key'] }}" @class(['required' => $question['evidence'] === 'required'])>Evidence {{ $question['evidence'] === 'required' ? '' : '(optional)' }}</label>
-                                <textarea id="evidence-{{ $question['key'] }}" name="evidence[{{ $question['key'] }}]" rows="2" maxlength="2000"
+                                <textarea id="evidence-{{ $question['key'] }}" name="evidence[{{ $question['key'] }}]" rows="2" maxlength="2000" placeholder="Briefly describe evidence that supports your answer (optional)"
                                           placeholder="For example: a document name, a number, or where Hive can see this">{{ old('evidence.'.$question['key'], $response?->evidence_note) }}</textarea>
                             @endif
                         </fieldset>

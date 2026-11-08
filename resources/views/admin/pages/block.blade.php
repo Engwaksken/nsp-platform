@@ -12,11 +12,11 @@
     <input type="hidden" data-name="type" name="blocks[{{ $i }}][type]" value="{{ $block['type'] }}">
     <div class="form-group">
         <label data-for="heading" for="block-{{ $i }}-heading">Heading</label>
-        <input type="text" data-name="heading" id="block-{{ $i }}-heading" name="blocks[{{ $i }}][heading]" value="{{ $block['heading'] ?? '' }}" maxlength="200">
+        <input type="text" data-name="heading" id="block-{{ $i }}-heading" name="blocks[{{ $i }}][heading]" value="{{ $block['heading'] ?? '' }}" placeholder="Section heading" maxlength="200">
     </div>
     <div class="form-group">
         <label data-for="body" for="block-{{ $i }}-body">Text (Markdown)</label>
-        <textarea data-name="body" id="block-{{ $i }}-body" name="blocks[{{ $i }}][body]" rows="4">{{ $block['body'] ?? '' }}</textarea>
+        <textarea data-name="body" id="block-{{ $i }}-body" name="blocks[{{ $i }}][body]" rows="4" placeholder="Write the text for this section…">{{ $block['body'] ?? '' }}</textarea>
     </div>
     <div class="form-group">
         <label data-for="items" for="block-{{ $i }}-items">Numbers (impact numbers only)</label>
@@ -26,7 +26,7 @@
     <div class="form-row">
         <div class="form-group">
             <label data-for="link_label" for="block-{{ $i }}-link_label">Button or link text</label>
-            <input type="text" data-name="link_label" id="block-{{ $i }}-link_label" name="blocks[{{ $i }}][link_label]" value="{{ $block['link_label'] ?? '' }}" maxlength="80">
+            <input type="text" data-name="link_label" id="block-{{ $i }}-link_label" name="blocks[{{ $i }}][link_label]" value="{{ $block['link_label'] ?? '' }}" placeholder="e.g. Learn more" maxlength="80">
         </div>
         <div class="form-group">
             <label data-for="link_url" for="block-{{ $i }}-link_url">Link address</label>

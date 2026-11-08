@@ -7,7 +7,7 @@
             @auth <a href="{{ route('talent.dashboard') }}">My applications</a> · <a href="{{ route('talent.profile') }}">My candidate profile</a>@else <a href="{{ route('login') }}">Sign in</a> to apply.@endauth</p>
 
         <form method="get" class="filters" role="search" aria-label="Filter jobs">
-            <div class="form-group"><label for="q">Keyword or skill</label><input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" maxlength="100"></div>
+            <div class="form-group"><label for="q">Keyword or skill</label><input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="e.g. marketing, Python, sales" maxlength="100"></div>
             <div class="form-group"><label for="type">Type</label>
                 <select id="type" name="type"><option value="">Any</option>
                     @foreach (\App\Models\Talent\Vacancy::TYPES as $value => $label)<option value="{{ $value }}" @selected(($filters['type'] ?? '') === $value)>{{ $label }}</option>@endforeach

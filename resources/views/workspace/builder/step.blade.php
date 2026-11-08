@@ -19,7 +19,7 @@
                 @foreach ($submission->step->fields ?? [] as $field)
                     <label for="field-{{ $field['key'] }}">{{ $field['label'] }} @if ($field['required'] ?? false)<span>(required)</span>@endif</label>
                     @if (($field['type'] ?? 'text') === 'textarea')
-                        <textarea id="field-{{ $field['key'] }}" name="responses[{{ $field['key'] }}]" rows="5">{{ old('responses.'.$field['key'], $submission->responses[$field['key']] ?? '') }}</textarea>
+                        <textarea id="field-{{ $field['key'] }}" name="responses[{{ $field['key'] }}]" rows="5" placeholder="Type your response here…">{{ old('responses.'.$field['key'], $submission->responses[$field['key']] ?? '') }}</textarea>
                     @elseif (($field['type'] ?? '') === 'select')
                         <select id="field-{{ $field['key'] }}" name="responses[{{ $field['key'] }}]"><option value="">Choose…</option>@foreach (($field['options'] ?? []) as $value => $label)<option value="{{ $value }}" @selected(old('responses.'.$field['key'], $submission->responses[$field['key']] ?? '') === $value)>{{ $label }}</option>@endforeach</select>
                     @else
@@ -50,8 +50,8 @@
                         <form method="post" enctype="multipart/form-data" action="{{ route('workspace.builder.step.evidence', [$startup, $submission]) }}">
                             @csrf<label for="evidence-title">Evidence title</label><input id="evidence-title" name="title" required maxlength="200">
                             <label for="evidence-file">Private file (up to {{ (int) (config('builder.evidence.max_kb') / 1024) }} MB)</label><input id="evidence-file" type="file" name="file" accept=".pdf,.docx,.xlsx,.xls,.pptx,.csv,.txt,.png,.jpg,.jpeg">
-                            <label for="evidence-url">Or source link (HTTP/HTTPS)</label><input id="evidence-url" type="url" name="url">
-                            <label for="evidence-note">Source note</label><textarea id="evidence-note" name="source_note" rows="2"></textarea>
+                            <label for="evidence-url">Or source link (HTTP/HTTPS)</label><input id="evidence-url" type="url" name="url" placeholder="https://">
+                            <label for="evidence-note">Source note</label><textarea id="evidence-note" name="source_note" rows="2" placeholder="What does this source show?"></textarea>
                             <button class="btn" type="submit">Add evidence</button>
                         </form>
                     @endif
@@ -62,7 +62,7 @@
                     <section class="panel" aria-labelledby="review-heading">
                         <h2 id="review-heading">Reviewer decision</h2>
                         <form method="post" action="{{ route('workspace.builder.step.review', [$startup, $submission]) }}">
-                            @csrf<label for="review-feedback">Feedback (at least 10 characters)</label><textarea id="review-feedback" name="feedback" rows="4" required minlength="10"></textarea>
+                            @csrf<label for="review-feedback">Feedback (at least 10 characters)</label><textarea id="review-feedback" name="feedback" rows="4" required minlength="10" placeholder="Share specific, constructive feedback…"></textarea>
                             <button class="btn" name="decision" value="changes_requested">Request changes</button>
                             <button class="btn btn-primary" name="decision" value="validated">Validate step</button>
                         </form>
@@ -83,7 +83,7 @@
                     <form method="post" action="{{ route('workspace.builder.step.document.save', [$startup, $submission, $document]) }}">
                         @csrf @method('PUT')<input type="hidden" name="expected_version" value="{{ $document->current_version }}">
                         <label for="document-body">Editable Markdown output</label>
-                        <textarea id="document-body" name="body" rows="16" required>{{ old('body', $currentDocumentVersion->body) }}</textarea>
+                        <textarea id="document-body" name="body" rows="16" required placeholder="Start writing your document…">{{ old('body', $currentDocumentVersion->body) }}</textarea>
                         @if ($membership->canEdit())<button class="btn btn-primary" type="submit">Save new version</button>@endif
                         <a class="btn btn-secondary" href="{{ route('workspace.builder.step.document.export', [$startup, $submission, $document]) }}">Download Markdown</a>
                     </form>

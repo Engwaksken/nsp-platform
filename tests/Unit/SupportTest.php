@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\SeoRedirect;
 use App\Support\Contrast;
+use App\Support\FieldPlaceholder;
 use App\Support\PageBlocks;
 use App\Support\Settings;
 use PHPUnit\Framework\TestCase;
@@ -56,5 +57,23 @@ class SupportTest extends TestCase
     {
         $this->assertSame('/old-page', SeoRedirect::normalizePath('/Old-Page/?utm=1'));
         $this->assertSame('/', SeoRedirect::normalizePath(''));
+    }
+
+    public function test_field_placeholders_are_derived_from_label_and_type(): void
+    {
+        $this->assertSame('Enter title', FieldPlaceholder::for('Title'));
+        $this->assertSame('Enter SEO title', FieldPlaceholder::for('SEO title'));
+        $this->assertSame('Enter pay', FieldPlaceholder::for('Pay (optional)'));
+        $this->assertSame('name@example.com', FieldPlaceholder::for('Email address', 'email'));
+        $this->assertSame('https://', FieldPlaceholder::for('Where to apply (link)', 'url'));
+        $this->assertSame('Enter meeting link or place', FieldPlaceholder::for('Meeting link or place'));
+        $this->assertSame('e.g. my-page-name', FieldPlaceholder::for('URL slug'));
+        $this->assertSame('Separate items with commas', FieldPlaceholder::for('Tags (comma separated)'));
+        $this->assertSame('Enter your password', FieldPlaceholder::for('Password', 'password'));
+        $this->assertSame('Type your answer here…', FieldPlaceholder::for('What happened?', 'textarea'));
+        $this->assertSame('Write about you…', FieldPlaceholder::for('About you', 'textarea'));
+        $this->assertSame('Enter details…', FieldPlaceholder::for('Details', 'textarea'));
+        $this->assertNull(FieldPlaceholder::for('Publication date', 'date'));
+        $this->assertNull(FieldPlaceholder::for('Category', 'select'));
     }
 }

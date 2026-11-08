@@ -7,7 +7,7 @@
         <a class="btn btn-primary" href="{{ route('admin.users.create') }}">Add user</a>
     </div>
     <form method="get" class="filters" role="search">
-        <div class="form-group"><label for="q">Name or email</label><input id="q" type="search" name="q" value="{{ request('q') }}"></div>
+        <div class="form-group"><label for="q">Name or email</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Search by name or email…"></div>
         <div class="form-group">
             <label for="role">Role</label>
             <select id="role" name="role"><option value="">Any</option>

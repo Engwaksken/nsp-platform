@@ -23,7 +23,7 @@
         @endif
 
         <form method="get" class="filters" role="search" aria-label="Find experts">
-            <div class="form-group"><label for="q">Name or keyword</label><input id="q" type="search" name="q" value="{{ $q }}"></div>
+            <div class="form-group"><label for="q">Name or keyword</label><input id="q" type="search" name="q" value="{{ $q }}" placeholder="Search experts by name or skill…"></div>
             <div class="form-group"><label for="kind">Looking for</label>
                 <select id="kind" name="kind">
                     <option value="">Anyone</option>

@@ -8,7 +8,7 @@
     </div>
 
     <form method="get" class="filters" role="search">
-        <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}"></div>
+        <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Search pages by title…"></div>
         <div class="form-group">
             <label for="status">Status</label>
             <select id="status" name="status">

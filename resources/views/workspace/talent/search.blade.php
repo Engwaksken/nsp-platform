@@ -10,7 +10,7 @@
         <p class="hint">Only people who chose to be found by startups appear here. You see their headline, skills, location and preferences, not their email or CV. Invite them to apply to an open vacancy; it is their choice to apply.</p>
 
         <form method="get" class="filters" role="search" aria-label="Find candidates">
-            <div class="form-group"><label for="q">Skill, headline or place</label><input id="q" type="search" name="q" value="{{ $q }}" maxlength="100"></div>
+            <div class="form-group"><label for="q">Skill, headline or place</label><input id="q" type="search" name="q" value="{{ $q }}" placeholder="e.g. designer, Kampala" maxlength="100"></div>
             <div class="form-group"><label for="type">Looking for</label>
                 <select id="type" name="type"><option value="">Any</option>
                     @foreach (\App\Models\Talent\Vacancy::TYPES as $value => $label)<option value="{{ $value }}" @selected($type === $value)>{{ $label }}</option>@endforeach
