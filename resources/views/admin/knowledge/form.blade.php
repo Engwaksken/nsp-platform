@@ -11,10 +11,14 @@
     @if ($resource->status === 'published')<p class="alert alert-info">Published content is live. Saving changes records a new immutable version.</p>@endif
     <form method="post" enctype="multipart/form-data" action="{{ $resource->exists ? route('admin.knowledge.update', $resource->uuid) : route('admin.knowledge.store') }}" class="panel">
         @csrf @if ($resource->exists) @method('PUT') @endif
+        <div data-tabs="Resource" data-tabs-key="knowledge-form">
+        <div data-tab="Content">
         @include('partials.field', ['name' => 'title', 'label' => 'Title', 'required' => true, 'maxlength' => 200, 'value' => $resource->title])
         @include('partials.field', ['name' => 'slug', 'label' => 'URL slug', 'required' => true, 'maxlength' => 140, 'value' => $resource->slug])
         @include('partials.field', ['name' => 'summary', 'label' => 'Summary', 'type' => 'textarea', 'rows' => 3, 'value' => $resource->summary])
         @include('partials.field', ['name' => 'body', 'label' => 'Body (Markdown)', 'type' => 'textarea', 'rows' => 12, 'value' => $resource->body])
+        </div>
+        <div data-tab="Classification">
         <div class="form-row">
             @include('partials.field', ['name' => 'resource_type', 'label' => 'Resource type', 'type' => 'select', 'required' => true, 'options' => config('knowledge.resource_types'), 'value' => $resource->resource_type])
             @include('partials.field', ['name' => 'category_id', 'label' => 'Category', 'type' => 'select', 'placeholder' => 'No category', 'options' => collect($categories)->mapWithKeys(fn ($category) => [$category->id => str_repeat('— ', $category->depth).$category->name])->all(), 'value' => $resource->category_id])
@@ -29,26 +33,32 @@
             @include('partials.field', ['name' => 'external_url', 'label' => 'External source URL', 'type' => 'url', 'value' => $resource->external_url])
             @include('partials.field', ['name' => 'tags', 'label' => 'Tags (comma separated)', 'value' => $resource->tags?->pluck('name')->implode(', ')])
         </div>
-        <h2>Who this helps</h2>
+        <h3>Who this helps</h3>
         <div class="form-row">
-            @foreach (config('knowledge.audiences') as $key => $label)<label><input type="checkbox" name="audience[]" value="{{ $key }}" @checked(in_array($key, old('audience', $resource->audience ?? []), true))> {{ $label }}</label>@endforeach
+            @foreach (config('knowledge.audiences') as $key => $label)<label class="checkbox"><input type="checkbox" name="audience[]" value="{{ $key }}" @checked(in_array($key, old('audience', $resource->audience ?? []), true))> {{ $label }}</label>@endforeach
         </div>
-        <h2>Venture stages</h2><div class="form-row">
-            @foreach (config('knowledge.stages') as $key => $label)<label><input type="checkbox" name="stages[]" value="{{ $key }}" @checked(in_array($key, old('stages', $resource->stages ?? []), true))> {{ $label }}</label>@endforeach
+        <h3>Venture stages</h3><div class="form-row">
+            @foreach (config('knowledge.stages') as $key => $label)<label class="checkbox"><input type="checkbox" name="stages[]" value="{{ $key }}" @checked(in_array($key, old('stages', $resource->stages ?? []), true))> {{ $label }}</label>@endforeach
         </div>
-        <h2>VGI dimensions</h2><div class="form-row">
-            @foreach (config('knowledge.vgi_dimensions') as $key => $label)<label><input type="checkbox" name="vgi_dimension_keys[]" value="{{ $key }}" @checked(in_array($key, old('vgi_dimension_keys', $resource->vgi_dimension_keys ?? []), true))> {{ $label }}</label>@endforeach
+        <h3>VGI dimensions</h3><div class="form-row">
+            @foreach (config('knowledge.vgi_dimensions') as $key => $label)<label class="checkbox"><input type="checkbox" name="vgi_dimension_keys[]" value="{{ $key }}" @checked(in_array($key, old('vgi_dimension_keys', $resource->vgi_dimension_keys ?? []), true))> {{ $label }}</label>@endforeach
         </div>
         @include('partials.field', ['name' => 'builder_step_keys', 'label' => 'Related Builder step keys (comma separated)', 'value' => implode(', ', $resource->builder_step_keys ?? [])])
+        </div>
+        <div data-tab="Review and SEO">
         <div class="form-row">
             @include('partials.field', ['name' => 'review_due_at', 'label' => 'Review due', 'type' => 'date', 'value' => $resource->review_due_at?->format('Y-m-d')])
             @include('partials.field', ['name' => 'expires_at', 'label' => 'Expiry date', 'type' => 'date', 'value' => $resource->expires_at?->format('Y-m-d')])
             @include('partials.field', ['name' => 'seo_title', 'label' => 'SEO title', 'maxlength' => 200, 'value' => $resource->seo_title])
             @include('partials.field', ['name' => 'seo_description', 'label' => 'SEO description', 'maxlength' => 320, 'value' => $resource->seo_description])
         </div>
-        <div class="form-group"><label for="knowledge-file">Upload file (private)</label><input id="knowledge-file" name="file" type="file" accept=".pdf,.docx,.xlsx,.pptx,.csv,.txt,.png,.jpg,.jpeg">@if ($resource->hasFile())<p>Current file: {{ $resource->file_name }} · <a href="{{ route('admin.knowledge.file', $resource->uuid) }}">Open privately</a></p><label><input type="checkbox" name="remove_file" value="1"> Remove current file</label>@endif</div>
+        </div>
+        <div data-tab="File">
+        <div class="form-group"><label for="knowledge-file">Upload file (private)</label><input id="knowledge-file" name="file" type="file" accept=".pdf,.docx,.xlsx,.pptx,.csv,.txt,.png,.jpg,.jpeg">@if ($resource->hasFile())<p>Current file: {{ $resource->file_name }} · <a href="{{ route('admin.knowledge.file', $resource->uuid) }}">Open privately</a></p><label class="checkbox"><input type="checkbox" name="remove_file" value="1"> <span>Remove current file</span></label>@endif</div>
+        </div>
+        </div>
         @if ($resource->exists && $resource->status === 'published')@include('partials.field', ['name' => 'change_note', 'label' => 'Version change note', 'maxlength' => 500, 'value' => ''])@endif
-        <button class="btn btn-primary" type="submit">Save {{ $resource->status === 'published' ? 'new version' : 'draft' }}</button>
+        <div class="actions"><button class="btn btn-primary" type="submit">Save {{ $resource->status === 'published' ? 'new version' : 'draft' }}</button></div>
     </form>
     @if ($resource->exists && $resource->status === 'draft')
         <form method="post" action="{{ route('admin.knowledge.submit', $resource->uuid) }}" class="panel">@csrf<h2>Editorial workflow</h2><p>Submit the saved draft for an independent review before publication.</p><button class="btn btn-secondary">Submit for review</button></form>
