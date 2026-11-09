@@ -59,7 +59,12 @@ Add one cron job:
 
 ## Updates
 1. Back up first: `mysqldump` the NSP database and archive `storage/app/public` and `storage/app/private`.
-2. Locally run `deploy/build-release.sh`, then on the server run `bash deploy/update-live.sh`. It puts the site in maintenance mode, fast-forwards to the new `production` commit, runs `php artisan migrate --force` and `php artisan db:seed --class=RolesAndPermissionsSeeder --force` (safe to repeat; it adds any new permissions), rebuilds the config, route and view caches, and brings the site back up.
+2. Locally run `deploy/build-release.sh`, then get the new `production` commit onto the server in one of these ways:
+   - **Just pull (recommended).** Once, on the server, run `bash deploy/install-hooks.sh`. After that, every `git pull` (terminal, or cPanel **Git Version Control → Update from Remote**) also runs `deploy/after-pull.sh` automatically, with output in `storage/logs/deploy.log`.
+   - **Fully automatic.** Add a cron job `*/5 * * * * cd ~/nsp && bash deploy/auto-update.sh >> storage/logs/deploy.log 2>&1`. Every 5 minutes it checks GitHub and, only when `production` has a new commit, pulls and applies it. Nothing to do on the server after a release.
+   - **Manually.** `bash deploy/update-live.sh` pulls and applies in one step (works without the hook).
+
+   Applying a release (`deploy/after-pull.sh`) puts the site in maintenance mode, runs `php artisan migrate --force` and `php artisan db:seed --class=RolesAndPermissionsSeeder --force` (safe to repeat; it adds any new permissions), rebuilds the config, route and view caches, and brings the site back up. It is safe to run again by hand if a step failed.
 3. The deployed source commit is in the `RELEASE` file at the app root.
 
 Data-room files (`storage/app/private/data-room`) and candidate CVs (`storage/app/private/talent`) live (the private `local` disk). Include that folder in backups; never link it into `public`.
