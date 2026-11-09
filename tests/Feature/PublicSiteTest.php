@@ -68,6 +68,30 @@ class PublicSiteTest extends TestCase
         $this->assertStringNotContainsString('>Home<', $footerHtml);
     }
 
+    public function test_phone_app_tab_bar_and_install_manifest(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('class="app-tabbar"', false)
+            ->assertSee('rel="manifest"', false)
+            ->assertSee('<span>Sign in</span>', false)
+            ->assertDontSee('<span>Alerts</span>', false);
+        $this->actingAs($this->userWithRole('startup_user'))->get('/')->assertOk()
+            ->assertSee('<span>Workspace</span>', false)
+            ->assertSee('<span>Alerts</span>', false);
+
+        $manifest = $this->get('/manifest.webmanifest')->assertOk()->assertHeader('Content-Type', 'application/manifest+json');
+        $this->assertSame('standalone', $manifest->json('display'));
+        $this->assertSame('Hive NSP', $manifest->json('name'));
+        $this->assertContains('maskable', array_column($manifest->json('icons'), 'purpose'));
+        foreach ($manifest->json('icons') as $icon) {
+            $this->assertFileExists(public_path(parse_url($icon['src'], PHP_URL_PATH)));
+        }
+
+        // The cached offline page carries no personal data, even when built for a signed-in person.
+        $this->actingAs($this->userWithRole('startup_user'))->get('/offline')->assertOk()->assertSee('You are offline')
+            ->assertDontSee('Signed in as');
+    }
+
     public function test_published_page_is_visible_and_markdown_is_rendered(): void
     {
         $this->page();

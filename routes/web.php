@@ -27,6 +27,8 @@ Route::get('/contact', [Site\ContactController::class, 'show'])->name('contact')
 Route::post('/contact', [Site\ContactController::class, 'store'])->middleware('throttle:contact')->name('contact.store');
 Route::get('/sitemap.xml', [Site\SitemapController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [Site\SitemapController::class, 'robots'])->name('robots');
+Route::get('/manifest.webmanifest', [Site\AppManifestController::class, 'manifest'])->name('app.manifest');
+Route::get('/offline', [Site\AppManifestController::class, 'offline'])->name('app.offline');
 
 /*
 | Opportunities and events (Phase 5a)
