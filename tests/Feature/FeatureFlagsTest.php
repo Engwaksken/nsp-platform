@@ -46,6 +46,16 @@ class FeatureFlagsTest extends TestCase
             ->assertSee('Register Hive IMS as a connected system', false);
     }
 
+    public function test_unfinished_capital_exchange_is_locked_and_its_pages_are_404(): void
+    {
+        $admin = $this->userWithRole('platform_admin');
+
+        $this->actingAs($admin)->put('/admin/features/capital_exchange', ['enabled' => 1])->assertSessionHasErrors('flags');
+        $this->assertFalse(Features::enabled('capital_exchange'));
+        $this->actingAs($admin)->get('/workspace/startups/00000000-0000-0000-0000-000000000000/capital')->assertNotFound();
+        $this->actingAs($admin)->get('/investors/pipeline')->assertNotFound();
+    }
+
     public function test_unknown_flags_are_404(): void
     {
         $this->actingAs($this->userWithRole('platform_admin'))->put('/admin/features/nope', ['enabled' => 1])->assertNotFound();

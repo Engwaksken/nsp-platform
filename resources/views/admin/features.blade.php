@@ -30,7 +30,7 @@
                     </td>
                     <td>
                         @if ($flag['locked'])
-                            <span class="meta">Locked</span>
+                            <span class="meta" title="{{ $flag['blocked_reason'] }}">{{ in_array($flag['key'], \App\Http\Controllers\Admin\FeatureFlagController::NOT_BUILT, true) ? 'Not built yet' : 'Locked' }}</span>
                         @else
                             <form method="post" action="{{ route('admin.features.update', $flag['key']) }}">
                                 @csrf @method('PUT')
