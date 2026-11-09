@@ -43,6 +43,9 @@
                 ->reject(fn ($item) => trim(url($item->href()), '/') === trim(url('/'), '/'))
                 ->unique(fn ($item) => trim(url($item->href()), '/'));
             $socialLinks = \App\Support\Settings::json('social_links');
+            // Phone tab bar: "Explore" opens the first enabled app section.
+            $exploreTab = $exploreLinks->first();
+            $tabIcon = fn (string $paths) => '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.$paths.'</svg>';
         @endphp
         <nav class="site-nav" id="site-nav" aria-label="Main">
             <ul class="nav-links">
@@ -116,6 +119,34 @@
 <main id="main" tabindex="-1">
     @yield('content')
 </main>
+
+{{-- Phones (768px and below): app-style tab bar fixed to the bottom of the screen. --}}
+<nav class="app-tabbar" aria-label="App">
+    <a href="{{ route('home') }}" @if (request()->routeIs('home')) aria-current="page" @endif>
+        {!! $tabIcon('<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/>') !!}<span>Home</span>
+    </a>
+    @if ($exploreTab)
+        <a href="{{ route($exploreTab['route']) }}" @if ($exploreLinks->contains(fn ($link) => request()->routeIs($link['active']))) aria-current="page" @endif>
+            {!! $tabIcon('<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>') !!}<span>Explore</span>
+        </a>
+    @endif
+    @auth
+        <a href="{{ route('workspace') }}" @if (request()->routeIs('workspace', 'workspace.*')) aria-current="page" @endif>
+            {!! $tabIcon('<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>') !!}<span>Workspace</span>
+        </a>
+        <a href="{{ route('notifications.index') }}" @if (request()->routeIs('notifications.*')) aria-current="page" @endif>
+            <span class="app-tab-icon">{!! $tabIcon('<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>') !!}@if ($unreadNotifications)<span class="app-tab-badge">{{ $unreadNotifications > 99 ? '99+' : $unreadNotifications }}</span>@endif</span>
+            <span>Alerts</span>@if ($unreadNotifications)<span class="visually-hidden"> ({{ $unreadNotifications }} unread)</span>@endif
+        </a>
+    @else
+        <a href="{{ route('login') }}" @if (request()->routeIs('login')) aria-current="page" @endif>
+            {!! $tabIcon('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>') !!}<span>Sign in</span>
+        </a>
+    @endauth
+    <button type="button" class="app-tab-menu" data-toggle-target="site-nav" aria-expanded="false" aria-controls="site-nav">
+        {!! $tabIcon('<path d="M4 6h16M4 12h16M4 18h16"/>') !!}<span>Menu</span>
+    </button>
+</nav>
 
 <footer class="site-footer">
     <div class="container">

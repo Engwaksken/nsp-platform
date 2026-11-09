@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>Growth report · {{ $startup->display_name }}</title>
-    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=15">
+    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=16">
     <style>
         body { background: #fff; }
         .report { max-width: 820px; margin: 0 auto; padding: 24px 16px; }

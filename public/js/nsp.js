@@ -45,14 +45,37 @@
   /* ------------------------------------------------------------------ */
   /* Mobile navigation toggles (public header and admin sidebar)         */
   /* ------------------------------------------------------------------ */
+  // Several buttons may control one panel (the header Menu and the phone tab bar's Menu both open #site-nav).
+  function setPanel(target, open) {
+    target.classList.toggle('is-open', open);
+    qsa(document, '[data-toggle-target="' + target.id + '"]').forEach(function (other) {
+      other.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    // On phones the site menu is a full sheet: stop the page behind it from scrolling.
+    if (target.id === 'site-nav') document.documentElement.classList.toggle('nav-sheet-open', open);
+  }
   qsa(document, '[data-toggle-target]').forEach(function (button) {
     var target = document.getElementById(button.getAttribute('data-toggle-target'));
     if (!target) return;
-    button.addEventListener('click', function () {
-      var open = target.classList.toggle('is-open');
-      button.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
+    button.addEventListener('click', function () { setPanel(target, !target.classList.contains('is-open')); });
   });
+  document.addEventListener('keydown', function (event) {
+    var siteNav = document.getElementById('site-nav');
+    if (event.key === 'Escape' && siteNav && siteNav.classList.contains('is-open') && window.matchMedia('(max-width: 768px)').matches) {
+      setPanel(siteNav, false);
+      var tab = document.querySelector('.app-tab-menu');
+      if (tab) tab.focus();
+    }
+  });
+
+  // Installable app: the service worker only adds an offline page and caches the
+  // versioned CSS/JS/fonts/icons. Pages themselves are never cached.
+  var swMeta = document.querySelector('meta[name="nsp-sw"]');
+  if (swMeta && 'serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register(swMeta.getAttribute('content')).catch(function () { /* the site works without it */ });
+    });
+  }
 
   // Public header dropdowns (Opportunities, Ecosystem, Account, CMS sub-menus).
   // Desktop: one open at a time, closed by outside click, Escape or tabbing away.
