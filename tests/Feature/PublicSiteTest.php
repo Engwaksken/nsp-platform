@@ -22,6 +22,18 @@ class PublicSiteTest extends TestCase
         $this->get('/')->assertOk()->assertSee('Hive NSP');
     }
 
+    public function test_header_hides_links_to_draft_pages(): void
+    {
+        $draft = $this->page(['status' => 'draft', 'published_at' => null]);
+        $live = $this->page(['title' => 'Team', 'slug' => 'team']);
+        $menu = \App\Models\Menu::query()->create(['name' => 'Header', 'location' => 'header']);
+        $menu->items()->create(['label' => 'About link', 'page_id' => $draft->id, 'sort_order' => 1]);
+        $menu->items()->create(['label' => 'Team link', 'page_id' => $live->id, 'sort_order' => 2]);
+        $menu->items()->create(['label' => 'News link', 'url' => '/news', 'sort_order' => 3]);
+
+        $this->get('/')->assertOk()->assertDontSee('About link')->assertSee('Team link')->assertSee('News link');
+    }
+
     public function test_published_page_is_visible_and_markdown_is_rendered(): void
     {
         $this->page();

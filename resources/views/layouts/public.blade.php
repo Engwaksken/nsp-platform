@@ -23,7 +23,7 @@
         <button type="button" class="nav-toggle" data-toggle-target="site-nav" aria-expanded="false" aria-controls="site-nav">Menu</button>
         <nav class="site-nav" id="site-nav" aria-label="Main">
             <ul>
-                @foreach ($headerMenu?->items->whereNull('parent_id') ?? [] as $item)
+                @foreach ($headerMenu?->items->whereNull('parent_id')->filter->isVisible() ?? [] as $item)
                     <li>
                         <a href="{{ $item->href() }}" @if (url()->current() === $item->href()) aria-current="page" @endif
                            @if ($item->open_in_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label }}</a>
@@ -99,7 +99,7 @@
             </div>
             <nav aria-label="Footer">
                 <ul>
-                    @foreach ($footerMenu?->items ?? [] as $item)
+                    @foreach ($footerMenu?->items->filter->isVisible() ?? [] as $item)
                         <li><a href="{{ $item->href() }}" @if ($item->open_in_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label }}</a></li>
                     @endforeach
                     @foreach (\App\Support\Settings::json('social_links') as $network => $link)
