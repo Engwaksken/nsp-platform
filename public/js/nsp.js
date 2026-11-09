@@ -54,23 +54,44 @@
     });
   });
 
-  // Public header: Account dropdown (desktop). On small screens the menu is shown inline inside the Menu panel.
-  var accountToggle = document.querySelector('.nav-account-toggle');
-  var accountMenu = accountToggle ? document.getElementById(accountToggle.getAttribute('aria-controls')) : null;
-  if (accountToggle && accountMenu) {
-    var setAccount = function (open) {
-      accountMenu.classList.toggle('is-open', open);
-      accountToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  // Public header dropdowns (Opportunities, Ecosystem, Account, CMS sub-menus).
+  // Desktop: one open at a time, closed by outside click, Escape or tabbing away.
+  // Phone: the same buttons open their links in place inside the Menu panel.
+  var navToggles = qsa(document, '.nav-group-toggle');
+  if (navToggles.length) {
+    var menuOf = function (button) { return document.getElementById(button.getAttribute('aria-controls')); };
+    var setGroup = function (button, open) {
+      var menu = menuOf(button);
+      if (!menu) return;
+      menu.classList.toggle('is-open', open);
+      button.setAttribute('aria-expanded', open ? 'true' : 'false');
+      // Right-align a dropdown that would run past the edge of the screen.
+      if (open && !menu.hasAttribute('data-fixed-align')) {
+        menu.classList.remove('nav-dropdown-end');
+        if (menu.getBoundingClientRect().right > document.documentElement.clientWidth - 8) menu.classList.add('nav-dropdown-end');
+      }
     };
-    accountToggle.addEventListener('click', function () { setAccount(accountToggle.getAttribute('aria-expanded') !== 'true'); });
+    var closeAll = function (except) {
+      navToggles.forEach(function (button) { if (button !== except) setGroup(button, false); });
+    };
+    navToggles.forEach(function (button) {
+      button.addEventListener('click', function () {
+        var open = button.getAttribute('aria-expanded') !== 'true';
+        closeAll(button);
+        setGroup(button, open);
+      });
+      var group = button.parentNode;
+      group.addEventListener('focusout', function (event) {
+        if (event.relatedTarget && !group.contains(event.relatedTarget)) setGroup(button, false);
+      });
+    });
     document.addEventListener('click', function (event) {
-      if (!accountToggle.contains(event.target) && !accountMenu.contains(event.target)) setAccount(false);
+      if (!event.target.closest || !event.target.closest('.nav-group')) closeAll(null);
     });
     document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape' && accountToggle.getAttribute('aria-expanded') === 'true') { setAccount(false); accountToggle.focus(); }
-    });
-    accountMenu.addEventListener('focusout', function (event) {
-      if (event.relatedTarget && !accountMenu.contains(event.relatedTarget) && event.relatedTarget !== accountToggle) setAccount(false);
+      if (event.key !== 'Escape') return;
+      var open = navToggles.filter(function (button) { return button.getAttribute('aria-expanded') === 'true'; })[0];
+      if (open) { setGroup(open, false); open.focus(); }
     });
   }
 
