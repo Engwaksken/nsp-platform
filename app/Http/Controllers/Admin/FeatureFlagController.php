@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Ai\AiSettings;
 use App\Http\Controllers\Controller;
 use App\Models\Integration\ApiClient;
 use App\Support\Audit;
@@ -21,8 +22,8 @@ class FeatureFlagController extends Controller
         if (in_array($key, self::NOT_BUILT, true)) {
             return 'This module is not built yet, so it cannot be switched on.';
         }
-        if ($key === 'ai_assistant' && (! config('nsp.ai.api_key') || ! config('nsp.ai.legal_approved'))) {
-            return 'The AI assistant can be switched on only after an API key is set and legal approval is recorded (ANTHROPIC_API_KEY and NSP_AI_LEGAL_APPROVED in .env).';
+        if ($key === 'ai_assistant' && (! AiSettings::config()['api_key'] || ! AiSettings::config()['legal_approved'])) {
+            return 'The AI assistant can be switched on only after an API key is added and the legal review is recorded in Admin → AI assistant.';
         }
 
         return null;
@@ -39,11 +40,12 @@ class FeatureFlagController extends Controller
     {
         $missing = [];
         if ($key === 'ai_assistant') {
-            if (! config('nsp.ai.api_key')) {
-                $missing[] = 'Set ANTHROPIC_API_KEY in .env.';
+            $ai = AiSettings::config();
+            if (! $ai['api_key']) {
+                $missing[] = 'Add the Anthropic API key in Admin → AI assistant.';
             }
-            if (! config('nsp.ai.legal_approved')) {
-                $missing[] = 'Record legal approval: set NSP_AI_LEGAL_APPROVED=true in .env once legal review is done (backlog AI-605).';
+            if (! $ai['legal_approved']) {
+                $missing[] = 'Record the legal review in Admin → AI assistant once it is done (backlog AI-605).';
             }
         }
         if ($key === 'oidc') {

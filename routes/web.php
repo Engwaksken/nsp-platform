@@ -333,6 +333,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
     Route::middleware('can:manage-feature-flags')->group(function () {
         Route::get('features', [Admin\FeatureFlagController::class, 'index'])->name('features.index');
         Route::put('features/{key}', [Admin\FeatureFlagController::class, 'update'])->name('features.update');
+        Route::get('ai', [Admin\AiSettingsController::class, 'edit'])->name('ai.edit');
+        Route::put('ai', [Admin\AiSettingsController::class, 'update'])->name('ai.update');
+        Route::post('ai/test', [Admin\AiSettingsController::class, 'test'])->middleware('throttle:10,1')->name('ai.test');
+        Route::post('ai/toggle', [Admin\AiSettingsController::class, 'toggle'])->name('ai.toggle');
+        Route::post('ai/legal', [Admin\AiSettingsController::class, 'approveLegal'])->name('ai.legal.approve');
+        Route::delete('ai/legal', [Admin\AiSettingsController::class, 'withdrawLegal'])->name('ai.legal.withdraw');
     });
 
     Route::get('audit', [Admin\AuditLogController::class, 'index'])->middleware('can:view-audit-log')->name('audit.index');
