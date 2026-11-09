@@ -111,12 +111,19 @@ main:focus { outline: none; }
 /* ==========================================================================
    4. Layout
    ========================================================================== */
-.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
-@media (min-width: 640px) { .container { padding: 0 24px; } }
+/* Side gutter: 16px on phones, 24px from 640px; never less than the notch/rounded-corner
+   safe area (viewport-fit=cover in partials/head). env() is 0 on desktops. */
+:root { --gutter: 16px; --gutter-left: max(var(--gutter), env(safe-area-inset-left)); --gutter-right: max(var(--gutter), env(safe-area-inset-right)); }
+@media (min-width: 640px) { :root { --gutter: 24px; } }
+.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 var(--gutter-right) 0 var(--gutter-left); }
 .narrow { max-width: 780px; }
 main { min-height: 60vh; display: block; }
 .section { padding: var(--space-7) 0; }
 @media (min-width: 900px) { .section { padding: var(--space-8) 0; } }
+/* Most pages use "container section": the .section shorthand above wipes the container's
+   side gutter, which put text against the screen edge. Restore it at every width.
+   (Inside the workspace shell, ".workspace-main > .container" later in this file still wins.) */
+.container.section { padding-left: var(--gutter-left); padding-right: var(--gutter-right); }
 .section-alt { background: var(--surface-sunken); }
 .section > h1:first-child, .section > h2:first-child { margin-top: 0; }
 
@@ -252,7 +259,7 @@ main { min-height: 60vh; display: block; }
   .site-header .nav-toggle { display: none; }
   .site-nav.is-open {
     position: fixed; left: 0; right: 0; top: calc(58px + env(safe-area-inset-top)); bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); z-index: 45;
-    overflow-y: auto; overscroll-behavior: contain; padding: var(--space-3) 16px var(--space-6); background: var(--surface);
+    overflow-y: auto; overscroll-behavior: contain; padding: var(--space-3) var(--gutter-right) var(--space-6) var(--gutter-left); background: var(--surface);
   }
   html.nav-sheet-open { overflow: hidden; }
   .app-tabbar {
@@ -278,7 +285,7 @@ main { min-height: 60vh; display: block; }
   .site-footer { margin-top: var(--space-6); }
 }
 
-.preview-banner { background: var(--warning-soft); color: #78350f; border-bottom: 1px solid #fcd34d; padding: .6rem 16px; text-align: center; font-weight: 600; font-size: .925rem; }
+.preview-banner { background: var(--warning-soft); color: #78350f; border-bottom: 1px solid #fcd34d; padding: .6rem max(16px, env(safe-area-inset-right)) .6rem max(16px, env(safe-area-inset-left)); text-align: center; font-weight: 600; font-size: .925rem; }
 
 /* ==========================================================================
    6. Buttons
@@ -611,7 +618,7 @@ td .btn-sm { white-space: nowrap; }
 .admin-topbar a:not(.btn):hover { color: var(--ink-strong); }
 .admin-topbar .nav-toggle { display: none; }
 @media (max-width: 640px) {
-  .admin-topbar { flex-wrap: nowrap; gap: var(--space-2); padding: .5rem var(--space-4); }
+  .admin-topbar { flex-wrap: nowrap; gap: var(--space-2); padding: .5rem var(--gutter-right) .5rem var(--gutter-left); }
   .admin-topbar > a { display: none; }
   .admin-topbar .actions { flex-wrap: nowrap; margin-left: auto; min-width: 0; }
   .admin-topbar .actions > a { max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -668,6 +675,7 @@ pre.json { white-space: pre-wrap; word-break: break-word; font-size: .8rem; marg
   .workspace-sidebar { display: none; position: static; max-height: none; }
   .workspace-sidebar.is-open { display: block; }
 }
+@media (max-width: 768px) { .workspace-shell { padding-left: var(--gutter-left); padding-right: var(--gutter-right); } }
 
 /* Workspace dashboard */
 .dash-greeting { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--space-3); margin-bottom: var(--space-5); }

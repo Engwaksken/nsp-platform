@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex">
     <title>You are offline | {{ $brand['site_name'] }}</title>
     <link rel="stylesheet" href="{{ asset('css/palette-hive.css') }}?v=1">
-    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=16">
+    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=17">
 </head>
 <body>
 <main class="container section narrow" style="text-align:center;padding-top:20vh">
