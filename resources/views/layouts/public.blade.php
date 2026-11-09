@@ -21,46 +21,78 @@
             @endif
         </a>
         <button type="button" class="nav-toggle" data-toggle-target="site-nav" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        @php
+            $menuItems = $headerMenu?->items->filter->isVisible() ?? collect();
+            // App sections grouped into dropdowns; a group with one enabled link shows as a plain link.
+            $navGroups = collect([
+                'Opportunities' => [
+                    ['feature' => 'opportunities', 'route' => 'opportunities.index', 'active' => 'opportunities.*', 'title' => 'Opportunities and events', 'text' => 'Grants, accelerators, competitions and events'],
+                    ['feature' => 'challenges', 'route' => 'challenges.index', 'active' => 'challenges.*', 'title' => 'Challenge Exchange', 'text' => 'Innovation and market challenges to solve'],
+                    ['feature' => 'talent', 'route' => 'jobs.index', 'active' => 'jobs.*', 'title' => 'Jobs', 'text' => 'Roles at startups in the ecosystem'],
+                ],
+                'Ecosystem' => [
+                    ['feature' => 'marketplace', 'route' => 'directory.index', 'active' => 'directory.*', 'title' => 'Startup directory', 'text' => 'Startups that chose to be listed'],
+                    ['feature' => 'marketplace', 'route' => 'marketplace.index', 'active' => 'marketplace.*', 'title' => 'Marketplace', 'text' => 'Products, services and partnerships'],
+                    ['feature' => 'knowledge', 'route' => 'knowledge.index', 'active' => 'knowledge.*', 'title' => 'Knowledge Hub', 'text' => 'Research, policy briefs, templates and toolkits'],
+                ],
+            ])->map(fn ($links) => collect($links)->filter(fn ($link) => \App\Support\Features::enabled($link['feature']) && \Illuminate\Support\Facades\Route::has($link['route'])))
+              ->filter(fn ($links) => $links->isNotEmpty());
+        @endphp
         <nav class="site-nav" id="site-nav" aria-label="Main">
-            <ul>
-                @foreach ($headerMenu?->items->whereNull('parent_id')->filter->isVisible() ?? [] as $item)
-                    <li>
-                        <a href="{{ $item->href() }}" @if (url()->current() === $item->href()) aria-current="page" @endif
-                           @if ($item->open_in_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label }}</a>
-                    </li>
+            <ul class="nav-links">
+                @foreach ($menuItems->whereNull('parent_id') as $item)
+                    @php($children = $menuItems->where('parent_id', $item->id))
+                    @if ($children->isNotEmpty())
+                        <li class="nav-group">
+                            <button type="button" class="nav-group-toggle" aria-expanded="false" aria-controls="nav-menu-{{ $item->id }}">{{ $item->label }}</button>
+                            <ul class="nav-dropdown" id="nav-menu-{{ $item->id }}">
+                                @foreach ($children as $child)
+                                    <li><a href="{{ $child->href() }}" @if (url()->current() === $child->href()) aria-current="page" @endif
+                                           @if ($child->open_in_new_tab) target="_blank" rel="noopener" @endif>{{ $child->label }}</a></li>
+                                @endforeach
+                            </ul>
+                        </li>
+                    @else
+                        <li><a class="nav-link" href="{{ $item->href() }}" @if (url()->current() === $item->href()) aria-current="page" @endif
+                               @if ($item->open_in_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label }}</a></li>
+                    @endif
                 @endforeach
-                @if (\App\Support\Features::enabled('opportunities'))
-                    <li><a href="{{ route('opportunities.index') }}" @if (request()->routeIs('opportunities.*')) aria-current="page" @endif>Opportunities</a></li>
-                @endif
-                @if (\App\Support\Features::enabled('challenges') && \Illuminate\Support\Facades\Route::has('challenges.index'))
-                    <li><a href="{{ route('challenges.index') }}" @if (request()->routeIs('challenges.*')) aria-current="page" @endif>Challenges</a></li>
-                @endif
-                @if (\App\Support\Features::enabled('knowledge') && \Illuminate\Support\Facades\Route::has('knowledge.index'))
-                    <li><a href="{{ route('knowledge.index') }}" @if (request()->routeIs('knowledge.*')) aria-current="page" @endif>Knowledge</a></li>
-                @endif
-                @if (\App\Support\Features::enabled('marketplace'))
-                    <li><a href="{{ route('directory.index') }}" @if (request()->routeIs('directory.*')) aria-current="page" @endif>Startups</a></li>
-                    <li><a href="{{ route('marketplace.index') }}" @if (request()->routeIs('marketplace.*')) aria-current="page" @endif>Marketplace</a></li>
-                @endif
-                @if (\App\Support\Features::enabled('talent'))
-                    <li><a href="{{ route('jobs.index') }}" @if (request()->routeIs('jobs.*')) aria-current="page" @endif>Jobs</a></li>
-                @endif
+                @foreach ($navGroups as $groupLabel => $links)
+                    @if ($links->count() === 1)
+                        @php($link = $links->first())
+                        <li><a class="nav-link" href="{{ route($link['route']) }}" @if (request()->routeIs($link['active'])) aria-current="page" @endif>{{ $link['title'] }}</a></li>
+                    @else
+                        @php($groupId = 'nav-menu-'.\Illuminate\Support\Str::slug($groupLabel))
+                        <li class="nav-group">
+                            <button type="button" class="nav-group-toggle @if ($links->contains(fn ($link) => request()->routeIs($link['active']))) is-current @endif" aria-expanded="false" aria-controls="{{ $groupId }}">{{ $groupLabel }}</button>
+                            <ul class="nav-dropdown nav-dropdown-wide" id="{{ $groupId }}">
+                                @foreach ($links as $link)
+                                    <li><a href="{{ route($link['route']) }}" @if (request()->routeIs($link['active'])) aria-current="page" @endif>
+                                        <span class="nav-item-title">{{ $link['title'] }}</span>
+                                        <span class="nav-item-text">{{ $link['text'] }}</span>
+                                    </a></li>
+                                @endforeach
+                            </ul>
+                        </li>
+                    @endif
+                @endforeach
             </ul>
             @auth
                 @php($unreadNotifications = \App\Models\Communication\UserNotification::query()->where('user_id', auth()->id())->whereNull('read_at')->count())
-                <div class="nav-account">
-                    <button type="button" class="nav-account-toggle" aria-expanded="false" aria-controls="nav-account-menu">
+                <div class="nav-group nav-account">
+                    <button type="button" class="nav-group-toggle nav-account-toggle" aria-expanded="false" aria-controls="nav-menu-account">
                         Account
                         @if ($unreadNotifications)<span class="nav-dot" aria-hidden="true"></span><span class="visually-hidden"> ({{ $unreadNotifications }} unread notifications)</span>@endif
                     </button>
-                    <ul class="nav-account-menu" id="nav-account-menu">
+                    <ul class="nav-dropdown nav-dropdown-end" id="nav-menu-account" data-fixed-align>
+                        <li class="nav-dropdown-head">Signed in as <strong>{{ auth()->user()->name }}</strong></li>
                         <li><a href="{{ route('workspace') }}" @if (request()->routeIs('workspace')) aria-current="page" @endif>My workspace</a></li>
-                        <li><a href="{{ route('notifications.index') }}" @if (request()->routeIs('notifications.*')) aria-current="page" @endif>Notifications @if ($unreadNotifications)<span class="badge badge-on">{{ $unreadNotifications }}<span class="visually-hidden"> unread</span></span>@endif</a></li>
+                        <li><a href="{{ route('notifications.index') }}" @if (request()->routeIs('notifications.*')) aria-current="page" @endif>Notifications @if ($unreadNotifications)<span class="badge">{{ $unreadNotifications }}<span class="visually-hidden"> unread</span></span>@endif</a></li>
                         <li><a href="{{ route('mfa.setup') }}" @if (request()->routeIs('mfa.*')) aria-current="page" @endif>Security</a></li>
                         @if (auth()->user()->canUseAdmin())
                             <li><a href="{{ route('admin.dashboard') }}">Admin</a></li>
                         @endif
-                        <li class="nav-account-signout">
+                        <li class="nav-dropdown-foot">
                             <form method="post" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="btn btn-secondary btn-sm">Sign out</button>
