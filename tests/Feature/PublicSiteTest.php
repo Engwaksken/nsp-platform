@@ -34,6 +34,22 @@ class PublicSiteTest extends TestCase
         $this->get('/')->assertOk()->assertDontSee('About link')->assertSee('Team link')->assertSee('News link');
     }
 
+    public function test_header_groups_sections_into_dropdowns_and_account_menu(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('aria-controls="nav-menu-opportunities"', false)
+            ->assertSee('aria-controls="nav-menu-ecosystem"', false)
+            ->assertSee('Challenge Exchange')
+            ->assertSee('Knowledge Hub')
+            ->assertSee('Sign in')
+            ->assertDontSee('nav-menu-account', false);
+
+        $this->actingAs($this->userWithRole('startup_user'))->get('/')->assertOk()
+            ->assertSee('aria-controls="nav-menu-account"', false)
+            ->assertSee('My workspace')
+            ->assertSee('Sign out');
+    }
+
     public function test_published_page_is_visible_and_markdown_is_rendered(): void
     {
         $this->page();
