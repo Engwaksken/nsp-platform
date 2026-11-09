@@ -37,7 +37,7 @@
                         </h2>
                         <p class="meta">{{ \App\Models\Registry\StartupMembership::ROLES[$membership->role] }} · Profile {{ $startup->profile?->profile_completion ?? 0 }}% complete</p>
                         <div class="actions">
-                            <a class="btn btn-secondary btn-sm" href="{{ route('workspace.startups.show', $startup) }}">Open<span class="visually-hidden"> {{ $startup->display_name }}</span></a>
+                            <a class="btn btn-secondary btn-sm" href="{{ route('workspace.startups.overview', $startup) }}">Open<span class="visually-hidden"> {{ $startup->display_name }}</span></a>
                             @if ($active?->startup_uuid !== $startup->uuid)
                                 <form method="post" action="{{ route('workspace.startups.switch', $startup) }}">
                                     @csrf

@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Marketplace · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Marketplace · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Marketplace · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
         <p class="hint">Published listings appear in the public <a href="{{ route('marketplace.index') }}">marketplace</a> with your startup’s name and sector. To appear in the <a href="{{ route('directory.index') }}">startup directory</a> too, turn on “{{ config('nsp.registry.consent_purposes.nsp_directory.label') }}” under Data sharing.</p>
 

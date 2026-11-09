@@ -1,13 +1,12 @@
-@extends('layouts.public', ['pageTitle' => 'Team · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Team · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     @php($roles = \App\Models\Registry\StartupMembership::ROLES)
     @php($isOwner = $membership->role === 'owner')
     <div class="container section">
         <h1>Team · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
 
         @if ($membership->canManageTeam())

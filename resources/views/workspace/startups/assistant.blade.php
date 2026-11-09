@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'AI assistant · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'AI assistant · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section narrow">
         <h1>AI writing assistant · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
 
         @if ($unavailable)

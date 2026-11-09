@@ -15,7 +15,7 @@
             <section class="panel" aria-labelledby="startups-heading">
                 <h2 id="startups-heading">Your startups</h2>
                 @forelse ($startups as $startup)
-                    <p><a href="{{ route('workspace.startups.show', $startup['uuid']) }}">{{ $startup['display_name'] }}</a> <span class="badge">{{ \App\Models\Registry\StartupMembership::ROLES[$startup['role']] ?? $startup['role'] }}</span></p>
+                    <p><a href="{{ route('workspace.startups.overview', $startup['uuid']) }}">{{ $startup['display_name'] }}</a> <span class="badge">{{ \App\Models\Registry\StartupMembership::ROLES[$startup['role']] ?? $startup['role'] }}</span></p>
                 @empty
                     <p>You are not on a startup team yet. <a href="{{ route('workspace.startups.create') }}">Register your startup</a>, or ask your co-founder to invite you.</p>
                 @endforelse

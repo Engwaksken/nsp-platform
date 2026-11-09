@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Growth · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Growth · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Growth · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
 
         @if (!$framework && !$latest)

@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Data sharing · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Data sharing · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section narrow">
         <h1>Data sharing · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
         <p>Choose what Hive may do with your startup’s profile. Nothing is shared until you turn it on, and turning it off stops sharing from that moment.
             @unless ($membership->canManageConsent()) Only owners and founders can change these choices. @endunless</p>

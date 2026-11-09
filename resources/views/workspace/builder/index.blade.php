@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Venture Builder · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Venture Builder · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Venture Builder · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
 
         @if (!$curriculum)

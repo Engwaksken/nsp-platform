@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Talent · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Talent · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Talent · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
         <p class="hint">Open vacancies appear on the public <a href="{{ route('jobs.index') }}">jobs board</a> with your startup’s name, sector and country. Applications and CVs are visible to your owners, founders and admins only.
             @if ($membership->canEdit()) <a href="{{ route('workspace.talent.search', $startup) }}">Find candidates</a>@endif</p>

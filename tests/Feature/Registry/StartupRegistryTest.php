@@ -99,7 +99,7 @@ class StartupRegistryTest extends TestCase
 
         $token = app(RegistryService::class)->invite($startup, $owner, 'CoFounder@greenfields.ug', 'founder');
         $this->actingAs($cofounder)->get("/invitations/{$token}")->assertOk()->assertSee('Accept and join');
-        $this->actingAs($cofounder)->post("/invitations/{$token}/accept")->assertRedirect("/workspace/startups/{$startup->uuid}");
+        $this->actingAs($cofounder)->post("/invitations/{$token}/accept")->assertRedirect("/workspace/startups/{$startup->uuid}/overview");
 
         $this->assertSame(1, Startup::query()->count());
         $this->assertSame('founder', $startup->membershipOf($cofounder)->role);
@@ -252,5 +252,31 @@ class StartupRegistryTest extends TestCase
 
         $this->actingAs($this->founder())->get('/workspace/startups')->assertNotFound();
         $this->actingAs($this->founder())->get('/workspace')->assertOk()->assertSee('Not available yet');
+    }
+
+    public function test_workspace_pages_have_a_sidebar_dashboard_and_startup_switcher(): void
+    {
+        $owner = $this->founder();
+        $first = $this->registered($owner);
+        $second = $this->registered($owner, ['legal_name' => 'Blue Wave Ltd', 'display_name' => 'Blue Wave', 'registration_number' => '80020009999999',
+            'website' => 'https://bluewave.ug', 'contact_email' => 'hello@bluewave.ug']);
+
+        $page = $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}/overview")->assertOk();
+        $page->assertSee('id="workspace-sidebar"', false)
+            ->assertSee('Next steps')
+            ->assertSee('Switch startup')
+            ->assertSee(route('workspace.startups.switch', $second), false)
+            ->assertSee('<a href="'.route('workspace.startups.overview', $first).'"  aria-current="page" >Dashboard</a>', false);
+
+        // Deeper pages get the sidebar too, with the right section marked.
+        $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}/team")->assertOk()
+            ->assertSee('id="workspace-sidebar"', false)
+            ->assertSee('aria-current="page" >Team</a>', false);
+
+        // Switching goes to the other startup's dashboard.
+        $this->actingAs($owner)->post("/workspace/startups/{$second->uuid}/switch")->assertRedirect("/workspace/startups/{$second->uuid}/overview");
+
+        // Registering a new startup has no startup yet, so no sidebar.
+        $this->actingAs($owner)->get('/workspace/startups/new')->assertOk()->assertDontSee('id="workspace-sidebar"', false);
     }
 }
