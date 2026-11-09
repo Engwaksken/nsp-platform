@@ -54,26 +54,24 @@
     });
   });
 
-  // Public header: switch to the Menu button when the links would wrap onto a second row.
-  var header = document.querySelector('.site-header');
-  var navList = header ? header.querySelector('.site-nav ul') : null;
-  if (header && navList) {
-    var fit = function () {
-      if (window.matchMedia('(max-width: 1080px)').matches) { header.classList.remove('is-compact'); return; }
-      header.classList.remove('is-compact');
-      var items = navList.children;
-      if (items.length && items[items.length - 1].offsetTop > items[0].offsetTop + 4) header.classList.add('is-compact');
-      var nav = header.querySelector('.site-nav');
-      if (!header.classList.contains('is-compact') && nav && nav.classList.contains('is-open')) {
-        nav.classList.remove('is-open');
-        var toggle = header.querySelector('.nav-toggle');
-        if (toggle) toggle.setAttribute('aria-expanded', 'false');
-      }
+  // Public header: Account dropdown (desktop). On small screens the menu is shown inline inside the Menu panel.
+  var accountToggle = document.querySelector('.nav-account-toggle');
+  var accountMenu = accountToggle ? document.getElementById(accountToggle.getAttribute('aria-controls')) : null;
+  if (accountToggle && accountMenu) {
+    var setAccount = function (open) {
+      accountMenu.classList.toggle('is-open', open);
+      accountToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     };
-    var timer;
-    window.addEventListener('resize', function () { window.clearTimeout(timer); timer = window.setTimeout(fit, 120); });
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
-    fit();
+    accountToggle.addEventListener('click', function () { setAccount(accountToggle.getAttribute('aria-expanded') !== 'true'); });
+    document.addEventListener('click', function (event) {
+      if (!accountToggle.contains(event.target) && !accountMenu.contains(event.target)) setAccount(false);
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && accountToggle.getAttribute('aria-expanded') === 'true') { setAccount(false); accountToggle.focus(); }
+    });
+    accountMenu.addEventListener('focusout', function (event) {
+      if (event.relatedTarget && !accountMenu.contains(event.relatedTarget) && event.relatedTarget !== accountToggle) setAccount(false);
+    });
   }
 
   /* ------------------------------------------------------------------ */

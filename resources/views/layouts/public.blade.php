@@ -45,24 +45,32 @@
                 @if (\App\Support\Features::enabled('talent'))
                     <li><a href="{{ route('jobs.index') }}" @if (request()->routeIs('jobs.*')) aria-current="page" @endif>Jobs</a></li>
                 @endif
-                @auth
-                    <li><a href="{{ route('workspace') }}">My workspace</a></li>
-                    @php($unreadNotifications = \App\Models\Communication\UserNotification::query()->where('user_id', auth()->id())->whereNull('read_at')->count())
-                    <li><a href="{{ route('notifications.index') }}" @if (request()->routeIs('notifications.*')) aria-current="page" @endif>Notifications @if ($unreadNotifications)<span class="badge badge-on">{{ $unreadNotifications }}<span class="visually-hidden"> unread</span></span>@endif</a></li>
-                    <li><a href="{{ route('mfa.setup') }}">Security</a></li>
-                    @if (auth()->user()->canUseAdmin())
-                        <li><a href="{{ route('admin.dashboard') }}">Admin</a></li>
-                    @endif
-                    <li>
-                        <form method="post" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="btn btn-secondary btn-sm">Sign out</button>
-                        </form>
-                    </li>
-                @else
-                    <li><a class="btn btn-primary btn-sm" href="{{ route('login') }}">Sign in</a></li>
-                @endauth
             </ul>
+            @auth
+                @php($unreadNotifications = \App\Models\Communication\UserNotification::query()->where('user_id', auth()->id())->whereNull('read_at')->count())
+                <div class="nav-account">
+                    <button type="button" class="nav-account-toggle" aria-expanded="false" aria-controls="nav-account-menu">
+                        Account
+                        @if ($unreadNotifications)<span class="nav-dot" aria-hidden="true"></span><span class="visually-hidden"> ({{ $unreadNotifications }} unread notifications)</span>@endif
+                    </button>
+                    <ul class="nav-account-menu" id="nav-account-menu">
+                        <li><a href="{{ route('workspace') }}" @if (request()->routeIs('workspace')) aria-current="page" @endif>My workspace</a></li>
+                        <li><a href="{{ route('notifications.index') }}" @if (request()->routeIs('notifications.*')) aria-current="page" @endif>Notifications @if ($unreadNotifications)<span class="badge badge-on">{{ $unreadNotifications }}<span class="visually-hidden"> unread</span></span>@endif</a></li>
+                        <li><a href="{{ route('mfa.setup') }}" @if (request()->routeIs('mfa.*')) aria-current="page" @endif>Security</a></li>
+                        @if (auth()->user()->canUseAdmin())
+                            <li><a href="{{ route('admin.dashboard') }}">Admin</a></li>
+                        @endif
+                        <li class="nav-account-signout">
+                            <form method="post" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="btn btn-secondary btn-sm">Sign out</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            @else
+                <a class="btn btn-primary btn-sm nav-signin" href="{{ route('login') }}">Sign in</a>
+            @endauth
         </nav>
     </div>
 </header>

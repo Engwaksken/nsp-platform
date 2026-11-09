@@ -156,41 +156,64 @@ main { min-height: 60vh; display: block; }
 .nav-toggle[aria-expanded="true"]::before { height: 2px; box-shadow: none; transform: rotate(45deg); }
 .nav-toggle:hover { background: var(--surface-alt); }
 
-.site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 2px; flex-wrap: wrap; align-items: center; }
+/* Desktop (1025px+): every link sits in one row, like a standard site header.
+   Signed-in links are grouped under an "Account" dropdown so the row stays short. */
+.site-header .container { flex-wrap: nowrap; }
+.brand { flex: none; }
+.site-nav { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.site-nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 2px; align-items: center; }
+.site-nav > ul { flex-wrap: wrap; justify-content: flex-end; }
 .site-nav li { margin: 0; }
-.site-nav form { margin: 0 0 0 var(--space-2); }
+.site-nav form { margin: 0; }
 .site-nav a:not(.btn) {
-  position: relative; display: block; padding: .5rem .7rem;
-  color: var(--ink); font-size: .935rem; font-weight: 500; text-decoration: none;
+  position: relative; display: block; padding: .5rem .65rem;
+  color: var(--ink); font-size: .935rem; font-weight: 500; text-decoration: none; white-space: nowrap;
   border-radius: 8px; transition: background-color .15s, color .15s;
 }
 .site-nav a:not(.btn):hover { background: var(--surface-alt); color: var(--ink-strong); }
 .site-nav a[aria-current="page"] { color: var(--ink-strong); font-weight: 600; }
-.site-nav a[aria-current="page"]::after { content: ""; position: absolute; left: .7rem; right: .7rem; bottom: 2px; height: 2px; border-radius: 2px; background: var(--brand-accent); }
-.site-nav li > .btn { margin-left: var(--space-2); }
+.site-nav > ul a[aria-current="page"]::after { content: ""; position: absolute; left: .65rem; right: .65rem; bottom: 2px; height: 2px; border-radius: 2px; background: var(--brand-accent); }
 .site-nav .badge { margin-left: .2rem; padding: 0 .45rem; font-size: .72rem; line-height: 1.5; background: var(--brand-accent); border-color: var(--brand-accent); color: #fff; }
+.site-nav .badge::before { display: none; }
+.nav-signin { flex: none; margin-left: var(--space-2); }
 
-@media (max-width: 1080px) {
+.nav-account { position: relative; flex: none; margin-left: var(--space-2); }
+.nav-account-toggle {
+  display: inline-flex; align-items: center; gap: .45rem; min-height: 38px; padding: .4rem .8rem;
+  background: var(--surface); color: var(--ink); font: inherit; font-weight: 600; font-size: .925rem; white-space: nowrap;
+  border: 1px solid var(--line-strong); border-radius: 8px; cursor: pointer;
+}
+.nav-account-toggle::after { content: ""; width: 7px; height: 7px; margin: -3px 0 0 .1rem; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); transition: transform .15s; }
+.nav-account-toggle[aria-expanded="true"]::after { margin-top: 3px; transform: rotate(-135deg); }
+.nav-account-toggle:hover { background: var(--surface-alt); }
+.nav-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-accent); }
+.nav-account-menu {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 40; min-width: 210px;
+  display: none; flex-direction: column; align-items: stretch; padding: .35rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-lg);
+}
+.nav-account-menu.is-open { display: flex; }
+.nav-account-menu a:not(.btn) { display: flex; align-items: center; justify-content: space-between; }
+.nav-account-menu a[aria-current="page"] { background: var(--surface-alt); }
+.nav-account-signout { margin-top: .35rem !important; padding-top: .35rem; border-top: 1px solid var(--line); }
+.nav-account-signout .btn { width: 100%; }
+
+/* Tablet and phone (1024px and below): links collapse behind the Menu button. */
+@media (max-width: 1024px) {
+  .site-header .container { flex-wrap: wrap; }
   .nav-toggle { display: inline-flex; }
-  .site-nav { width: 100%; display: none; padding: var(--space-2) 0 var(--space-4); border-top: 1px solid var(--line); }
-  .site-nav.is-open { display: block; }
-  .site-nav ul { flex-direction: column; align-items: stretch; gap: 2px; }
+  .site-nav { width: 100%; display: none; flex-direction: column; align-items: stretch; gap: 0; padding: var(--space-2) 0 var(--space-4); border-top: 1px solid var(--line); }
+  .site-nav.is-open { display: flex; }
+  .site-nav ul, .site-nav > ul { flex-direction: column; align-items: stretch; flex-wrap: nowrap; }
   .site-nav a:not(.btn) { padding: .7rem .8rem; }
   .site-nav a[aria-current="page"] { background: var(--surface-alt); }
-  .site-nav a[aria-current="page"]::after { left: 0; right: auto; top: .55rem; bottom: .55rem; width: 3px; height: auto; }
-  .site-nav form, .site-nav .btn { margin: var(--space-2) 0 0; }
-  .site-nav .btn, .site-nav form .btn { width: 100%; }
+  .site-nav > ul a[aria-current="page"]::after { left: 0; right: auto; top: .55rem; bottom: .55rem; width: 3px; height: auto; }
+  .nav-signin { margin: var(--space-3) 0 0; width: 100%; }
+  .nav-account { margin: var(--space-2) 0 0; padding-top: var(--space-2); border-top: 1px solid var(--line); }
+  .nav-account-toggle { display: none; }
+  .nav-account-menu, .nav-account-menu.is-open { position: static; display: flex; min-width: 0; padding: 0; border: 0; box-shadow: none; background: none; }
+  .nav-account-signout { border-top: 0; padding-top: 0; }
 }
-/* nsp.js adds .is-compact when the links don't fit on one row (for example a long signed-in menu). */
-.site-header.is-compact .nav-toggle { display: inline-flex; }
-.site-header.is-compact .site-nav { width: 100%; display: none; padding: var(--space-2) 0 var(--space-4); border-top: 1px solid var(--line); }
-.site-header.is-compact .site-nav.is-open { display: block; }
-.site-header.is-compact .site-nav ul { flex-direction: column; align-items: stretch; gap: 2px; }
-.site-header.is-compact .site-nav a:not(.btn) { padding: .7rem .8rem; }
-.site-header.is-compact .site-nav a[aria-current="page"] { background: var(--surface-alt); }
-.site-header.is-compact .site-nav a[aria-current="page"]::after { left: 0; right: auto; top: .55rem; bottom: .55rem; width: 3px; height: auto; }
-.site-header.is-compact .site-nav form, .site-nav .btn { margin: var(--space-2) 0 0; }
-.site-header.is-compact .site-nav .btn, .site-nav form .btn { width: 100%; }
 
 .preview-banner { background: var(--warning-soft); color: #78350f; border-bottom: 1px solid #fcd34d; padding: .6rem 16px; text-align: center; font-weight: 600; font-size: .925rem; }
 
@@ -468,6 +491,9 @@ td .btn-sm { white-space: nowrap; }
 .badge-draft, .badge-new { background: #fffaeb; border-color: #fedf89; color: #b54708; }
 .badge-scheduled, .badge-in_progress { background: #eff8ff; border-color: #b2ddff; color: #175cd3; }
 .badge-archived, .badge-off, .badge-spam { background: #f2f4f7; border-color: #e4e7ec; color: #475467; }
+.setup-needed { margin-top: var(--space-2); padding: .6rem .8rem; font-size: .875rem; background: var(--warning-soft); border: 1px solid #fcd34d; border-radius: 8px; color: #78350f; }
+.setup-needed ul { margin: .3rem 0 0; padding-left: 1.1rem; }
+.setup-needed li + li { margin-top: .2rem; }
 :is(.badge-published, .badge-on, .badge-closed, .badge-draft, .badge-new, .badge-scheduled, .badge-in_progress, .badge-archived, .badge-off, .badge-spam)::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
 /* Phones: each table row becomes a card with labelled values (nsp.js adds the labels). */

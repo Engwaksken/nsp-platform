@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="{{ asset('css/fonts.css') }}?v=1">
 @endif
 <link rel="stylesheet" href="{{ asset('css/palette-hive.css') }}?v=1">
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=7">
+<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=9">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};
@@ -33,4 +33,4 @@
         --brand-font: {!! str_replace(['<', '>', '{', '}', ';'], '', $brandFont) !!};
     }
 </style>
-<script src="{{ asset('js/nsp.js') }}?v=4" defer></script>
+<script src="{{ asset('js/nsp.js') }}?v=5" defer></script>
