@@ -33,6 +33,19 @@ class FeatureFlagsTest extends TestCase
         $this->assertDatabaseHas('audit_logs', ['action' => 'feature_flag.changed']);
     }
 
+    public function test_admin_page_lists_missing_setup_for_external_features(): void
+    {
+        config(['nsp.ai.api_key' => null, 'nsp.ai.legal_approved' => false, 'nsp.oidc.issuer' => null, 'nsp.ims_url' => null]);
+
+        $this->actingAs($this->userWithRole('platform_admin'))
+            ->get('/admin/features')
+            ->assertOk()
+            ->assertSee('Setup needed')
+            ->assertSee('Set ANTHROPIC_API_KEY in .env.')
+            ->assertSee('Set OIDC_ISSUER in .env.')
+            ->assertSee('Register Hive IMS as a connected system', false);
+    }
+
     public function test_unknown_flags_are_404(): void
     {
         $this->actingAs($this->userWithRole('platform_admin'))->put('/admin/features/nope', ['enabled' => 1])->assertNotFound();

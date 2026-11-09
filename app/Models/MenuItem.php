@@ -23,4 +23,10 @@ class MenuItem extends Model
     {
         return $this->page ? $this->page->publicUrl() : (string) $this->url;
     }
+
+    /** Links to draft, scheduled or archived pages are hidden so visitors never land on a 404. */
+    public function isVisible(): bool
+    {
+        return $this->page_id === null || ($this->page !== null && $this->page->isLive());
+    }
 }
