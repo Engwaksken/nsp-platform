@@ -6,6 +6,7 @@
         <h1>Users and roles</h1>
         <a class="btn btn-primary" href="{{ route('admin.users.create') }}" data-modal>Add user</a>
     </div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::users()])
     <form method="get" class="filters" role="search">
         <div class="form-group"><label for="q">Name or email</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Search by name or email…"></div>
         <div class="form-group">

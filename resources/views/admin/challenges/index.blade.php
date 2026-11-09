@@ -6,6 +6,7 @@
         <h1>Challenge Exchange</h1>
         @can('manage-challenges')<a class="btn btn-primary" href="{{ route('admin.challenges.create') }}" data-modal="lg">New challenge</a>@endcan
     </div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::challenges()])
     @include('partials.flash')
     <nav class="filters" aria-label="Filter challenge records">
         @foreach (['submitted' => 'Submitted', 'under_review' => 'Under review', 'changes_requested' => 'Changes requested', 'approved' => 'Approved', 'live' => 'Published', 'draft' => 'Drafts', 'rejected' => 'Rejected', 'archived' => 'Archived'] as $key => $label)

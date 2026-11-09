@@ -92,6 +92,23 @@ class PublicSiteTest extends TestCase
             ->assertDontSee('Signed in as');
     }
 
+    public function test_listing_and_admin_pages_show_statistics_cards_with_icons(): void
+    {
+        $this->get('/opportunities')->assertOk()
+            ->assertSee('vendor/fontawesome/css/solid.min.css', false)
+            ->assertSee('class="stat-cards"', false)
+            ->assertSee('fas fa-bullhorn', false)
+            ->assertSee('Open opportunities');
+        $this->get('/jobs')->assertOk()->assertSee('Startups hiring');
+        $this->get('/marketplace')->assertOk()->assertSee('Requests to buy');
+        $this->get(route('directory.index'))->assertOk()->assertSee('Listed startups');
+
+        $admin = $this->userWithRole('platform_admin');
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('class="stat-cards"', false)->assertSee('data-tab="Modules"', false);
+        $this->actingAs($admin)->get('/admin/users')->assertOk()->assertSee('Two-step sign-in on');
+        $this->assertFileExists(public_path('vendor/fontawesome/webfonts/fa-solid-900.woff2'));
+    }
+
     public function test_published_page_is_visible_and_markdown_is_rendered(): void
     {
         $this->page();

@@ -9,20 +9,15 @@
         <h1>Team · {{ $startup->display_name }}</h1>
         @include('partials.flash')
 
-        @if ($membership->canManageTeam())
-            <form method="post" action="{{ route('workspace.startups.team.invite', $startup) }}" class="panel">
-                @csrf
-                <h2>Invite someone</h2>
-                <p class="hint">They get an email link and must sign in with that same email address to join.</p>
-                <div class="form-row">
-                    @include('partials.field', ['name' => 'email', 'label' => 'Email address', 'type' => 'email', 'required' => true])
-                    @include('partials.field', ['name' => 'role', 'label' => 'Role', 'type' => 'select', 'required' => true, 'value' => 'team_member',
-                        'options' => $isOwner ? $roles : array_diff_key($roles, ['owner' => 1, 'admin' => 1])])
-                    <div><button type="submit" class="btn btn-primary">Send invitation</button></div>
-                </div>
-            </form>
-        @endif
+        @include('partials.stats', ['label' => 'Team at a glance', 'stats' => [
+            ['icon' => 'fa-users', 'tone' => 'purple', 'label' => 'Active members', 'value' => $members->where('status', 'active')->count()],
+            ['icon' => 'fa-envelope-open-text', 'tone' => 'blue', 'label' => 'Invitations pending', 'value' => $members->where('status', 'invited')->count()],
+            ['icon' => 'fa-user-clock', 'tone' => 'amber', 'label' => 'Asked to join', 'value' => $members->where('status', 'requested')->count()],
+            ['icon' => 'fa-crown', 'tone' => 'orange', 'label' => 'Owners', 'value' => $members->where('status', 'active')->where('role', 'owner')->count()],
+        ]])
 
+        <div data-tabs="Team sections" data-tabs-key="team">
+        <section data-tab="Members" data-tab-icon="fa-users" data-tab-count="{{ $members->count() }}" aria-label="Members">
         <div class="table-wrap" tabindex="0" role="region" aria-label="Team members">
             <table>
                 <thead><tr><th scope="col">Person</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
@@ -87,5 +82,23 @@
             </table>
         </div>
         <p class="hint">Roles: owners and admins manage the team (only owners manage other owners and admins); owners, founders and admins edit the profile; team members and viewers can see it. A startup always keeps at least one owner.</p>
+        </section>
+
+        @if ($membership->canManageTeam())
+            <section data-tab="Invite someone" data-tab-icon="fa-user-plus" aria-label="Invite someone">
+            <form method="post" action="{{ route('workspace.startups.team.invite', $startup) }}" class="panel">
+                @csrf
+                <h2>Invite someone</h2>
+                <p class="hint">They get an email link and must sign in with that same email address to join.</p>
+                <div class="form-row">
+                    @include('partials.field', ['name' => 'email', 'label' => 'Email address', 'type' => 'email', 'required' => true])
+                    @include('partials.field', ['name' => 'role', 'label' => 'Role', 'type' => 'select', 'required' => true, 'value' => 'team_member',
+                        'options' => $isOwner ? $roles : array_diff_key($roles, ['owner' => 1, 'admin' => 1])])
+                    <div><button type="submit" class="btn btn-primary">Send invitation</button></div>
+                </div>
+            </form>
+            </section>
+        @endif
+        </div>
     </div>
 @endsection

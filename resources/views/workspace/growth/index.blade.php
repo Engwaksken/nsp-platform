@@ -10,7 +10,15 @@
         @if (!$framework && !$latest)
             <div class="card"><h2>Coming soon</h2><p>Hive has not published the growth assessment yet. You will be able to assess your startup and build a growth plan here.</p></div>
         @else
-            <section class="panel" aria-labelledby="assess-heading">
+            @include('partials.stats', ['label' => 'Growth at a glance', 'stats' => [
+                ['icon' => 'fa-gauge-high', 'tone' => 'green', 'label' => 'Growth score', 'value' => $latest ? number_format($latest->displayScore(), 1) : '—', 'note' => $latest ? 'out of 100' : 'Not assessed yet'],
+                ['icon' => 'fa-seedling', 'tone' => 'green', 'label' => 'Stage', 'value' => $latest ? $latest->displayBand() : 'Not assessed'],
+                ['icon' => 'fa-list-check', 'tone' => 'blue', 'label' => 'Open actions', 'value' => $actions->where('status', '!=', 'done')->count(), 'note' => $actions->where('status', 'done')->count().' done'],
+                ['icon' => 'fa-clock-rotate-left', 'tone' => 'purple', 'label' => 'Assessments', 'value' => $history->count()],
+            ]])
+
+            <div data-tabs="Growth sections" data-tabs-key="growth">
+            <section class="panel" aria-labelledby="assess-heading" data-tab="Assessment" data-tab-icon="fa-gauge-high">
                 <h2 id="assess-heading">Growth assessment</h2>
                 @if ($latest)
                     @include('workspace.growth.scores', ['assessment' => $latest])
@@ -34,7 +42,7 @@
             </section>
 
             @if ($latest && $dimensionTrends)
-                <section class="panel" aria-labelledby="dimension-trends-heading">
+                <section class="panel" aria-labelledby="dimension-trends-heading" data-tab="Progress by area" data-tab-icon="fa-chart-line">
                     <h2 id="dimension-trends-heading">Dimension-level progress</h2>
                     <p class="hint">Only assessments using the same rubric version are compared. Missing information is not treated as a score change.</p>
                     <div class="table-wrap" tabindex="0" role="region" aria-label="VGI dimension score trends">
@@ -53,7 +61,7 @@
                 </section>
             @endif
 
-            <section class="panel" aria-labelledby="plan-heading">
+            <section class="panel" aria-labelledby="plan-heading" data-tab="Growth plan" data-tab-icon="fa-list-check" data-tab-count="{{ $actions->where('status', '!=', 'done')->count() }}">
                 <h2 id="plan-heading">Growth plan</h2>
                 @if ($actions->isEmpty())
                     <p class="empty">No actions yet. Add suggested actions from your assessment results, or add your own below.</p>
@@ -108,7 +116,7 @@
             </section>
 
             @if ($history->count() > 1)
-                <section class="panel" aria-labelledby="history-heading">
+                <section class="panel" aria-labelledby="history-heading" data-tab="History" data-tab-icon="fa-clock-rotate-left">
                     <h2 id="history-heading">Progress over time</h2>
                     <table>
                         <thead><tr><th scope="col">Date</th><th scope="col">Score</th><th scope="col">Stage</th><th scope="col">Rubric</th></tr></thead>
@@ -126,6 +134,7 @@
                     <p class="hint">Scores from different rubric versions are not directly comparable.</p>
                 </section>
             @endif
+            </div>
         @endif
     </div>
 @endsection

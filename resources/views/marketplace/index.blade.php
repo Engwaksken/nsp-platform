@@ -6,6 +6,8 @@
         <p>Products and services from Hive startups, things they want to buy, and partnerships they are looking for.
             @auth <a href="{{ route('marketplace.inbox') }}">My messages</a>@endauth</p>
 
+        @include('partials.stats', ['label' => 'Marketplace at a glance', 'stats' => \App\Support\PublicStats::marketplace()])
+
         <form method="get" class="filters" role="search" aria-label="Filter the marketplace">
             <div class="form-group"><label for="q">Keyword</label><input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search products and services…" maxlength="100"></div>
             <div class="form-group"><label for="kind">Type</label>

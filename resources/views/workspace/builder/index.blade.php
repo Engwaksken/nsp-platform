@@ -25,12 +25,16 @@
             </section>
         @else
             @if ($curriculum->isProvisional())<p class="notice">Provisional curriculum — awaiting owner approval.</p>@endif
-            <section class="panel" aria-label="Builder progress">
-                <h2>Progress</h2><p>{{ $progress['done'] }} of {{ $progress['total'] }} steps validated or completed ({{ $progress['percent'] }}%).</p>
-                <progress max="100" value="{{ $progress['percent'] }}" aria-label="Builder completion">{{ $progress['percent'] }}%</progress>
-            </section>
+            @include('partials.stats', ['label' => 'Venture Builder progress', 'stats' => [
+                ['icon' => 'fa-chart-pie', 'tone' => 'green', 'label' => 'Complete', 'value' => $progress['percent'].'%'],
+                ['icon' => 'fa-circle-check', 'tone' => 'blue', 'label' => 'Steps done', 'value' => $progress['done'], 'note' => 'of '.$progress['total']],
+                ['icon' => 'fa-shoe-prints', 'tone' => 'amber', 'label' => 'Steps to go', 'value' => max(0, $progress['total'] - $progress['done'])],
+                ['icon' => 'fa-layer-group', 'tone' => 'purple', 'label' => 'Modules', 'value' => $curriculum->modules->where('is_active', true)->count()],
+            ]])
+            <p><progress max="100" value="{{ $progress['percent'] }}" aria-label="Builder completion">{{ $progress['percent'] }}%</progress></p>
+            <div data-tabs="Builder modules" data-tabs-key="builder">
             @foreach ($curriculum->modules->where('is_active', true)->sortBy('position') as $module)
-                <section class="panel"><h2>{{ $module->position }}. {{ $module->title }}</h2>
+                <section class="panel" data-tab="{{ $module->position }}. {{ $module->title }}" data-tab-count="{{ $module->steps->where('is_active', true)->count() }}" aria-label="{{ $module->title }}"><h2>{{ $module->position }}. {{ $module->title }}</h2>
                     @if ($module->description)<p>{{ $module->description }}</p>@endif
                     <ol>
                         @foreach ($module->steps->where('is_active', true)->sortBy('position') as $step)
@@ -48,6 +52,7 @@
                     </ol>
                 </section>
             @endforeach
+            </div>
         @endif
     </div>
 @endsection

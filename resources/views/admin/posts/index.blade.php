@@ -6,6 +6,7 @@
         <h1>News</h1>
         <a class="btn btn-primary" href="{{ route('admin.posts.create') }}" data-modal="lg">New post</a>
     </div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::posts()])
     <form method="get" class="filters" role="search">
         <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Search news by title…"></div>
         <button class="btn btn-secondary" type="submit">Search</button>

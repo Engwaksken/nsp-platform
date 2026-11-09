@@ -3,7 +3,7 @@
 //   if the network fails, the cached /offline page is shown instead;
 // - versioned static files (CSS, JS, fonts, icons) are cached after first use.
 // Bump VERSION to drop old caches.
-var VERSION = 'nsp-v1';
+var VERSION = 'nsp-v2';
 var OFFLINE_URL = '/offline';
 
 self.addEventListener('install', function (event) {
@@ -22,7 +22,7 @@ self.addEventListener('activate', function (event) {
 });
 
 function isStatic(url) {
-  return url.origin === self.location.origin && /^\/(css|js|fonts|icons)\//.test(url.pathname);
+  return url.origin === self.location.origin && /^\/(css|js|fonts|icons|vendor)\//.test(url.pathname);
 }
 
 self.addEventListener('fetch', function (event) {
