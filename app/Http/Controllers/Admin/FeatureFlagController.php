@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Integration\ApiClient;
 use App\Support\Audit;
 use App\Support\Features;
 use Illuminate\Http\RedirectResponse;
@@ -27,12 +28,57 @@ class FeatureFlagController extends Controller
         return null;
     }
 
+    /**
+     * Set-up steps still missing for a feature that depends on outside systems.
+     * These do not block the switch (except where blockedReason says so); they explain
+     * why a switched-on feature would not work yet.
+     *
+     * @return list<string>
+     */
+    public static function missingSetup(string $key): array
+    {
+        $missing = [];
+        if ($key === 'ai_assistant') {
+            if (! config('nsp.ai.api_key')) {
+                $missing[] = 'Set ANTHROPIC_API_KEY in .env.';
+            }
+            if (! config('nsp.ai.legal_approved')) {
+                $missing[] = 'Record legal approval: set NSP_AI_LEGAL_APPROVED=true in .env once legal review is done (backlog AI-605).';
+            }
+        }
+        if ($key === 'oidc') {
+            foreach (['issuer' => 'OIDC_ISSUER', 'client_id' => 'OIDC_CLIENT_ID', 'client_secret' => 'OIDC_CLIENT_SECRET', 'redirect_uri' => 'OIDC_REDIRECT_URI'] as $setting => $env) {
+                if (! filled(config("nsp.oidc.$setting"))) {
+                    $missing[] = "Set $env in .env.";
+                }
+            }
+            if ($missing) {
+                $missing[] = 'Register '.(config('nsp.oidc.redirect_uri') ?: url('/auth/oidc/callback')).' as the redirect URI with the Hive identity provider. The SSO button stays hidden until this is configured.';
+            }
+        }
+        if ($key === 'ims_integration') {
+            $clients = ApiClient::query()->where('is_active', true)->where('recipient_system', 'ims');
+            if (! (clone $clients)->exists()) {
+                $missing[] = 'Register Hive IMS as a connected system: php artisan nsp:api-client ims-live --name="Hive IMS" --redirect-uri=… --webhook-url=…';
+            } elseif (! (clone $clients)->whereNotNull('webhook_url')->exists()) {
+                $missing[] = 'Give the IMS client a webhook URL (php artisan nsp:api-client {client_id} --webhook-url=…) so events can be delivered.';
+            }
+            if (! config('nsp.ims_url')) {
+                $missing[] = 'Set IMS_URL in .env so founders get a link to Hive IMS.';
+            }
+        }
+
+        return $missing;
+    }
+
     public function index(): View
     {
         $flags = collect(Features::definitions())->map(fn ($definition, $key) => $definition + [
             'key' => $key,
             'enabled' => Features::enabled($key),
             'locked' => self::blockedReason($key) !== null,
+            'blocked_reason' => self::blockedReason($key),
+            'missing' => self::missingSetup($key),
         ]);
 
         return view('admin.features', compact('flags'));

@@ -3,7 +3,7 @@
 
 @section('content')
     <div class="page-head"><h1>Feature flags</h1></div>
-    <p class="hint">Modules for later phases are locked until they are built, tested and approved.</p>
+    <p class="hint">Features that connect to outside systems (single sign-on, Hive IMS, the AI assistant) stay off until their set-up is done. Each one lists what is still missing.</p>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">Feature</th><th scope="col">Description</th><th scope="col">State</th><th scope="col">Change</th></tr></thead>
@@ -11,11 +11,26 @@
             @foreach ($flags as $flag)
                 <tr>
                     <td>{{ $flag['label'] }}<br><code>{{ $flag['key'] }}</code></td>
-                    <td>{{ $flag['description'] }}</td>
-                    <td><span class="badge badge-{{ $flag['enabled'] ? 'on' : 'off' }}">{{ $flag['enabled'] ? 'On' : 'Off' }}</span></td>
+                    <td>
+                        {{ $flag['description'] }}
+                        @if ($flag['missing'])
+                            <div class="setup-needed">
+                                <strong>{{ $flag['enabled'] ? 'Switched on, but not working until:' : 'Still needed before it works:' }}</strong>
+                                <ul>
+                                    @foreach ($flag['missing'] as $step)
+                                        <li>{{ $step }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </td>
+                    <td>
+                        <span class="badge badge-{{ $flag['enabled'] ? 'on' : 'off' }}">{{ $flag['enabled'] ? 'On' : 'Off' }}</span>
+                        @if ($flag['missing'])<br><span class="badge badge-draft">Setup needed</span>@endif
+                    </td>
                     <td>
                         @if ($flag['locked'])
-                            <span class="meta">Not built yet</span>
+                            <span class="meta">Locked</span>
                         @else
                             <form method="post" action="{{ route('admin.features.update', $flag['key']) }}">
                                 @csrf @method('PUT')
