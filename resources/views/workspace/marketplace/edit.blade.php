@@ -1,8 +1,8 @@
-@extends('layouts.public', ['pageTitle' => 'Edit listing · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Edit listing · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section narrow">
         <p><a href="{{ route('workspace.marketplace', $startup) }}">← {{ $startup->display_name }} marketplace</a></p>
         <h1>{{ $listing->title }}</h1>

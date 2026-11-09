@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Growth assessment · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Growth assessment · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section narrow">
         <h1>Growth assessment · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
         @error('growth')<div class="alert alert-danger" role="alert">{{ $message }}</div>@enderror
         <p>Answer honestly. This is for your team’s planning, not a test. You can save and come back. {{ $assessment->framework->name }}, version {{ $assessment->framework->version }}.</p>

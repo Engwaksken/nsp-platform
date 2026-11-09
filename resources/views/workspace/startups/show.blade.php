@@ -1,8 +1,8 @@
-@extends('layouts.public', ['pageTitle' => $startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => $startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     @php
         $role = $membership->role;
         $canSee = function (string $group) use ($profile, $membership): bool {
@@ -17,7 +17,6 @@
             @if ($membership->canEdit())<a class="btn btn-primary" href="{{ route('workspace.startups.edit', $startup) }}">Edit profile</a>@endif
         </div>
         <p class="meta">You are {{ \App\Models\Registry\StartupMembership::ROLES[$role] }} · Hive startup ID <code>{{ $startup->uuid }}</code></p>
-        @include('workspace.startups.nav')
         @include('partials.flash')
 
         <section class="panel" aria-labelledby="completion-heading">

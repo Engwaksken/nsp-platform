@@ -1,12 +1,11 @@
-@extends('layouts.public', ['pageTitle' => $submission->step->title.' · Venture Builder'])
+@extends('layouts.workspace', ['pageTitle' => $submission->step->title.' · Venture Builder'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <p><a href="{{ route('workspace.builder', $startup) }}">← Venture Builder</a></p>
         <h1>{{ $submission->step->module->title }}: {{ $submission->step->title }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
         @if ($submission->step->guidance)<div class="panel">{!! \App\Support\Markdown::render($submission->step->guidance) !!}</div>@endif
         @if (!$membership->canEdit() || !$submission->isEditable())

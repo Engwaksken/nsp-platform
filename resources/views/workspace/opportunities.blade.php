@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Opportunities · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Opportunities · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Opportunities · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
 
         <section aria-labelledby="rec-heading">

@@ -32,7 +32,7 @@ class InvitationController extends Controller
         }
         ActiveStartup::switchTo($membership->startup);
 
-        return redirect()->route('workspace.startups.show', $membership->startup)->with('status', 'Welcome to '.$membership->startup->display_name.'.');
+        return redirect()->route('workspace.startups.overview', $membership->startup)->with('status', 'Welcome to '.$membership->startup->display_name.'.');
     }
 
     public function decline(Request $request, string $token): RedirectResponse
