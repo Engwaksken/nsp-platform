@@ -198,8 +198,19 @@ main { min-height: 60vh; display: block; }
 .nav-account-signout { margin-top: .35rem !important; padding-top: .35rem; border-top: 1px solid var(--line); }
 .nav-account-signout .btn { width: 100%; }
 
-/* Tablet and phone (1024px and below): links collapse behind the Menu button. */
-@media (max-width: 1024px) {
+/* Laptops and tablets in landscape (769px-1200px): tighter spacing so every link still fits in the header. */
+@media (min-width: 769px) and (max-width: 1200px) {
+  .site-header .container { gap: var(--space-3); }
+  .brand { font-size: 1.05rem; }
+  .brand img { max-height: 34px; }
+  .site-nav { gap: var(--space-1); }
+  .site-nav a:not(.btn) { padding: .45rem .45rem; font-size: .875rem; }
+  .site-nav > ul a[aria-current="page"]::after { left: .45rem; right: .45rem; }
+  .nav-account-toggle { padding: .35rem .6rem; font-size: .875rem; }
+}
+
+/* Phones and small tablets (768px and below): links collapse behind the Menu button. */
+@media (max-width: 768px) {
   .site-header .container { flex-wrap: wrap; }
   .nav-toggle { display: inline-flex; }
   .site-nav { width: 100%; display: none; flex-direction: column; align-items: stretch; gap: 0; padding: var(--space-2) 0 var(--space-4); border-top: 1px solid var(--line); }
