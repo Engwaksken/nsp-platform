@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="{{ asset('css/fonts.css') }}?v=1">
 @endif
 <link rel="stylesheet" href="{{ asset('css/palette-hive.css') }}?v=1">
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=16">
+<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=17">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};
