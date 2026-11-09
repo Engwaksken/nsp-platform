@@ -7,6 +7,8 @@ use Anthropic\Core\Exceptions\APIConnectionException;
 use Anthropic\Core\Exceptions\APIStatusException;
 use Anthropic\Core\Exceptions\AuthenticationException;
 use Anthropic\Core\Exceptions\BadRequestException;
+use Anthropic\Core\Exceptions\NotFoundException;
+use Anthropic\Core\Exceptions\PermissionDeniedException;
 use Anthropic\Core\Exceptions\RateLimitException;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -22,21 +24,56 @@ class AnthropicAiClient implements AiClient
 {
     public function __construct(private readonly array $config) {}
 
+    private function client(): Client
+    {
+        return new Client(apiKey: (string) $this->config['api_key'], baseUrl: $this->config['base_url'] ?? null, requestOptions: [
+            'timeout' => (float) ($this->config['timeout'] ?? 60),
+            'maxRetries' => (int) ($this->config['max_retries'] ?? 2),
+        ]);
+    }
+
+    public function check(): ?string
+    {
+        if (! filled($this->config['api_key'] ?? null)) {
+            return 'No API key is set.';
+        }
+        try {
+            // Looking up the chosen model checks the key and the model name; it generates nothing, so it costs no tokens.
+            $this->client()->models->retrieve((string) $this->config['model']);
+        } catch (AuthenticationException|PermissionDeniedException) {
+            return 'The API key was rejected. Check that it was copied in full and is still active.';
+        } catch (NotFoundException) {
+            return 'The key works, but the model "'.$this->config['model'].'" is not available to this account.';
+        } catch (RateLimitException) {
+            return 'The AI service is busy. The key may be fine; try again in a minute.';
+        } catch (APIConnectionException $e) {
+            Log::warning('[ai] connection check failed: '.mb_substr($e->getMessage(), 0, 300));
+
+            return 'The AI service could not be reached from this server. Check the server\'s internet access or firewall.';
+        } catch (Throwable $e) {
+            Log::warning('[ai] connection check failed: '.class_basename($e).' '.mb_substr($e->getMessage(), 0, 300));
+
+            return 'The AI service had a problem ('.class_basename($e).'). Try again later.';
+        }
+
+        return null;
+    }
+
     public function complete(string $system, string $user): AiResult
     {
+        $model = (string) $this->config['model'];
+        // Server-side refusal fallbacks exist for Opus, Sonnet and Fable; Haiku has none, so it is not sent there.
+        // (Null arguments are dropped by the SDK, so nothing is sent for Haiku.)
+        $fallback = AiSettings::supportsFallbacks($model);
         try {
-            $client = new Client(apiKey: (string) $this->config['api_key'], baseUrl: $this->config['base_url'] ?? null, requestOptions: [
-                'timeout' => (float) ($this->config['timeout'] ?? 60),
-                'maxRetries' => (int) ($this->config['max_retries'] ?? 2),
-            ]);
-            $message = $client->beta->messages->create(
+            $message = $this->client()->beta->messages->create(
                 maxTokens: (int) ($this->config['max_tokens'] ?? 4000),
                 messages: [['role' => 'user', 'content' => $user]],
-                model: (string) $this->config['model'],
+                model: $model,
                 system: $system,
                 outputConfig: ['effort' => (string) ($this->config['effort'] ?? 'medium')],
-                fallbacks: 'default',
-                betas: ['server-side-fallback-2026-07-01'],
+                fallbacks: $fallback ? 'default' : null,
+                betas: $fallback ? ['server-side-fallback-2026-07-01'] : null,
             );
         } catch (AuthenticationException $e) {
             return $this->failure('The AI service rejected our credentials.', $e);

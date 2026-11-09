@@ -15,7 +15,7 @@ use App\Support\Features;
  * Optional writing help for founders (AI-605).
  *
  * Safeguards:
- * - off unless the feature flag is on, an API key is set and legal review is recorded (NSP_AI_LEGAL_APPROVED);
+ * - off unless the feature flag is on, an API key is set and legal review is recorded (Admin → AI assistant, or .env);
  * - each person opts in (versioned consent) and can withdraw;
  * - only owners, founders and admins of the startup can use it;
  * - the model receives only the text the founder typed plus the startup's display name, sector and growth stage:
@@ -58,10 +58,11 @@ TXT;
         if (! Features::enabled('ai_assistant')) {
             return 'The AI assistant is switched off.';
         }
-        if (! config('nsp.ai.api_key')) {
+        $settings = AiSettings::config();
+        if (! $settings['api_key']) {
             return 'The AI assistant is not configured.';
         }
-        if (! config('nsp.ai.legal_approved')) {
+        if (! $settings['legal_approved']) {
             return 'The AI assistant is waiting for Hive’s legal review.';
         }
 
@@ -131,7 +132,7 @@ TXT;
     private function enforceLimits(Startup $startup, User $user): void
     {
         $since = now()->startOfDay();
-        $limits = config('nsp.ai.daily_limits');
+        $limits = AiSettings::config()['daily_limits'];
         if (AiInteraction::query()->where('user_id', $user->id)->where('created_at', '>=', $since)->count() >= $limits['user']) {
             throw new RegistryException('You have used the assistant '.$limits['user'].' times today. Try again tomorrow.');
         }

@@ -40,4 +40,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Connected systems always get JSON errors, whatever Accept header they send.
         $exceptions->shouldRenderJsonWhen(fn (Request $request) => $request->is('api/*') || $request->expectsJson());
+        // Never put secrets back into the session (and the re-rendered form) after a validation error.
+        $exceptions->dontFlash(['api_key']);
     })->create();

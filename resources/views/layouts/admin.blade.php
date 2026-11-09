@@ -69,6 +69,7 @@
                     @can('manage-users') {!! $navLink('admin.users.index', 'Users and roles', 'admin.users.*') !!} @endcan
                     @can('manage-settings') {!! $navLink('admin.settings.edit', 'Branding and settings', 'admin.settings.*') !!} @endcan
                     @can('manage-feature-flags') {!! $navLink('admin.features.index', 'Feature flags', 'admin.features.*') !!} @endcan
+                    @can('manage-feature-flags') {!! $navLink('admin.ai.edit', 'AI assistant', 'admin.ai.*') !!} @endcan
                     @can('view-audit-log') {!! $navLink('admin.audit.index', 'Audit log', 'admin.audit.*') !!} @endcan
                     @can('view-system-health') {!! $navLink('admin.system', 'System health', 'admin.system') !!} @endcan
                 </ul>

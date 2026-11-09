@@ -50,6 +50,24 @@ class PublicSiteTest extends TestCase
             ->assertSee('Sign out');
     }
 
+    public function test_footer_has_explore_information_and_contact_columns_without_duplicates(): void
+    {
+        $header = \App\Models\Menu::query()->create(['name' => 'Header', 'location' => 'header']);
+        $header->items()->create(['label' => 'Home', 'url' => '/', 'sort_order' => 1]);
+        $header->items()->create(['label' => 'FAQs', 'url' => '/faqs', 'sort_order' => 2]);
+        $footer = \App\Models\Menu::query()->create(['name' => 'Footer', 'location' => 'footer']);
+        $footer->items()->create(['label' => 'FAQs', 'url' => '/faqs', 'sort_order' => 1]);
+        $footer->items()->create(['label' => 'Privacy', 'url' => '/privacy', 'sort_order' => 2]);
+
+        $html = $this->get('/')->assertOk()->getContent();
+        $footerHtml = substr($html, strpos($html, '<footer'));
+        foreach (['id="footer-explore"', 'id="footer-info"', 'Get in touch', 'Knowledge Hub', 'Privacy', 'Back to top'] as $text) {
+            $this->assertStringContainsString($text, $footerHtml);
+        }
+        $this->assertSame(1, substr_count($footerHtml, '>FAQs<'), 'A link in both menus is listed once.');
+        $this->assertStringNotContainsString('>Home<', $footerHtml);
+    }
+
     public function test_published_page_is_visible_and_markdown_is_rendered(): void
     {
         $this->page();
