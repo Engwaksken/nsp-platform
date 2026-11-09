@@ -3,6 +3,7 @@
 
 @section('content')
     <div class="page-head"><h1>Knowledge Hub</h1>@can('manage-knowledge')<a class="btn btn-primary" href="{{ route('admin.knowledge.create') }}" data-modal="lg">New resource</a>@endcan</div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::knowledge()])
     @include('partials.flash')
     <nav class="filters" aria-label="Filter resources by status">
         <a class="tag" href="{{ route('admin.knowledge.index') }}">All</a>

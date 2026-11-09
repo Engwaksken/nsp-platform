@@ -3,6 +3,7 @@
 
 @section('content')
     <div class="page-head"><h1>Vacancies</h1></div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::vacancies()])
     @include('partials.flash')
     <p class="hint">Startups publish vacancies themselves. Take down anything misleading, discriminatory or unlawful; the startup sees your note. Applications and CVs are not visible here.</p>
     <nav class="tags" aria-label="Filter by status">

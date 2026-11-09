@@ -6,6 +6,7 @@
         <h1>Opportunities</h1>
         <a class="btn btn-primary" href="{{ route('admin.opportunities.create') }}" data-modal="lg">New opportunity</a>
     </div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::opportunities()])
     <nav class="filters" aria-label="Filter opportunities">
         @foreach (['published' => 'Open', 'pending_review' => 'To review ('.$pendingCount.')', 'draft' => 'Drafts', 'closed' => 'Closed', 'rejected' => 'Rejected', 'archived' => 'Archived'] as $value => $label)
             <a class="tag" href="{{ route('admin.opportunities.index', ['tab' => $value]) }}" @if ($tab === $value) aria-current="true" @endif>{{ $label }}</a>

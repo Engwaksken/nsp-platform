@@ -487,6 +487,9 @@
       var tabs = panels.map(function (panel) {
         if (!panel.id) panel.id = nextId('tabpanel');
         var tab = el('button', { type: 'button', role: 'tab', id: panel.id + '-tab', 'aria-controls': panel.id, 'class': 'tab' });
+        // Optional Font Awesome icon: data-tab-icon="fa-coins" (letters, digits and dashes only).
+        var icon = panel.getAttribute('data-tab-icon');
+        if (icon && /^fa-[a-z0-9-]+$/.test(icon)) tab.appendChild(el('i', { 'class': 'fas ' + icon, 'aria-hidden': 'true' }));
         tab.appendChild(el('span', {}, panel.getAttribute('data-tab')));
         var count = panel.getAttribute('data-tab-count');
         if (count) {

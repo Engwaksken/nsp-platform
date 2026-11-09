@@ -26,15 +26,20 @@
             </section>
         @endif
 
-        <h2 class="visually-hidden">Key figures</h2>
-        <div class="dash-cards">
-            @foreach ($cards as [$label, $value, $url])
-                <a class="card card-link" href="{{ $url }}">
-                    <span class="meta">{{ $label }}</span>
-                    <span class="kpi-value">{{ is_numeric($value) ? number_format($value) : $value }}</span>
-                </a>
-            @endforeach
-        </div>
+        @php
+            $look = [
+                'Profile complete' => ['fa-id-card', 'blue'], 'Team members' => ['fa-users', 'purple'],
+                'Growth stage' => ['fa-seedling', 'green'], 'Open growth actions' => ['fa-list-check', 'green'],
+                'Funding request' => ['fa-sack-dollar', 'amber'], 'Investor introductions' => ['fa-handshake', 'amber'],
+                'Active expert engagements' => ['fa-user-tie', 'blue'], 'Open vacancies' => ['fa-briefcase', 'orange'],
+                'New job applications' => ['fa-file-lines', 'orange'], 'Unread marketplace messages' => ['fa-envelope', 'red'],
+                'Hive programs' => ['fa-graduation-cap', 'purple'],
+            ];
+        @endphp
+        @include('partials.stats', ['label' => 'Key figures', 'stats' => array_map(fn ($card) => [
+            'icon' => $look[$card[0]][0] ?? 'fa-chart-simple', 'tone' => $look[$card[0]][1] ?? 'grey',
+            'label' => $card[0], 'value' => $card[1], 'url' => $card[2],
+        ], $cards)])
 
         @if ($membership->canEdit())
             <section class="panel" aria-labelledby="export-heading">

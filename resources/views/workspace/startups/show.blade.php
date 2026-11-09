@@ -19,14 +19,15 @@
         <p class="meta">You are {{ \App\Models\Registry\StartupMembership::ROLES[$role] }} · Hive startup ID <code>{{ $startup->uuid }}</code></p>
         @include('partials.flash')
 
-        <section class="panel" aria-labelledby="completion-heading">
-            <h2 id="completion-heading">Profile completion</h2>
-            <p><meter min="0" max="100" value="{{ $profile->profile_completion }}" aria-describedby="completion-text"></meter>
-                <span id="completion-text">{{ $profile->profile_completion }}% complete</span></p>
-        </section>
+        @include('partials.stats', ['label' => 'Profile at a glance', 'stats' => [
+            ['icon' => 'fa-id-card', 'tone' => 'blue', 'label' => 'Profile complete', 'value' => ($profile->profile_completion ?? 0).'%', 'url' => $membership->canEdit() ? route('workspace.startups.edit', $startup) : null],
+            ['icon' => 'fa-users', 'tone' => 'purple', 'label' => 'Team members', 'value' => $startup->activeMemberships->count(), 'url' => route('workspace.startups.team', $startup)],
+            ['icon' => 'fa-industry', 'tone' => 'green', 'label' => 'Sector', 'value' => $profile->sector ?: 'Not given'],
+            ['icon' => 'fa-calendar-days', 'tone' => 'amber', 'label' => 'Founded', 'value' => $startup->year_founded ? (string) $startup->year_founded : 'Not given'],
+        ]])
 
-        <div class="form-row">
-            <section class="panel" aria-labelledby="company-heading">
+        <div data-tabs="Profile sections" data-tabs-key="profile">
+            <section class="panel" aria-labelledby="company-heading" data-tab="Company" data-tab-icon="fa-building">
                 <h2 id="company-heading">Company</h2>
                 <dl>
                     <dt>Registered name</dt><dd>{{ $startup->legal_name }}</dd>
@@ -41,7 +42,7 @@
                 @if ($startup->description)<h3>About</h3><p>{!! nl2br(e($startup->description)) !!}</p>@endif
             </section>
 
-            <section class="panel" aria-labelledby="private-heading">
+            <section class="panel" aria-labelledby="private-heading" data-tab="Private details" data-tab-icon="fa-lock">
                 <h2 id="private-heading">Private details</h2>
                 <dl>
                     <dt>Yearly revenue</dt>
@@ -54,16 +55,16 @@
                     <dd>{{ $canSee('contact') ? trim(($profile->contact_email ?: '').' '.($profile->contact_phone ?: '')) ?: 'Not given' : $hidden }}</dd>
                 </dl>
             </section>
-        </div>
 
-        <section class="panel" aria-labelledby="team-heading">
-            <h2 id="team-heading">Team</h2>
-            <ul>
-                @foreach ($startup->activeMemberships as $member)
-                    <li>{{ $member->user?->name }} · {{ \App\Models\Registry\StartupMembership::ROLES[$member->role] }}</li>
-                @endforeach
-            </ul>
-            <a href="{{ route('workspace.startups.team', $startup) }}">Manage the team</a>
-        </section>
+            <section class="panel" aria-labelledby="team-heading" data-tab="Team" data-tab-icon="fa-users" data-tab-count="{{ $startup->activeMemberships->count() }}">
+                <h2 id="team-heading">Team</h2>
+                <ul>
+                    @foreach ($startup->activeMemberships as $member)
+                        <li>{{ $member->user?->name }} · {{ \App\Models\Registry\StartupMembership::ROLES[$member->role] }}</li>
+                    @endforeach
+                </ul>
+                <a href="{{ route('workspace.startups.team', $startup) }}">Manage the team</a>
+            </section>
+        </div>
     </div>
 @endsection
