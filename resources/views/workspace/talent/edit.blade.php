@@ -1,8 +1,8 @@
-@extends('layouts.public', ['pageTitle' => 'Edit vacancy · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Edit vacancy · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section narrow">
         <p><a href="{{ route('workspace.talent.vacancy', [$startup, $vacancy]) }}">← Applications for this role</a></p>
         <h1>{{ $vacancy->title }}</h1>

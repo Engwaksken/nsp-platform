@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Find candidates · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Find candidates · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Find candidates · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
         <p class="hint">Only people who chose to be found by startups appear here. You see their headline, skills, location and preferences, not their email or CV. Invite them to apply to an open vacancy; it is their choice to apply.</p>
 

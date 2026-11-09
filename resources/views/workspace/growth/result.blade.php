@@ -1,14 +1,13 @@
-@extends('layouts.public', ['pageTitle' => 'Growth results · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Growth results · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <div class="page-head">
             <h1>Growth results · {{ $startup->display_name }}</h1>
             <a class="btn btn-secondary" href="{{ route('workspace.growth.report', [$startup, $assessment]) }}">Printable report</a>
         </div>
-        @include('workspace.startups.nav')
         @include('partials.flash')
         <p class="meta">Submitted by {{ $assessment->submitter?->name ?? 'a team member' }} on {{ $assessment->submitted_at->format('j M Y') }}.
             {{ $assessment->result['band']['description'] ?? '' }}</p>

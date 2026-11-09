@@ -107,7 +107,7 @@ class StartupController extends Controller
         $this->membershipOr404($request, $startup);
         ActiveStartup::switchTo($startup);
 
-        return redirect()->route('workspace.startups.show', $startup)->with('status', 'You are now working on '.$startup->display_name.'.');
+        return redirect()->route('workspace.startups.overview', $startup)->with('status', 'You are now working on '.$startup->display_name.'.');
     }
 
     public function history(Request $request, Startup $startup): View

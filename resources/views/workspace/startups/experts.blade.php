@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Experts · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Experts · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Experts and mentors · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
         <p class="hint">Experts here are checked by Hive. When you send a request, the expert sees your startup’s name, sector and what you write. Contact details are shared once they accept.</p>
 

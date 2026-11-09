@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Funding · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Funding · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Funding · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         @include('partials.flash')
         <p class="hint">NSP helps you meet investors that Hive has verified. It does not promise or arrange funding. Investors only find you while you have an open funding request <strong>and</strong> “{{ config('nsp.registry.consent_purposes.investor_listing.label') }}” is turned on, and your documents are only shared with investors you choose.</p>
 

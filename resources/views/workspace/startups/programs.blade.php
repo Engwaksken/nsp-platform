@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Applications and programs · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Applications and programs · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Applications and programs · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         <p class="hint">Hive IMS sends these updates when you apply with your Hive startup profile. Reviews and scores stay in IMS.
             @if ($imsUrl) <a href="{{ $imsUrl }}" rel="noopener" target="_blank">Open Hive IMS</a> for full details.@endif</p>
 

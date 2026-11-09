@@ -24,19 +24,37 @@ class OverviewController extends Controller
         $membership = $this->membershipOr404($request, $startup);
         $uuid = $startup->uuid;
         $cards = [];
-        $cards[] = ['Profile complete', ($startup->profile?->profile_completion ?? 0).'%', route('workspace.startups.edit', $startup)];
+        $next = []; // [text, link label, url]: things the team should do next
+        $completion = (int) ($startup->profile?->profile_completion ?? 0);
+        $cards[] = ['Profile complete', $completion.'%', route('workspace.startups.edit', $startup)];
+        if ($completion < 80 && $membership->canEdit()) {
+            $next[] = ['Your profile is '.$completion.'% complete. A fuller profile helps matching and support.', 'Complete the profile', route('workspace.startups.edit', $startup)];
+        }
         $cards[] = ['Team members', StartupMembership::query()->where('startup_uuid', $uuid)->where('status', 'active')->count(), route('workspace.startups.team', $startup)];
+        if ($membership->canEdit()) {
+            $joinRequests = StartupMembership::query()->where('startup_uuid', $uuid)->where('status', 'requested')->count();
+            if ($joinRequests) {
+                $next[] = [trans_choice(':count person has asked to join the team.|:count people have asked to join the team.', $joinRequests), 'Review requests', route('workspace.startups.team', $startup)];
+            }
+        }
         if (Features::enabled('vgi')) {
-            $cards[] = ['Growth stage', Eligibility::stage($startup) ?? 'Not assessed', route('workspace.growth', $startup)];
+            $stage = Eligibility::stage($startup);
+            $cards[] = ['Growth stage', $stage ?? 'Not assessed', route('workspace.growth', $startup)];
             $cards[] = ['Open growth actions', DB::table('growth_actions')->where('startup_uuid', $uuid)->where('status', '!=', 'done')->count(), route('workspace.growth', $startup)];
+            if ($stage === null) {
+                $next[] = ['Take the growth assessment to see your stage and get tailored guidance.', 'Start the assessment', route('workspace.growth', $startup)];
+            }
         }
         if (Features::enabled('funding')) {
+            $openRequest = DB::table('funding_requests')->where('startup_uuid', $uuid)->where('status', 'open')->exists();
+            $cards[] = ['Funding request', $openRequest ? 'Open' : 'None', route('workspace.funding', $startup)];
             $cards[] = ['Investor introductions', DB::table('investor_introductions')->where('startup_uuid', $uuid)->whereIn('status', ['requested', 'accepted'])->count(), route('workspace.funding', $startup)];
         }
         if (Features::enabled('experts')) {
             $cards[] = ['Active expert engagements', DB::table('expert_engagements')->where('startup_uuid', $uuid)->where('status', 'active')->count(), route('workspace.experts', $startup)];
         }
         if (Features::enabled('talent')) {
+            $cards[] = ['Open vacancies', DB::table('vacancies')->where('startup_uuid', $uuid)->where('status', 'open')->count(), route('workspace.talent', $startup)];
             $cards[] = ['New job applications', DB::table('job_applications')->where('startup_uuid', $uuid)->where('status', 'submitted')->count(), route('workspace.talent', $startup)];
         }
         if (Features::enabled('marketplace')) {
@@ -46,7 +64,7 @@ class OverviewController extends Controller
             $cards[] = ['Hive programs', DB::table('startup_program_records')->where('startup_uuid', $uuid)->where('enrolled', true)->count(), route('workspace.startups.programs', $startup)];
         }
 
-        return view('workspace.startups.overview', ['startup' => $startup, 'membership' => $membership, 'cards' => $cards]);
+        return view('workspace.startups.overview', ['startup' => $startup, 'membership' => $membership, 'cards' => $cards, 'next' => $next]);
     }
 
     /**

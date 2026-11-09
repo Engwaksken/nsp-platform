@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => $startup->exists ? 'Edit '.$startup->display_name : 'Register a startup'])
+@extends('layouts.workspace', ['pageTitle' => $startup->exists ? 'Edit '.$startup->display_name : 'Register a startup'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section narrow">
         <h1>{{ $startup->exists ? 'Edit '.$startup->display_name : 'Register your startup' }}</h1>
-        @if ($startup->exists)@include('workspace.startups.nav')@endif
         @include('partials.flash')
 
         @if (!empty($matches))

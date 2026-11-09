@@ -1,11 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Change history · '.$startup->display_name])
+@extends('layouts.workspace', ['pageTitle' => 'Change history · '.$startup->display_name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section">
         <h1>Change history · {{ $startup->display_name }}</h1>
-        @include('workspace.startups.nav')
         <p class="hint">Private details only show that they changed, never their values.</p>
         <div class="table-wrap" tabindex="0" role="region" aria-label="Change history">
             <table>

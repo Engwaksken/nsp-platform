@@ -1,8 +1,8 @@
-@extends('layouts.public', ['pageTitle' => 'Application · '.$application->vacancy->title])
+@extends('layouts.workspace', ['pageTitle' => 'Application · '.$application->vacancy->title])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
-@section('content')
+@section('workspace')
     <div class="container section narrow">
         <p><a href="{{ route('workspace.talent.vacancy', [$startup, $application->vacancy]) }}">← Applications for {{ $application->vacancy->title }}</a></p>
         <h1>{{ $application->applicant?->name ?? 'Deleted account' }}</h1>
