@@ -168,4 +168,11 @@ class FakeAiClient implements AiClient
 
         return $this->next ?? new AiResult('ok', 'Suggested text.', 'claude-opus-5-5', 10, 5);
     }
+
+    public ?string $checkError = null;
+
+    public function check(): ?string
+    {
+        return $this->checkError;
+    }
 }

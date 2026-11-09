@@ -37,6 +37,12 @@
                 ],
             ])->map(fn ($links) => collect($links)->filter(fn ($link) => \App\Support\Features::enabled($link['feature']) && \Illuminate\Support\Facades\Route::has($link['route'])))
               ->filter(fn ($links) => $links->isNotEmpty());
+            // Footer: "Explore" lists the same app sections; "Information" merges the top-level header links and the footer menu (no duplicates, no home link).
+            $exploreLinks = $navGroups->flatten(1);
+            $infoLinks = $menuItems->whereNull('parent_id')->concat($footerMenu?->items->filter->isVisible() ?? [])
+                ->reject(fn ($item) => trim(url($item->href()), '/') === trim(url('/'), '/'))
+                ->unique(fn ($item) => trim(url($item->href()), '/'));
+            $socialLinks = \App\Support\Settings::json('social_links');
         @endphp
         <nav class="site-nav" id="site-nav" aria-label="Main">
             <ul class="nav-links">
@@ -114,33 +120,60 @@
 <footer class="site-footer">
     <div class="container">
         <div class="footer-grid">
-            <div>
+            <div class="footer-col footer-brand">
                 <strong>{{ $brand['site_name'] }}</strong>
                 @if ($brand['site_tagline'])<p>{{ $brand['site_tagline'] }}</p>@endif
                 @if ($brand['footer_text'])<p>{{ $brand['footer_text'] }}</p>@endif
+                @if ($socialLinks)
+                    <ul class="footer-social" aria-label="Social media">
+                        @foreach ($socialLinks as $network => $link)
+                            <li><a href="{{ $link }}" rel="noopener me" target="_blank">{{ \App\Http\Controllers\Admin\SettingsController::SOCIAL[$network] ?? $network }}</a></li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
-            <div>
+            @if ($exploreLinks->isNotEmpty())
+                <nav class="footer-col" aria-labelledby="footer-explore">
+                    <h2 id="footer-explore">Explore</h2>
+                    <ul>
+                        @foreach ($exploreLinks as $link)
+                            <li><a href="{{ route($link['route']) }}">{{ $link['title'] }}</a></li>
+                        @endforeach
+                    </ul>
+                </nav>
+            @endif
+            @if ($infoLinks->isNotEmpty())
+                <nav class="footer-col" aria-labelledby="footer-info">
+                    <h2 id="footer-info">Information</h2>
+                    <ul>
+                        @foreach ($infoLinks as $item)
+                            <li><a href="{{ $item->href() }}" @if ($item->open_in_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label }}</a></li>
+                        @endforeach
+                    </ul>
+                </nav>
+            @endif
+            <div class="footer-col">
+                <h2>Get in touch</h2>
                 @if ($brand['contact_email'] || $brand['contact_phone'] || $brand['contact_address'])
-                    <h2 class="visually-hidden">Contact</h2>
                     <address>
-                        @if ($brand['contact_address']){{ $brand['contact_address'] }}<br>@endif
-                        @if ($brand['contact_phone'])<a href="tel:{{ preg_replace('/[^0-9+]/', '', $brand['contact_phone']) }}">{{ $brand['contact_phone'] }}</a><br>@endif
+                        @if ($brand['contact_address'])<span>{{ $brand['contact_address'] }}</span>@endif
+                        @if ($brand['contact_phone'])<a href="tel:{{ preg_replace('/[^0-9+]/', '', $brand['contact_phone']) }}">{{ $brand['contact_phone'] }}</a>@endif
                         @if ($brand['contact_email'])<a href="mailto:{{ $brand['contact_email'] }}">{{ $brand['contact_email'] }}</a>@endif
                     </address>
                 @endif
-            </div>
-            <nav aria-label="Footer">
                 <ul>
-                    @foreach ($footerMenu?->items->filter->isVisible() ?? [] as $item)
-                        <li><a href="{{ $item->href() }}" @if ($item->open_in_new_tab) target="_blank" rel="noopener" @endif>{{ $item->label }}</a></li>
-                    @endforeach
-                    @foreach (\App\Support\Settings::json('social_links') as $network => $link)
-                        <li><a href="{{ $link }}" rel="noopener me" target="_blank">{{ \App\Http\Controllers\Admin\SettingsController::SOCIAL[$network] ?? $network }}</a></li>
-                    @endforeach
+                    @auth
+                        <li><a href="{{ route('workspace') }}">My workspace</a></li>
+                    @else
+                        <li><a href="{{ route('login') }}">Sign in</a></li>
+                    @endauth
                 </ul>
-            </nav>
+            </div>
         </div>
-        <p class="meta">&copy; {{ now()->year }} {{ $brand['site_name'] }}</p>
+        <div class="footer-bottom">
+            <p>&copy; {{ now()->year }} {{ $brand['site_name'] }}. All rights reserved.</p>
+            <a href="#main">Back to top</a>
+        </div>
     </div>
 </footer>
 </body>

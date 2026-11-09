@@ -62,6 +62,27 @@ class AnthropicClientTest extends TestCase
         $this->assertArrayNotHasKey('tools', $request['body'], 'The model gets no tools.');
     }
 
+    public function test_haiku_is_sent_without_server_side_fallbacks(): void
+    {
+        $this->client(['model' => 'claude-haiku-5-5'])->complete('S', 'U');
+
+        $request = $this->lastRequest();
+        $this->assertNull($request['beta']);
+        $this->assertArrayNotHasKey('fallbacks', $request['body']);
+        $this->assertSame('claude-haiku-5-5', $request['body']['model']);
+    }
+
+    public function test_connection_check_looks_up_the_model_and_explains_failures(): void
+    {
+        $this->assertNull($this->client()->check());
+        $this->assertSame('/v1/models/claude-opus-5-5', $this->lastRequest()['path']);
+
+        $this->assertStringContainsString('rejected', $this->client(['api_key' => 'bad-key'])->check());
+        $this->assertStringContainsString('not available', $this->client(['model' => 'missing-model'])->check());
+        $this->assertStringContainsString('could not be reached', $this->client(['base_url' => 'http://127.0.0.1:9', 'timeout' => 3])->check());
+        $this->assertSame('No API key is set.', $this->client(['api_key' => null])->check());
+    }
+
     public function test_refusal_and_errors_become_results_not_exceptions(): void
     {
         $this->assertSame('refused', $this->client()->complete('S', 'TRIGGER_REFUSAL')->status);
