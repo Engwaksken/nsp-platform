@@ -239,6 +239,45 @@ main { min-height: 60vh; display: block; }
   .nav-account-toggle { border: 0; background: none; }
 }
 
+/* App-style phone layout (768px and below): bottom tab bar, the menu as a full
+   sheet between the header and the tab bar, and room for the phone's notch and
+   home indicator when installed to the home screen. */
+.app-tabbar { display: none; }
+@media (max-width: 768px) {
+  :root { --tabbar-h: 62px; }
+  body { padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); -webkit-tap-highlight-color: transparent; }
+  /* Solid header on phones: a backdrop-filter would make the fixed menu sheet position itself inside the header. */
+  .site-header { padding-top: env(safe-area-inset-top); background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .site-header .container { min-height: 58px; }
+  .site-header .nav-toggle { display: none; }
+  .site-nav.is-open {
+    position: fixed; left: 0; right: 0; top: calc(58px + env(safe-area-inset-top)); bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); z-index: 45;
+    overflow-y: auto; overscroll-behavior: contain; padding: var(--space-3) 16px var(--space-6); background: var(--surface);
+  }
+  html.nav-sheet-open { overflow: hidden; }
+  .app-tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: stretch;
+    height: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background: color-mix(in srgb, var(--surface) 96%, transparent); -webkit-backdrop-filter: saturate(180%) blur(12px); backdrop-filter: saturate(180%) blur(12px);
+    border-top: 1px solid var(--line); box-shadow: 0 -2px 12px rgba(16, 24, 40, .06);
+  }
+  .app-tabbar a, .app-tabbar button {
+    flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    padding: 6px 2px 4px; color: var(--ink-muted); font: inherit; font-size: .7rem; font-weight: 600; letter-spacing: .01em; text-decoration: none;
+    background: none; border: 0; cursor: pointer;
+  }
+  .app-tabbar span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .app-tabbar a[aria-current="page"], .app-tabbar button[aria-expanded="true"] { color: var(--brand-accent); }
+  .app-tabbar a[aria-current="page"] svg { stroke-width: 2.2; }
+  .app-tabbar a:active, .app-tabbar button:active { background: var(--surface-alt); }
+  .app-tab-icon { position: relative; display: inline-flex; overflow: visible !important; }
+  .app-tab-badge { position: absolute; top: -5px; left: 14px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--brand-accent); color: #fff; font-size: .65rem; line-height: 17px; text-align: center; }
+  /* Pages: edge-to-edge feel, larger tap targets. */
+  .btn { min-height: 44px; }
+  .btn-sm { min-height: 36px; }
+  .site-footer { margin-top: var(--space-6); }
+}
+
 .preview-banner { background: var(--warning-soft); color: #78350f; border-bottom: 1px solid #fcd34d; padding: .6rem 16px; text-align: center; font-weight: 600; font-size: .925rem; }
 
 /* ==========================================================================

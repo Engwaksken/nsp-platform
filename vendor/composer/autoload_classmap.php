@@ -3621,6 +3621,7 @@ return array(
     'App\\Http\\Controllers\\Organizations\\PortalController' => $baseDir . '/app/Http/Controllers/Organizations/PortalController.php',
     'App\\Http\\Controllers\\Organizations\\ResolvesOrganization' => $baseDir . '/app/Http/Controllers/Organizations/ResolvesOrganization.php',
     'App\\Http\\Controllers\\Organizations\\WorkspaceOrganizationController' => $baseDir . '/app/Http/Controllers/Organizations/WorkspaceOrganizationController.php',
+    'App\\Http\\Controllers\\Site\\AppManifestController' => $baseDir . '/app/Http/Controllers/Site/AppManifestController.php',
     'App\\Http\\Controllers\\Site\\ContactController' => $baseDir . '/app/Http/Controllers/Site/ContactController.php',
     'App\\Http\\Controllers\\Site\\FaqController' => $baseDir . '/app/Http/Controllers/Site/FaqController.php',
     'App\\Http\\Controllers\\Site\\JobController' => $baseDir . '/app/Http/Controllers/Site/JobController.php',

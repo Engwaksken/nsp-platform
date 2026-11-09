@@ -4156,6 +4156,7 @@ class ComposerStaticInita0cac0c3623639d9c1f0edd9ab6ff8ac
         'App\\Http\\Controllers\\Organizations\\PortalController' => __DIR__ . '/../..' . '/app/Http/Controllers/Organizations/PortalController.php',
         'App\\Http\\Controllers\\Organizations\\ResolvesOrganization' => __DIR__ . '/../..' . '/app/Http/Controllers/Organizations/ResolvesOrganization.php',
         'App\\Http\\Controllers\\Organizations\\WorkspaceOrganizationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Organizations/WorkspaceOrganizationController.php',
+        'App\\Http\\Controllers\\Site\\AppManifestController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/AppManifestController.php',
         'App\\Http\\Controllers\\Site\\ContactController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/ContactController.php',
         'App\\Http\\Controllers\\Site\\FaqController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/FaqController.php',
         'App\\Http\\Controllers\\Site\\JobController' => __DIR__ . '/../..' . '/app/Http/Controllers/Site/JobController.php',
