@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Http\Controllers\Admin\FeatureFlagController;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Tests\TestCase;
 
 class AdminPermissionsTest extends TestCase
@@ -163,6 +166,28 @@ class AdminPermissionsTest extends TestCase
         Storage::disk('public')->assertExists($media->path);
         $this->assertSame($media->id, (int) \App\Support\Settings::get('logo_media_id'));
         $this->get('/')->assertSee($media->url(), false);
+    }
+
+    public function test_admin_created_users_receive_a_working_email_confirmation_link(): void
+    {
+        Notification::fake();
+        $admin = $this->userWithRole('platform_admin');
+
+        $this->actingAs($admin)->post('/admin/users', [
+            'name' => 'New Member', 'email' => 'new.member@example.test', 'password' => '',
+            'roles' => ['startup_user'], 'is_active' => 1,
+        ])->assertRedirect('/admin/users')->assertSessionHas('status', 'User created. A confirmation email was sent.');
+
+        $newUser = User::query()->where('email', 'new.member@example.test')->firstOrFail();
+        $this->assertNull($newUser->email_verified_at);
+        Notification::assertSentTo($newUser, VerifyEmail::class);
+
+        $url = URL::temporarySignedRoute('verification.verify', now()->addHour(), [
+            'id' => $newUser->id,
+            'hash' => sha1($newUser->getEmailForVerification()),
+        ]);
+        $this->get($url)->assertRedirect('/')->assertSessionHas('status', 'Your email address has been confirmed.');
+        $this->assertNotNull($newUser->fresh()->email_verified_at);
     }
 
     public function test_ims_setup_hint_uses_configured_ims_host(): void

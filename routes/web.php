@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -93,6 +94,13 @@ Route::middleware('guest')->group(function () {
     });
 });
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1')->name('verification.send');
+});
 
 /*
 | Account security (two-factor sign-in)
@@ -329,6 +337,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
 
     Route::middleware('can:manage-users')->group(function () {
         Route::resource('users', Admin\UserController::class)->except(['show', 'destroy']);
+        Route::post('users/{user}/send-verification', [Admin\UserController::class, 'resendVerification'])->name('users.send-verification');
         Route::post('users/{user}/reset-mfa', [Admin\UserController::class, 'resetMfa'])->name('users.reset-mfa');
     });
 

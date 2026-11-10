@@ -16,6 +16,19 @@
         @include('partials.field', ['name' => 'email', 'label' => 'Email', 'type' => 'email', 'value' => $user->email, 'required' => true, 'autocomplete' => 'off'])
         @include('partials.field', ['name' => 'password', 'label' => $user->exists ? 'New password (optional)' : 'Password (optional)', 'type' => 'password', 'value' => '', 'autocomplete' => 'new-password',
             'hint' => 'At least 12 characters with letters and numbers. Leave empty for accounts that sign in only with Hive single sign-on.'])
+        @if (! $user->exists)
+            <p class="hint">A confirmation email will be sent to the new account. They can confirm their address from the secure link.</p>
+        @elseif ($user->hasVerifiedEmail())
+            <p class="hint">Email confirmed{{ $user->email_verified_at ? ' on '.$user->email_verified_at->format('j M Y') : '' }}.</p>
+        @else
+            <div class="form-group">
+                <p class="hint">Email address not confirmed yet.</p>
+                <form method="post" action="{{ route('admin.users.send-verification', $user) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-secondary btn-sm">Resend confirmation email</button>
+                </form>
+            </div>
+        @endif
         <fieldset class="form-group">
             <legend class="label">Platform roles</legend>
             @php($current = old('roles', $user->exists ? $user->getRoleNames()->all() : []))
