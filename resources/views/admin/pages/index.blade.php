@@ -6,6 +6,7 @@
         <h1>Pages</h1>
         <a class="btn btn-primary" href="{{ route('admin.pages.create') }}" data-modal="lg">New page</a>
     </div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::pages()])
 
     <form method="get" class="filters" role="search">
         <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Search pages by title…"></div>

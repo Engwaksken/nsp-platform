@@ -3,6 +3,7 @@
 
 @section('content')
     <div class="page-head"><h1>Contact messages</h1></div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::messages()])
     <nav class="filters" aria-label="Filter by status">
         <a class="tag" href="{{ route('admin.messages.index') }}" @if (!$status) aria-current="true" @endif>All</a>
         @foreach (\App\Models\ContactMessage::STATUSES as $option)

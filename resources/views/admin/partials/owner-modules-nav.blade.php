@@ -8,8 +8,9 @@
     ['admin.payments.index', 'Payments ledger (sandbox)', 'admin.payments.*', 'manage-payments', 'experts'],
 ], fn ($l) => \Illuminate\Support\Facades\Route::has($l[0]) && \App\Support\Features::enabled($l[4]) && $user->canAny((array) $l[3])))
 @if ($ownerLinks)
-    <p class="nav-heading">Venture building</p>
+    <details class="nav-group" @if (request()->routeIs('admin.organizations.*', 'admin.builder.*', 'admin.intelligence.*', 'admin.challenges.*', 'admin.knowledge.*', 'admin.payments.*')) open @endif>
+    <summary class="nav-heading"><i class="fas fa-diagram-project" aria-hidden="true"></i><span>Venture building</span></summary>
     <ul>
         @foreach ($ownerLinks as $l) {!! $navLink($l[0], $l[1], $l[2]) !!} @endforeach
-    </ul>
+    </ul></details>
 @endif

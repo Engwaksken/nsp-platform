@@ -4,6 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\Page;
 use App\Models\User;
+use App\Http\Controllers\Admin\FeatureFlagController;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Tests\TestCase;
 
 class AdminPermissionsTest extends TestCase
@@ -144,6 +150,57 @@ class AdminPermissionsTest extends TestCase
             'site_name' => 'x', 'primary_color' => 'red;}</style><script>', 'secondary_color' => '#000000',
             'accent_color' => '#000000', 'font_family' => 'Poppins',
         ])->assertSessionHasErrors('primary_color');
+    }
+
+    public function test_admin_can_upload_a_logo_and_use_it_globally(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs($this->userWithRole('platform_admin'))->put('/admin/settings', [
+            'site_name' => 'Hive Growth', 'primary_color' => '#123456', 'secondary_color' => '#0f766e',
+            'accent_color' => '#b45309', 'font_family' => 'Outfit',
+            'logo_upload' => UploadedFile::fake()->image('logo.png'),
+        ])->assertRedirect()->assertSessionHas('status', 'Settings saved.');
+
+        $media = \App\Models\Media::query()->firstOrFail();
+        Storage::disk('public')->assertExists($media->path);
+        $this->assertSame($media->id, (int) \App\Support\Settings::get('logo_media_id'));
+        $this->get('/')->assertSee($media->url(), false);
+    }
+
+    public function test_admin_created_users_receive_a_working_email_confirmation_link(): void
+    {
+        Notification::fake();
+        $admin = $this->userWithRole('platform_admin');
+
+        $this->actingAs($admin)->post('/admin/users', [
+            'name' => 'New Member', 'email' => 'new.member@example.test', 'password' => '',
+            'roles' => ['startup_user'], 'is_active' => 1,
+        ])->assertRedirect('/admin/users')->assertSessionHas('status', 'User created. A confirmation email was sent.');
+
+        $newUser = User::query()->where('email', 'new.member@example.test')->firstOrFail();
+        $this->assertNull($newUser->email_verified_at);
+        Notification::assertSentTo($newUser, VerifyEmail::class);
+
+        $url = URL::temporarySignedRoute('verification.verify', now()->addHour(), [
+            'id' => $newUser->id,
+            'hash' => sha1($newUser->getEmailForVerification()),
+        ]);
+        $this->get($url)->assertRedirect('/')->assertSessionHas('status', 'Your email address has been confirmed.');
+        $this->assertNotNull($newUser->fresh()->email_verified_at);
+    }
+
+    public function test_ims_setup_hint_uses_configured_ims_host(): void
+    {
+        config(['nsp.ims_url' => 'https://ims.hivecolab.com/']);
+
+        $missing = FeatureFlagController::missingSetup('ims_integration');
+
+        $this->assertContains(
+            'Register Hive IMS as a connected system: php artisan nsp:api-client ims-live --name="Hive IMS" --redirect-uri=https://ims.hivecolab.com/nsp-callback --webhook-url=https://ims.hivecolab.com/nsp-webhook',
+            $missing,
+        );
+        $this->assertNotContains('Set IMS_URL in .env so founders get a link to Hive IMS.', $missing);
     }
 
     public function test_every_admin_screen_renders_for_a_super_admin(): void

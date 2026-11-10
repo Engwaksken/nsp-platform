@@ -5,11 +5,11 @@
     <div class="page-head"><h1>Marketplace and disputes</h1></div>
     @include('partials.flash')
 
-    <div class="grid">
-        @foreach ($figures as $label => $value)
-            <div class="card"><p class="meta">{{ $label }}</p><p class="h3">{{ number_format($value) }}</p></div>
-        @endforeach
-    </div>
+    @php($look = ['Published listings' => ['fa-store', 'green'], 'Offers' => ['fa-box-open', 'blue'], 'Requests to buy' => ['fa-cart-shopping', 'purple'],
+        'Partnerships' => ['fa-handshake', 'orange'], 'Conversations (30 days)' => ['fa-comments', 'blue'], 'Open reports' => ['fa-flag', 'red']])
+    @include('partials.stats', ['label' => 'Summary', 'stats' => collect($figures)->map(fn ($value, $label) => [
+        'icon' => $look[$label][0] ?? 'fa-chart-simple', 'tone' => $look[$label][1] ?? 'grey', 'label' => $label, 'value' => $value,
+    ])->values()->all()])
 
     <h2>Reports</h2>
     <nav class="tags" aria-label="Filter reports">

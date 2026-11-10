@@ -9,6 +9,8 @@
         @include('partials.flash')
         <p>Grants, accelerators, competitions, events and calls from Hive and partners. Sign in to save opportunities, get deadline reminders and see whether your startup qualifies.</p>
 
+        @include('partials.stats', ['label' => 'Opportunities at a glance', 'stats' => \App\Support\PublicStats::opportunities()])
+
         <form method="get" class="filters" role="search" aria-label="Filter opportunities">
             <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Search opportunities…"></div>
             <div class="form-group"><label for="type">Type</label>

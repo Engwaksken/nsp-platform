@@ -487,6 +487,9 @@
       var tabs = panels.map(function (panel) {
         if (!panel.id) panel.id = nextId('tabpanel');
         var tab = el('button', { type: 'button', role: 'tab', id: panel.id + '-tab', 'aria-controls': panel.id, 'class': 'tab' });
+        // Optional Font Awesome icon: data-tab-icon="fa-coins" (letters, digits and dashes only).
+        var icon = panel.getAttribute('data-tab-icon');
+        if (icon && /^fa-[a-z0-9-]+$/.test(icon)) tab.appendChild(el('i', { 'class': 'fas ' + icon, 'aria-hidden': 'true' }));
         tab.appendChild(el('span', {}, panel.getAttribute('data-tab')));
         var count = panel.getAttribute('data-tab-count');
         if (count) {
@@ -728,10 +731,116 @@
     });
   }
 
+  function initAiProviderForm(root) {
+    qsa(root, '[data-ai-provider-form]').forEach(function (form) {
+      if (form.__nspAiProvider) return;
+      var provider = form.querySelector('#field-provider');
+      var customFields = form.querySelector('[data-custom-provider-field]');
+      var curatedFields = form.querySelector('[data-curated-model-field]');
+      var model = form.querySelector('#field-model');
+      var customModel = form.querySelector('#field-custom_model');
+      var baseUrl = form.querySelector('#field-base_url');
+      if (!provider || !customFields || !curatedFields || !model || !customModel || !baseUrl) return;
+      form.__nspAiProvider = true;
+      var catalog = {};
+      try { catalog = JSON.parse(form.getAttribute('data-model-catalog') || '{}'); } catch (e) { return; }
+      var defaultModel = form.getAttribute('data-default-model') || '';
+      function sync() {
+        var isCustom = provider.value === 'custom';
+        customFields.hidden = !isCustom;
+        curatedFields.hidden = isCustom;
+        model.disabled = isCustom;
+        model.required = !isCustom;
+        customModel.disabled = !isCustom;
+        customModel.required = isCustom;
+        baseUrl.required = isCustom;
+        if (!isCustom) {
+          var choices = catalog[provider.value] || {};
+          var selected = choices[model.value] ? model.value : (choices[defaultModel] ? defaultModel : Object.keys(choices)[0]);
+          model.replaceChildren(new Option('Choose a model', ''));
+          Object.keys(choices).forEach(function (id) { model.add(new Option(choices[id], id)); });
+          model.value = selected || '';
+        }
+      }
+      provider.addEventListener('change', sync);
+      sync();
+    });
+  }
+
+  function initPasswordToggles(root) {
+    qsa(root, 'input[type="password"]:not([data-no-password-toggle])').forEach(function (input) {
+      if (input.__nspPasswordToggle) return;
+      input.__nspPasswordToggle = true;
+      if (!input.id) input.id = nextId('password');
+      var wrapper = el('span', { 'class': 'password-toggle-wrap' });
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+      var button = el('button', {
+        type: 'button',
+        'class': 'password-toggle',
+        'aria-label': 'Show password',
+        'aria-controls': input.id,
+        'aria-pressed': 'false',
+        title: 'Show password'
+      });
+      var icon = el('i', { 'class': 'fas fa-eye', 'aria-hidden': 'true' });
+      button.appendChild(icon);
+      button.addEventListener('click', function () {
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        button.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        button.setAttribute('aria-pressed', show ? 'true' : 'false');
+        button.title = show ? 'Hide password' : 'Show password';
+        icon.className = 'fas ' + (show ? 'fa-eye-slash' : 'fa-eye');
+        input.focus();
+      });
+      wrapper.appendChild(button);
+    });
+  }
+
+  function initTableActionIcons(root) {
+    qsa(root, 'table').forEach(function (table) {
+      var headers = table.tHead ? Array.prototype.slice.call(table.tHead.rows[table.tHead.rows.length - 1].cells) : [];
+      var actionIndex = headers.findIndex(function (header) { return visibleText(header).toLowerCase() === 'actions'; });
+      if (actionIndex < 0) return;
+      var iconFor = function (label) {
+        var text = label.toLowerCase();
+        if (/review|view|preview|inspect/.test(text)) return 'fa-eye';
+        if (/edit|change/.test(text)) return 'fa-pen-to-square';
+        if (/delete|remove|take down/.test(text)) return 'fa-trash';
+        if (/restore|undo/.test(text)) return 'fa-arrow-rotate-left';
+        if (/send|replay/.test(text)) return 'fa-paper-plane';
+        if (/merge/.test(text)) return 'fa-code-merge';
+        if (/approve|publish/.test(text)) return 'fa-circle-check';
+        if (/reject|suspend|do not verify/.test(text)) return 'fa-ban';
+        return 'fa-arrow-up-right-from-square';
+      };
+      Array.prototype.forEach.call(table.tBodies, function (body) {
+        Array.prototype.forEach.call(body.rows, function (row) {
+          var cell = row.cells[actionIndex];
+          if (!cell) return;
+          qsa(cell, 'a, button').forEach(function (control) {
+            if (control.__nspActionIcon) return;
+            control.__nspActionIcon = true;
+            var label = visibleText(control);
+            if (!control.hasAttribute('title') && label) control.title = label;
+            if (!control.querySelector('i.fas')) {
+              var icon = el('i', { 'class': 'fas ' + iconFor(label), 'aria-hidden': 'true' });
+              control.insertBefore(icon, control.firstChild);
+            }
+          });
+        });
+      });
+    });
+  }
+
   NSP.enhance = function (root) {
     root = root || document;
     initTables(root);
     initTabs(root);
+    initAiProviderForm(root);
+    initPasswordToggles(root);
+    initTableActionIcons(root);
     initInlineModals(root);
     initAlerts(root);
     initBuilder(root);

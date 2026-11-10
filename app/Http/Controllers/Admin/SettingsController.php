@@ -9,6 +9,7 @@ use App\Support\Audit;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -40,6 +41,8 @@ class SettingsController extends Controller
             'font_family' => ['required', Rule::in(array_keys(Settings::FONTS))],
             'logo_media_id' => ['nullable', 'integer', 'exists:media,id'],
             'favicon_media_id' => ['nullable', 'integer', 'exists:media,id'],
+            'logo_upload' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp,gif'],
+            'favicon_upload' => ['nullable', 'file', 'max:5120', 'mimes:png,ico'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:40'],
             'contact_address' => ['nullable', 'string', 'max:300'],
@@ -52,6 +55,33 @@ class SettingsController extends Controller
             '*.regex' => 'Use a colour like #1d4ed8.',
             'social.*.url' => 'Social links must start with https://.',
         ]);
+
+        foreach (['logo_upload' => 'logo_media_id', 'favicon_upload' => 'favicon_media_id'] as $uploadKey => $settingKey) {
+            if (! $request->hasFile($uploadKey)) {
+                continue;
+            }
+
+            $file = $request->file($uploadKey);
+            $extension = strtolower($file->getClientOriginalExtension());
+            $mime = (string) $file->getMimeType();
+            $allowed = $uploadKey === 'favicon_upload'
+                ? ['png' => ['image/png'], 'ico' => ['image/x-icon', 'image/vnd.microsoft.icon']]
+                : ['jpg' => ['image/jpeg'], 'jpeg' => ['image/jpeg'], 'png' => ['image/png'], 'webp' => ['image/webp'], 'gif' => ['image/gif']];
+
+            if (! in_array($mime, $allowed[$extension] ?? [], true)) {
+                return back()->withErrors([$uploadKey => 'The uploaded file contents do not match the selected image type.']);
+            }
+
+            $path = $file->storeAs('media/'.now()->format('Y/m'), Str::uuid().'.'.$extension, 'public');
+            $media = Media::query()->create([
+                'disk' => 'public', 'path' => $path,
+                'original_name' => mb_substr(basename($file->getClientOriginalName()), 0, 255),
+                'mime_type' => $mime, 'size' => $file->getSize(),
+                'alt_text' => $uploadKey === 'logo_upload' ? 'Site logo' : null,
+                'uploaded_by' => $request->user()->id,
+            ]);
+            $data[$settingKey] = $media->id;
+        }
 
         $social = array_filter(array_intersect_key($data['social'] ?? [], self::SOCIAL));
         $routing = array_filter(array_intersect_key($data['routing'] ?? [], ContactMessage::TOPICS));

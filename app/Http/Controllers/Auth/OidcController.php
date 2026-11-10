@@ -90,14 +90,18 @@ class OidcController extends Controller
     {
         $issuer = $this->client->issuer();
         $subject = (string) $claims['sub'];
+        $emailVerified = ($claims['email_verified'] ?? false) === true;
 
         $user = User::query()->where('oidc_issuer', $issuer)->where('oidc_subject', $subject)->first();
         if ($user) {
+            if ($emailVerified && ! $user->hasVerifiedEmail()) {
+                $user->markEmailAsVerified();
+            }
+
             return $user;
         }
 
         $email = Str::lower((string) ($claims['email'] ?? ''));
-        $emailVerified = ($claims['email_verified'] ?? false) === true;
         if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return 'Your identity provider account has no email address. Add one, then try again.';
         }
@@ -108,7 +112,7 @@ class OidcController extends Controller
             if (! config('nsp.oidc.link_verified_email') || ! $emailVerified || $existing->oidc_subject !== null) {
                 return 'An NSP account already uses this email. Ask an administrator to link it to your Hive login.';
             }
-            $existing->forceFill(['oidc_issuer' => $issuer, 'oidc_subject' => $subject])->save();
+            $existing->forceFill(['oidc_issuer' => $issuer, 'oidc_subject' => $subject, 'email_verified_at' => now()])->save();
             Audit::log('auth.oidc_linked', $existing, ['issuer' => $issuer]);
 
             return $existing;

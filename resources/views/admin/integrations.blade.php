@@ -11,9 +11,15 @@
         @endforeach
     </div>
 
-    <section class="panel" aria-labelledby="clients-heading">
+    <div data-tabs="Integration records" data-tabs-key="admin-integrations">
+    <section class="panel" data-tab="Connected systems" data-tab-count="{{ $clients->total() }}" aria-labelledby="clients-heading">
         <h2 id="clients-heading">Connected systems</h2>
         <p class="hint">Create or rotate clients on the server: <code>php artisan nsp:api-client</code>. Secrets are shown only once.</p>
+        <form method="get" class="filters" role="search">
+            <div class="form-group"><label for="q">Search clients</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Name or client ID"></div>
+            <div class="form-group"><label for="client-status">Status</label><select id="client-status" name="client_status"><option value="">All</option><option value="active" @selected(request('client_status') === 'active')>Active</option><option value="disabled" @selected(request('client_status') === 'disabled')>Disabled</option></select></div>
+            <div class="actions"><button class="btn btn-primary" type="submit">Filter</button><a class="btn btn-secondary" href="{{ route('admin.integrations.index') }}">Clear</a></div>
+        </form>
         <div class="table-wrap" tabindex="0" role="region" aria-label="Connected systems">
             <table>
                 <thead><tr><th scope="col">Client</th><th scope="col">System</th><th scope="col">Scopes</th><th scope="col">Webhook</th><th scope="col">Last used</th><th scope="col">Status</th></tr></thead>
@@ -33,9 +39,10 @@
                 </tbody>
             </table>
         </div>
+        {{ $clients->links() }}
     </section>
 
-    <section class="panel" aria-labelledby="problems-heading">
+    <section class="panel" data-tab="Delivery problems" data-tab-count="{{ $problems->total() }}" aria-labelledby="problems-heading">
         <h2 id="problems-heading">Deliveries with problems</h2>
         <div class="table-wrap" tabindex="0" role="region" aria-label="Deliveries with problems">
             <table>
@@ -61,9 +68,10 @@
                 </tbody>
             </table>
         </div>
+        {{ $problems->links() }}
     </section>
 
-    <section class="panel" aria-labelledby="inbox-heading">
+    <section class="panel" data-tab="Incoming events" data-tab-count="{{ $inbox->total() }}" aria-labelledby="inbox-heading">
         <h2 id="inbox-heading">Incoming events</h2>
         <nav class="filters" aria-label="Filter incoming events">
             <a class="tag" href="{{ route('admin.integrations.index') }}" @if (request('inbox') !== 'rejected') aria-current="true" @endif>All</a>
@@ -87,5 +95,7 @@
                 </tbody>
             </table>
         </div>
+        {{ $inbox->links() }}
     </section>
+    </div>
 @endsection

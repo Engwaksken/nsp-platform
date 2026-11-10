@@ -268,10 +268,17 @@ class StartupRegistryTest extends TestCase
             ->assertSee(route('workspace.startups.switch', $second), false)
             ->assertSee('<a href="'.route('workspace.startups.overview', $first).'"  aria-current="page" >Dashboard</a>', false);
 
-        // Deeper pages get the sidebar too, with the right section marked.
+        $page->assertSee('class="stat-cards"', false)->assertSee('fas fa-users', false);
+
+        // Deeper pages get the sidebar too, with the right section marked, stat cards and tabbed sections.
         $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}/team")->assertOk()
             ->assertSee('id="workspace-sidebar"', false)
-            ->assertSee('aria-current="page" >Team</a>', false);
+            ->assertSee('aria-current="page" >Team</a>', false)
+            ->assertSee('Invitations pending')
+            ->assertSee('data-tabs="Team sections"', false)
+            ->assertSee('data-tab="Invite someone"', false);
+        $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}")->assertOk()
+            ->assertSee('data-tab="Private details"', false);
 
         // Switching goes to the other startup's dashboard.
         $this->actingAs($owner)->post("/workspace/startups/{$second->uuid}/switch")->assertRedirect("/workspace/startups/{$second->uuid}/overview");

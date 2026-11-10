@@ -3,6 +3,7 @@
 
 @section('content')
     <div class="page-head"><h1>Investors</h1></div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::investors()])
     <p class="hint">Check who each investor is (for example their website, fund registration or references) before verifying. Verified investors can see startups that chose to be listed, and founders can ask them for introductions.</p>
     <nav class="tags" aria-label="Filter by status">
         @foreach ($statuses as $value => $label)

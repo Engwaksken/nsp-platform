@@ -8,19 +8,15 @@
         @include('partials.flash')
         <p class="hint">Experts here are checked by Hive. When you send a request, the expert sees your startup’s name, sector and what you write. Contact details are shared once they accept.</p>
 
-        @if ($engagements->isNotEmpty())
-            <section class="panel" aria-labelledby="mine-heading">
-                <h2 id="mine-heading">Your requests and mentors</h2>
-                <ul>
-                    @foreach ($engagements as $engagement)
-                        <li><a href="{{ route('engagements.show', $engagement) }}">{{ $engagement->topic }}</a>
-                            · {{ \App\Models\Experts\Engagement::TYPES[$engagement->type] }} with {{ $engagement->expert?->name ?? 'former expert' }}
-                            <span class="badge badge-{{ $engagement->status === 'active' ? 'on' : ($engagement->status === 'requested' ? 'draft' : 'off') }}">{{ \App\Models\Experts\Engagement::STATUSES[$engagement->status] }}</span></li>
-                    @endforeach
-                </ul>
-            </section>
-        @endif
+        @include('partials.stats', ['label' => 'Experts at a glance', 'stats' => [
+            ['icon' => 'fa-user-tie', 'tone' => 'blue', 'label' => 'Experts found', 'value' => count($rows)],
+            ['icon' => 'fa-handshake-angle', 'tone' => 'green', 'label' => 'Active engagements', 'value' => $engagements->where('status', 'active')->count()],
+            ['icon' => 'fa-hourglass-half', 'tone' => 'amber', 'label' => 'Waiting for reply', 'value' => $engagements->where('status', 'requested')->count()],
+            ['icon' => 'fa-circle-check', 'tone' => 'purple', 'label' => 'Completed', 'value' => $engagements->where('status', 'completed')->count()],
+        ]])
 
+        <div data-tabs="Expert sections" data-tabs-key="experts">
+        <section data-tab="Find experts" data-tab-icon="fa-magnifying-glass" data-tab-count="{{ count($rows) }}" aria-label="Find experts">
         <form method="get" class="filters" role="search" aria-label="Find experts">
             <div class="form-group"><label for="q">Name or keyword</label><input id="q" type="search" name="q" value="{{ $q }}" placeholder="Search experts by name or skill…"></div>
             <div class="form-group"><label for="kind">Looking for</label>
@@ -74,6 +70,23 @@
             @empty
                 <p class="empty">No verified experts match. Try fewer filters.</p>
             @endforelse
+        </div>
+        </section>
+
+        <section class="panel" aria-labelledby="mine-heading" data-tab="Your requests and mentors" data-tab-icon="fa-handshake-angle" data-tab-count="{{ $engagements->count() }}">
+            <h2 id="mine-heading">Your requests and mentors</h2>
+            @if ($engagements->isEmpty())
+                <p class="empty">No requests yet. Find an expert and send a request.</p>
+            @else
+                <ul>
+                    @foreach ($engagements as $engagement)
+                        <li><a href="{{ route('engagements.show', $engagement) }}">{{ $engagement->topic }}</a>
+                            · {{ \App\Models\Experts\Engagement::TYPES[$engagement->type] }} with {{ $engagement->expert?->name ?? 'former expert' }}
+                            <span class="badge badge-{{ $engagement->status === 'active' ? 'on' : ($engagement->status === 'requested' ? 'draft' : 'off') }}">{{ \App\Models\Experts\Engagement::STATUSES[$engagement->status] }}</span></li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
         </div>
     </div>
 @endsection

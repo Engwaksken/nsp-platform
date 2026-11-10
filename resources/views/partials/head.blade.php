@@ -32,7 +32,10 @@
     <link rel="stylesheet" href="{{ asset('css/fonts.css') }}?v=1">
 @endif
 <link rel="stylesheet" href="{{ asset('css/palette-hive.css') }}?v=1">
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=17">
+{{-- Font Awesome Free 6.5.2, solid icons only, self-hosted (public/vendor/fontawesome; the CSP allows no CDNs). --}}
+<link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/fontawesome.min.css') }}?v=6.5.2">
+<link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/solid.min.css') }}?v=6.5.2">
+<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=19">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};
@@ -42,4 +45,4 @@
         --brand-font: {!! str_replace(['<', '>', '{', '}', ';'], '', $brandFont) !!};
     }
 </style>
-<script src="{{ asset('js/nsp.js') }}?v=7" defer></script>
+<script src="{{ asset('js/nsp.js') }}?v=10" defer></script>

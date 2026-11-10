@@ -5,7 +5,17 @@
     <div class="page-head"><h1>Venture Builder curricula</h1></div>
     @include('partials.flash')
     <p>Publishing checks the six-module/24-step structure. Curriculum content remains marked provisional until owner methodology approval.</p>
+    @include('partials.stats', ['label' => 'Curriculum statistics', 'stats' => [
+        ['icon' => 'fa-layer-group', 'label' => 'Versions', 'value' => $curriculumStats['total'], 'tone' => 'blue'],
+        ['icon' => 'fa-file-pen', 'label' => 'Drafts', 'value' => $curriculumStats['drafts'], 'tone' => 'amber'],
+        ['icon' => 'fa-circle-check', 'label' => 'Published', 'value' => $curriculumStats['published'], 'tone' => 'green'],
+    ]])
     @can('manage-builder-curricula')<form method="post" action="{{ route('admin.builder.create') }}">@csrf<button class="btn btn-primary" type="submit">Create new draft version</button></form>@endcan
+    <form method="get" class="filters" role="search">
+        <div class="form-group"><label for="q">Search curricula</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Curriculum name"></div>
+        <div class="form-group"><label for="status">Status</label><select id="status" name="status"><option value="">All statuses</option>@foreach (\App\Models\Builder\BuilderCurriculum::STATUSES as $key => $label)<option value="{{ $key }}" @selected(request('status') === $key)>{{ $label }}</option>@endforeach</select></div>
+        <div class="actions"><button class="btn btn-primary" type="submit">Filter</button><a class="btn btn-secondary" href="{{ route('admin.builder.index') }}">Clear</a></div>
+    </form>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Curriculum versions">
         <table><thead><tr><th>Version</th><th>Status</th><th>Methodology</th><th>Modules / steps</th><th>Actions</th></tr></thead><tbody>
             @forelse ($curricula as $curriculum)
@@ -17,4 +27,5 @@
             @empty<tr><td colspan="5">No curriculum draft yet. Run the database seeders to add the provisional scaffold.</td></tr>@endforelse
         </tbody></table>
     </div>
+    {{ $curricula->links() }}
 @endsection

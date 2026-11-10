@@ -6,6 +6,7 @@
         <h1>Experts</h1>
         <a class="btn btn-secondary" href="{{ route('admin.engagements.index') }}">Mentoring and engagements</a>
     </div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::experts()])
     <p class="hint">Check each expert’s experience (website, LinkedIn or a reference) before verifying. Verified experts appear in the directory for every startup.</p>
     <nav class="tags" aria-label="Filter by status">
         @foreach ($statuses as $value => $label)

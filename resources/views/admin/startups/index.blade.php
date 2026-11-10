@@ -6,6 +6,7 @@
         <h1>Startups</h1>
         @can('review-duplicates')<a class="btn btn-secondary" href="{{ route('admin.duplicates.index') }}">Review possible duplicates</a>@endcan
     </div>
+    @include('partials.stats', ['label' => 'Summary', 'stats' => \App\Support\AdminStats::startups()])
     <form method="get" class="filters" role="search">
         <div class="form-group"><label for="q">Name or registration number</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Startup name or registration number"></div>
         <div class="form-group"><label for="status">Status</label>

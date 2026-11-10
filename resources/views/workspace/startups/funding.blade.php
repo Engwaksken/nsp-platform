@@ -10,8 +10,16 @@
 
         @php($canEdit = $membership->canEdit())
 
+        @include('partials.stats', ['label' => 'Funding at a glance', 'stats' => [
+            ['icon' => 'fa-sack-dollar', 'tone' => 'amber', 'label' => 'Funding request', 'value' => $open ? $open->amountLabel() : 'None open'],
+            ['icon' => 'fa-handshake', 'tone' => 'green', 'label' => 'Introductions', 'value' => $introductions->count(), 'note' => $introductions->where('status', 'accepted')->count().' accepted'],
+            ['icon' => 'fa-folder-open', 'tone' => 'blue', 'label' => 'Data room documents', 'value' => $files->count()],
+            ['icon' => 'fa-key', 'tone' => 'purple', 'label' => 'Investors with access', 'value' => $grants->count()],
+        ]])
+
+        <div data-tabs="Funding sections" data-tabs-key="funding">
         {{-- 1. Funding request --}}
-        <section class="panel" aria-labelledby="request-heading">
+        <section class="panel" aria-labelledby="request-heading" data-tab="Funding request" data-tab-icon="fa-sack-dollar">
             <h2 id="request-heading">Funding request
                 <span class="badge badge-{{ $open ? 'on' : 'off' }}">{{ $open ? 'Open' : 'None open' }}</span></h2>
             @if ($open && ! $consent)
@@ -49,7 +57,7 @@
         </section>
 
         {{-- 2. Introductions --}}
-        <section class="panel" aria-labelledby="intro-heading">
+        <section class="panel" aria-labelledby="intro-heading" data-tab="Introductions" data-tab-icon="fa-handshake" data-tab-count="{{ $introductions->count() }}">
             <h2 id="intro-heading">Introductions</h2>
             @forelse ($introductions as $introduction)
                 @php($investorProfile = $profiles[$introduction->investor_user_id] ?? null)
@@ -76,7 +84,7 @@
 
         {{-- 3. Matching investors --}}
         @if ($open)
-            <section class="panel" aria-labelledby="match-heading">
+            <section class="panel" aria-labelledby="match-heading" data-tab="Verified investors" data-tab-icon="fa-building-columns" data-tab-count="{{ count($matches) }}">
                 <h2 id="match-heading">Verified investors</h2>
                 <p class="hint">Sorted by how well each investor’s stated focus fits your request. The reasons show why.</p>
                 @php($contacted = $introductions->whereIn('status', ['requested', 'accepted'])->pluck('investor_user_id')->all())
@@ -105,7 +113,7 @@
         @endif
 
         {{-- 4. Data room --}}
-        <section class="panel" aria-labelledby="room-heading">
+        <section class="panel" aria-labelledby="room-heading" data-tab="Data room" data-tab-icon="fa-folder-open" data-tab-count="{{ $files->count() }}">
             <h2 id="room-heading">Data room</h2>
             <p class="hint">Private documents. Your team can always open them. An investor can open them only after you connect and share access, and only until the date you choose. Every download is logged below.</p>
             <div class="table-wrap" tabindex="0" role="region" aria-label="Data room documents">
@@ -171,5 +179,6 @@
                 <p class="empty">No downloads yet.</p>
             @endforelse
         </section>
+        </div>
     </div>
 @endsection

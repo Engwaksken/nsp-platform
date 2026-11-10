@@ -20,9 +20,24 @@ class AiSettingsController extends Controller
     {
         $config = AiSettings::config();
         $stored = AiSettings::stored();
+        $provider = $config['provider'];
+        $models = [];
+        $modelsByProvider = [];
+        foreach (AiSettings::PROVIDERS as $providerKey => $providerDefinition) {
+            foreach ($providerDefinition['models'] as $modelId => $modelDefinition) {
+                $models[$modelId] = $providerDefinition['label'].' · '.$modelDefinition['label'];
+                $modelsByProvider[$providerKey][$modelId] = $modelDefinition['label'];
+            }
+        }
+        if ($provider === 'custom' && filled($config['model'])) {
+            $models[$config['model']] = 'Custom · '.$config['model'];
+        }
 
         return view('admin.ai', [
             'config' => $config,
+            'providers' => collect(AiSettings::PROVIDERS)->map(fn ($p) => $p['label'])->all(),
+            'models' => $models,
+            'modelsByProvider' => $modelsByProvider,
             'keySource' => AiSettings::keySource(),
             'maskedKey' => AiSettings::maskedKey(),
             'legal' => AiSettings::legalApproval(),
@@ -40,26 +55,47 @@ class AiSettingsController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
+        $provider = $request->input('provider', AiSettings::config()['provider']);
+        $request->merge(['provider' => $provider]);
+        if (! isset(AiSettings::PROVIDERS[$provider])) {
+            return back()->withErrors(['provider' => 'Choose a supported AI provider.'])->withInput();
+        }
+        $modelRule = ['required', Rule::in(array_keys(AiSettings::PROVIDERS[$provider]['models']))];
+        if ($provider === 'custom') {
+            $modelRule = ['nullable'];
+        }
         $data = $request->validate([
+            'provider' => ['required', Rule::in(array_keys(AiSettings::PROVIDERS))],
             'api_key' => ['nullable', 'string', 'min:20', 'max:300', 'regex:/^\S+$/'],
             'remove_key' => ['nullable', 'boolean'],
-            'model' => ['required', Rule::in(array_keys(AiSettings::MODELS))],
+            'model' => $modelRule,
+            'custom_model' => [Rule::requiredIf($provider === 'custom'), 'nullable', 'string', 'regex:/^[a-zA-Z0-9._:-]{1,100}$/'],
+            'base_url' => [Rule::requiredIf($provider === 'custom'), 'nullable', 'url:https', 'max:255'],
             'effort' => ['required', Rule::in(array_keys(AiSettings::EFFORTS))],
             'limit_user' => ['required', 'integer', 'min:1', 'max:1000'],
             'limit_startup' => ['required', 'integer', 'min:1', 'max:10000'],
             'limit_platform' => ['required', 'integer', 'min:1', 'max:100000'],
         ], ['api_key.regex' => 'The API key cannot contain spaces.', 'api_key.min' => 'That does not look like a full API key.']);
+        if ($provider === 'custom') {
+            $data['model'] = $data['custom_model'];
+            if (! $this->isSafeCustomEndpoint($data['base_url'])) {
+                return back()->withErrors(['base_url' => 'Use a publicly reachable HTTPS API host. Private, local, and IP-literal endpoints are not allowed.'])->withInput($request->except('api_key'));
+            }
+        }
 
         $values = [
-            'model' => $data['model'], 'effort' => $data['effort'],
+            'provider' => $provider, 'model' => $data['model'], 'effort' => $data['effort'],
             'limit_user' => (string) $data['limit_user'], 'limit_startup' => (string) $data['limit_startup'], 'limit_platform' => (string) $data['limit_platform'],
         ];
+        if ($provider === 'custom') {
+            $values['base_url'] = rtrim($data['base_url'] ?? '', '/');
+        }
         $keyChange = null;
         if (filled($data['api_key'] ?? null)) {
-            $values['api_key'] = trim($data['api_key']);
+            $values[$provider === 'anthropic' ? 'api_key' : 'api_key_'.$provider] = trim($data['api_key']);
             $keyChange = 'replaced';
         } elseif ($request->boolean('remove_key')) {
-            $values['api_key'] = null;
+            $values[$provider === 'anthropic' ? 'api_key' : 'api_key_'.$provider] = null;
             $keyChange = 'removed';
         }
         if ($keyChange) {
@@ -74,7 +110,7 @@ class AiSettingsController extends Controller
         }
         // The key itself is never written to the audit log.
         Audit::log('ai.settings_changed', 'ai_settings', array_filter([
-            'model' => $data['model'], 'effort' => $data['effort'], 'key' => $keyChange,
+            'provider' => $provider, 'model' => $data['model'], 'effort' => $data['effort'], 'key' => $keyChange,
             'limits' => [$data['limit_user'], $data['limit_startup'], $data['limit_platform']],
         ]));
 
@@ -148,5 +184,25 @@ class AiSettingsController extends Controller
             'output_tokens' => (int) $rows->sum('output_tokens'),
             'cost' => round($rows->sum(fn ($row) => AiSettings::cost($row->model, (int) $row->input_tokens, (int) $row->output_tokens)), 2),
         ];
+    }
+
+    private function isSafeCustomEndpoint(string $url): bool
+    {
+        $parts = parse_url($url);
+        if (! is_array($parts) || ($parts['scheme'] ?? null) !== 'https' || empty($parts['host']) || isset($parts['user']) || isset($parts['pass']) || isset($parts['query']) || isset($parts['fragment']) || (isset($parts['port']) && $parts['port'] !== 443)) {
+            return false;
+        }
+        $host = strtolower($parts['host']);
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            return false;
+        }
+        $addresses = gethostbynamel($host) ?: [];
+        foreach (dns_get_record($host, DNS_AAAA) ?: [] as $record) {
+            if (isset($record['ipv6'])) {
+                $addresses[] = $record['ipv6'];
+            }
+        }
+
+        return $addresses !== [] && collect($addresses)->every(fn ($ip) => filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false);
     }
 }
