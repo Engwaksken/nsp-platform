@@ -3,6 +3,10 @@
 
 @section('content')
     <div class="page-head"><h1>News categories</h1></div>
+    @include('partials.stats', ['label' => 'Category statistics', 'stats' => [
+        ['icon' => 'fa-folder-open', 'label' => 'Categories', 'value' => $categoryStats['total'], 'tone' => 'blue'],
+        ['icon' => 'fa-newspaper', 'label' => 'Categorized posts', 'value' => $categoryStats['posts'], 'tone' => 'purple'],
+    ]])
     <section class="panel" id="add-category" data-inline-modal data-modal-size="sm" data-modal-trigger="Add category" data-modal-trigger-into=".page-head">
         <h2>Add a category</h2>
         <form method="post" action="{{ route('admin.categories.store') }}">
@@ -13,6 +17,10 @@
             </div>
         </form>
     </section>
+    <form method="get" class="filters" role="search">
+        <div class="form-group"><label for="q">Search categories</label><input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Category name"></div>
+        <div class="actions"><button type="submit" class="btn btn-primary">Search</button><a class="btn btn-secondary" href="{{ route('admin.categories.index') }}">Clear</a></div>
+    </form>
     <div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable table">
         <table>
             <thead><tr><th scope="col">Name</th><th scope="col">Posts</th><th scope="col">Actions</th></tr></thead>
@@ -34,4 +42,5 @@
             </tbody>
         </table>
     </div>
+    {{ $categories->links() }}
 @endsection

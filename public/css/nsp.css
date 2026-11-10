@@ -606,7 +606,11 @@ td .btn-sm { white-space: nowrap; }
 .admin-sidebar .brand { display: flex; color: #fff; font-size: 1.05rem; padding: var(--space-2) var(--space-5) var(--space-4); margin-bottom: var(--space-2); border-bottom: 1px solid rgba(255, 255, 255, .1); }
 .admin-sidebar nav ul { list-style: none; margin: 0; padding: 0 var(--space-3); }
 .admin-sidebar li { margin: 0; }
-.admin-sidebar .nav-heading { margin: 0; padding: var(--space-5) var(--space-5) var(--space-2); font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: rgba(255, 255, 255, .45); }
+.admin-sidebar .nav-heading { display: list-item; cursor: pointer; list-style: none; margin: 0; padding: var(--space-5) var(--space-5) var(--space-2); font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: rgba(255, 255, 255, .55); }
+.admin-sidebar .nav-heading::-webkit-details-marker { display: none; }
+.admin-sidebar .nav-heading::after { content: "⌄"; float: right; font-size: .9rem; transition: transform .15s; }
+.admin-sidebar details:not([open]) > .nav-heading::after { transform: rotate(-90deg); }
+.admin-sidebar .nav-group > ul { padding-bottom: var(--space-2); }
 .admin-sidebar a:not(.brand) { display: block; padding: .5rem .75rem; margin-bottom: 1px; font-size: .9rem; color: rgba(255, 255, 255, .78); text-decoration: none; border-radius: 8px; transition: background-color .15s, color .15s; }
 .admin-sidebar a:not(.brand):hover { background: rgba(255, 255, 255, .07); color: #fff; }
 .admin-sidebar a[aria-current="page"] { position: relative; background: rgba(255, 255, 255, .1); color: #fff; font-weight: 600; }

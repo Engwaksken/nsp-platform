@@ -42,7 +42,7 @@ class FeatureFlagController extends Controller
         if ($key === 'ai_assistant') {
             $ai = AiSettings::config();
             if (! $ai['api_key']) {
-                $missing[] = 'Add the Anthropic API key in Admin → AI assistant.';
+                $missing[] = 'Configure an API key for the selected provider in Admin → AI assistant.';
             }
             if (! $ai['legal_approved']) {
                 $missing[] = 'Record the legal review in Admin → AI assistant once it is done (backlog AI-605).';

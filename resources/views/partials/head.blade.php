@@ -45,4 +45,4 @@
         --brand-font: {!! str_replace(['<', '>', '{', '}', ';'], '', $brandFont) !!};
     }
 </style>
-<script src="{{ asset('js/nsp.js') }}?v=8" defer></script>
+<script src="{{ asset('js/nsp.js') }}?v=9" defer></script>

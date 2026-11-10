@@ -5,16 +5,17 @@
     <div class="page-head">
         <div>
             <h1>AI assistant</h1>
-            <p>Optional writing help for founders, powered by Claude (Anthropic). Founders opt in one by one; only the text they type and their startup's name, sector and stage are sent.</p>
+            <p>Optional writing help for founders, powered by an administrator-selected AI provider. Founders opt in one by one; only the text they type and their startup's name, sector and stage are sent.</p>
         </div>
     </div>
 
     @if ($errors->has('ai'))
         <div class="alert alert-danger" role="alert">{{ $errors->first('ai') }}</div>
     @endif
+    @php($selectedProvider = old('provider', $config['provider']))
 
-    {{-- 1. Status and switch --}}
-    <section class="panel" aria-labelledby="ai-status-heading">
+    <div data-tabs="AI administration" data-tabs-key="ai-admin">
+    <section class="panel" data-tab="Status" aria-labelledby="ai-status-heading">
         <h2 id="ai-status-heading">Status</h2>
         <ul class="setup-checklist">
             <li class="{{ $maskedKey ? 'is-done' : '' }}">API key {{ $maskedKey ? 'added ('.$maskedKey.($keySource === 'env' ? ', from .env' : '').')' : 'missing' }}</li>
@@ -46,20 +47,25 @@
     </section>
 
     {{-- 2. Connection, model and limits --}}
-    <form method="post" action="{{ route('admin.ai.update') }}" class="panel" aria-labelledby="ai-connection-heading">
+    <form method="post" action="{{ route('admin.ai.update') }}" class="panel" data-tab="Provider and model" data-ai-provider-form data-model-catalog="{{ json_encode($modelsByProvider) }}" data-default-model="{{ $config['model'] }}" aria-labelledby="ai-connection-heading">
         @csrf @method('PUT')
         <h2 id="ai-connection-heading">API key and model</h2>
-        @include('partials.field', ['name' => 'api_key', 'label' => $maskedKey ? 'Replace API key' : 'Anthropic API key', 'type' => 'password', 'value' => '',
+        @include('partials.field', ['name' => 'provider', 'label' => 'Provider', 'type' => 'select', 'required' => true, 'value' => old('provider', $config['provider']), 'options' => $providers])
+        @include('partials.field', ['name' => 'api_key', 'label' => $maskedKey ? 'Replace API key' : $providers[$config['provider']].' API key', 'type' => 'password', 'value' => '',
             'placeholder' => $maskedKey ? 'Leave empty to keep the current key ('.$maskedKey.')' : 'sk-ant-…', 'autocomplete' => 'new-password',
             'attrs' => 'spellcheck="false" autocapitalize="off"',
-            'hint' => 'Create a key at console.anthropic.com → API keys. It is stored encrypted and never shown again; only its last four characters are displayed.'])
+            'hint' => 'The key is stored encrypted and never shown again; only its last four characters are displayed.'])
         @if ($keySource === 'admin')
             <label class="checkbox"><input type="checkbox" name="remove_key" value="1"> Remove the saved key{{ filled(config('nsp.ai.api_key')) ? ' (the key in .env will be used instead)' : ' (the assistant is switched off)' }}</label>
         @endif
+        <div data-custom-provider-field @if ($selectedProvider !== 'custom') hidden @endif>
+            @include('partials.field', ['name' => 'base_url', 'label' => 'OpenAI-compatible API base URL', 'type' => 'url', 'value' => $config['base_url'], 'placeholder' => 'https://api.example.com/v1', 'hint' => 'HTTPS endpoint implementing /chat/completions.'])
+            @include('partials.field', ['name' => 'custom_model', 'label' => 'Custom model ID', 'value' => old('custom_model', $selectedProvider === 'custom' ? $config['model'] : ''), 'placeholder' => 'e.g. provider-model-v1'])
+        </div>
         <div class="form-row">
-            @include('partials.field', ['name' => 'model', 'label' => 'Model', 'type' => 'select', 'required' => true, 'value' => $config['model'],
-                'options' => collect(\App\Ai\AiSettings::MODELS)->map(fn ($m) => $m['label'])->all(),
-                'hint' => 'Price per million tokens in / out: '.collect(\App\Ai\AiSettings::MODELS)->map(fn ($m, $id) => \Illuminate\Support\Str::of($m['label'])->before(' (').' $'.(float) $m['input'].' / $'.(float) $m['output'])->implode(' · ').'.'])
+            <div data-curated-model-field @if ($selectedProvider === 'custom') hidden @endif>
+                @include('partials.field', ['name' => 'model', 'label' => 'Model', 'type' => 'select', 'required' => true, 'value' => old('model', $config['model']), 'options' => $models])
+            </div>
             @include('partials.field', ['name' => 'effort', 'label' => 'Effort', 'type' => 'select', 'required' => true, 'value' => $config['effort'], 'options' => \App\Ai\AiSettings::EFFORTS,
                 'hint' => 'How hard the model works on each request. Higher effort uses more tokens.'])
         </div>
@@ -75,7 +81,7 @@
     </form>
 
     {{-- 3. Legal approval --}}
-    <section class="panel" aria-labelledby="ai-legal-heading">
+    <section class="panel" data-tab="Legal approval" aria-labelledby="ai-legal-heading">
         <h2 id="ai-legal-heading">Legal review</h2>
         @if ($legal)
             <p>Recorded{{ $legal['by'] ? ' by '.$legal['by'] : '' }}{{ $legal['at'] ? ' on '.\Illuminate\Support\Carbon::parse($legal['at'])->format('j M Y') : '' }}.
@@ -87,7 +93,7 @@
                 </form>
             @endif
         @else
-            <p class="hint">Hive's legal team must approve the assistant (data sent to Anthropic, founder consent wording) before it is switched on (backlog AI-605).</p>
+            <p class="hint">Hive's legal team must approve the assistant (including the selected provider and founder consent wording) before it is switched on.</p>
             <form method="post" action="{{ route('admin.ai.legal.approve') }}">
                 @csrf
                 @include('partials.field', ['name' => 'legal_reference', 'label' => 'Where is the approval recorded?', 'value' => '', 'required' => true, 'maxlength' => 255,
@@ -100,17 +106,18 @@
     </section>
 
     {{-- 4. Token usage --}}
-    <section class="panel" aria-labelledby="ai-usage-heading">
+    <section class="panel" data-tab="Usage statistics" aria-labelledby="ai-usage-heading">
         <h2 id="ai-usage-heading">Usage and tokens</h2>
         @foreach (['today' => 'Today', 'month' => 'Last 30 days'] as $period => $label)
             <h3>{{ $label }}</h3>
-            <dl class="status-row">
-                <div><dt>Requests</dt><dd>{{ number_format($usage[$period]['requests']) }}@if ($usage[$period]['failed'])<span class="meta"> ({{ $usage[$period]['failed'] }} failed)</span>@endif</dd></div>
-                <div><dt>Input tokens</dt><dd>{{ number_format($usage[$period]['input_tokens']) }}</dd></div>
-                <div><dt>Output tokens</dt><dd>{{ number_format($usage[$period]['output_tokens']) }}</dd></div>
-                <div><dt>Estimated cost</dt><dd>US$ {{ number_format($usage[$period]['cost'], 2) }}</dd></div>
-            </dl>
+            @include('partials.stats', ['label' => $label.' AI usage', 'stats' => [
+                ['icon' => 'fa-wand-magic-sparkles', 'label' => 'Requests', 'value' => $usage[$period]['requests'], 'tone' => 'blue', 'note' => $usage[$period]['failed'].' failed'],
+                ['icon' => 'fa-arrow-right-to-bracket', 'label' => 'Input tokens', 'value' => number_format($usage[$period]['input_tokens']), 'tone' => 'purple'],
+                ['icon' => 'fa-arrow-right-from-bracket', 'label' => 'Output tokens', 'value' => number_format($usage[$period]['output_tokens']), 'tone' => 'green'],
+                ['icon' => 'fa-coins', 'label' => 'Estimated cost', 'value' => 'US$ '.number_format($usage[$period]['cost'], 2), 'tone' => 'amber'],
+            ]])
         @endforeach
-        <p class="hint">Estimates use Anthropic's list prices. Your Anthropic console shows the exact bill.</p>
+        <p class="hint">@if ($config['provider'] === 'custom') Cost estimates are approximate for custom model IDs. @else Estimated costs use the configured model's published list rates. @endif The provider console shows the exact bill.</p>
     </section>
+    </div>
 @endsection
