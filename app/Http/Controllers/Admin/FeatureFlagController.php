@@ -61,7 +61,14 @@ class FeatureFlagController extends Controller
         if ($key === 'ims_integration') {
             $clients = ApiClient::query()->where('is_active', true)->where('recipient_system', 'ims');
             if (! (clone $clients)->exists()) {
-                $missing[] = 'Register Hive IMS as a connected system: php artisan nsp:api-client ims-live --name="Hive IMS" --redirect-uri=… --webhook-url=…';
+                $imsUrl = rtrim((string) config('nsp.ims_url'), '/');
+                $registration = 'php artisan nsp:api-client ims-live --name="Hive IMS"';
+                if ($imsUrl !== '') {
+                    $registration .= ' --redirect-uri='.$imsUrl.'/nsp-callback --webhook-url='.$imsUrl.'/nsp-webhook';
+                } else {
+                    $registration .= ' --redirect-uri=<IMS callback URL> --webhook-url=<IMS webhook URL>';
+                }
+                $missing[] = 'Register Hive IMS as a connected system: '.$registration;
             } elseif (! (clone $clients)->whereNotNull('webhook_url')->exists()) {
                 $missing[] = 'Give the IMS client a webhook URL (php artisan nsp:api-client {client_id} --webhook-url=…) so events can be delivered.';
             }

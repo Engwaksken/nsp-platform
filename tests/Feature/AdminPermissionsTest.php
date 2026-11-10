@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Page;
 use App\Models\User;
+use App\Http\Controllers\Admin\FeatureFlagController;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -162,6 +163,19 @@ class AdminPermissionsTest extends TestCase
         Storage::disk('public')->assertExists($media->path);
         $this->assertSame($media->id, (int) \App\Support\Settings::get('logo_media_id'));
         $this->get('/')->assertSee($media->url(), false);
+    }
+
+    public function test_ims_setup_hint_uses_configured_ims_host(): void
+    {
+        config(['nsp.ims_url' => 'https://ims.hivecolab.com/']);
+
+        $missing = FeatureFlagController::missingSetup('ims_integration');
+
+        $this->assertContains(
+            'Register Hive IMS as a connected system: php artisan nsp:api-client ims-live --name="Hive IMS" --redirect-uri=https://ims.hivecolab.com/nsp-callback --webhook-url=https://ims.hivecolab.com/nsp-webhook',
+            $missing,
+        );
+        $this->assertNotContains('Set IMS_URL in .env so founders get a link to Hive IMS.', $missing);
     }
 
     public function test_every_admin_screen_renders_for_a_super_admin(): void
