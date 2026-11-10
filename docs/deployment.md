@@ -46,9 +46,11 @@ If the host has no terminal, use cPanel **Git Version Control** to pull the `pro
 6. Production `.env` must set:
    - `SESSION_SECURE_COOKIE=true`
    - `SESSION_ENCRYPT=true`
-   - `MAIL_MAILER=smtp`
-   - `QUEUE_CONNECTION=database`
-   - `LOG_LEVEL=warning`
+    - `MAIL_MAILER=smtp`
+    - `QUEUE_CONNECTION=database`
+    - `LOG_LEVEL=warning`
+
+   The example `.env` defaults to `MAIL_MAILER=log`, which writes messages to the Laravel log and does not deliver them. Set valid SMTP host, port, username, password, encryption/scheme and sender values in the live `.env`, then run `php artisan config:cache`. Admin-created users receive a confirmation email; verify delivery by creating a temporary test account and opening its link. The live server must be on the `production` branch for a release to take effect.
 
 ## Cron (no queue worker on shared hosting)
 Add one cron job:

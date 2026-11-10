@@ -9,10 +9,12 @@ use App\Support\SecurityAlert;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
+use Throwable;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
@@ -60,8 +62,11 @@ class UserController extends Controller
         ])->save();
         $user->syncRoles($roles);
         Audit::log('user.created', $user, ['roles' => $roles]);
+        $sent = $this->sendVerification($user);
 
-        return redirect()->route('admin.users.index')->with('status', 'User created.');
+        $response = redirect()->route('admin.users.index')->with('status', 'User created.'.($sent ? ' A confirmation email was sent.' : ''));
+
+        return $sent ? $response : $response->withErrors(['email' => 'The account was created, but the confirmation email could not be sent. Check the live mail settings and retry from the user account page.']);
     }
 
     public function edit(Request $request, User $user): View
@@ -126,6 +131,31 @@ class UserController extends Controller
         SecurityAlert::send($user, 'Your two-factor sign-in was reset', 'An administrator reset two-factor sign-in on your NSP account');
 
         return back()->with('status', 'Two-factor sign-in was reset. '.$user->name.' must set it up again at the next sign-in.');
+    }
+
+    public function resendVerification(Request $request, User $user): RedirectResponse
+    {
+        abort_if($user->hasVerifiedEmail(), 400, 'This email address is already confirmed.');
+        if (! $this->sendVerification($user)) {
+            return back()->withErrors(['email' => 'The confirmation email could not be sent. Check the live mail settings and try again.']);
+        }
+
+        Audit::log('user.email_verification_resent', $user);
+
+        return back()->with('status', 'A new email confirmation link was sent.');
+    }
+
+    private function sendVerification(User $user): bool
+    {
+        try {
+            $user->sendEmailVerificationNotification();
+
+            return true;
+        } catch (Throwable $exception) {
+            Log::warning('[user-verification] email delivery failed', ['user_id' => $user->id, 'exception' => class_basename($exception)]);
+
+            return false;
+        }
     }
 
     private function checkedRoles(User $actor, array $roles): array
