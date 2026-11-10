@@ -5,7 +5,7 @@
     <div class="page-head"><h1>Branding and settings</h1></div>
     @php($imageOptions = $images->mapWithKeys(fn ($m) => [$m->id => $m->original_name])->all())
 
-    <form method="post" action="{{ route('admin.settings.update') }}">
+    <form method="post" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
         @csrf @method('PUT')
 
         <section class="panel" aria-labelledby="identity-heading">
@@ -16,6 +16,20 @@
             <div class="form-row">
                 @include('partials.field', ['name' => 'logo_media_id', 'label' => 'Logo', 'type' => 'select', 'options' => $imageOptions, 'placeholder' => 'None', 'value' => $settings['logo_media_id']])
                 @include('partials.field', ['name' => 'favicon_media_id', 'label' => 'Favicon', 'type' => 'select', 'options' => $imageOptions, 'placeholder' => 'None', 'value' => $settings['favicon_media_id'], 'hint' => 'A square PNG or ICO, 32×32 or larger.'])
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="logo-upload">Upload site logo</label>
+                    <input id="logo-upload" type="file" name="logo_upload" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <p class="hint">JPG, PNG, WebP or GIF; up to 5 MB. Uploading replaces the selected logo.</p>
+                    @error('logo_upload')<p class="error">{{ $message }}</p>@enderror
+                </div>
+                <div class="form-group">
+                    <label for="favicon-upload">Upload favicon</label>
+                    <input id="favicon-upload" type="file" name="favicon_upload" accept="image/png,image/x-icon">
+                    <p class="hint">PNG or ICO; up to 5 MB. Uploading replaces the selected favicon.</p>
+                    @error('favicon_upload')<p class="error">{{ $message }}</p>@enderror
+                </div>
             </div>
         </section>
 

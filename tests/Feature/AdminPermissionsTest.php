@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Page;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AdminPermissionsTest extends TestCase
@@ -144,6 +146,22 @@ class AdminPermissionsTest extends TestCase
             'site_name' => 'x', 'primary_color' => 'red;}</style><script>', 'secondary_color' => '#000000',
             'accent_color' => '#000000', 'font_family' => 'Poppins',
         ])->assertSessionHasErrors('primary_color');
+    }
+
+    public function test_admin_can_upload_a_logo_and_use_it_globally(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs($this->userWithRole('platform_admin'))->put('/admin/settings', [
+            'site_name' => 'Hive Growth', 'primary_color' => '#123456', 'secondary_color' => '#0f766e',
+            'accent_color' => '#b45309', 'font_family' => 'Outfit',
+            'logo_upload' => UploadedFile::fake()->image('logo.png'),
+        ])->assertRedirect()->assertSessionHas('status', 'Settings saved.');
+
+        $media = \App\Models\Media::query()->firstOrFail();
+        Storage::disk('public')->assertExists($media->path);
+        $this->assertSame($media->id, (int) \App\Support\Settings::get('logo_media_id'));
+        $this->get('/')->assertSee($media->url(), false);
     }
 
     public function test_every_admin_screen_renders_for_a_super_admin(): void
