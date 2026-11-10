@@ -2,7 +2,7 @@
 
 namespace App\Ai;
 
-/** The calls the assistant makes. Bound to AnthropicAiClient; tests bind a fake. */
+/** The calls the assistant makes. Bound to a provider adapter; tests bind a fake. */
 interface AiClient
 {
     /**

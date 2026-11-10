@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Post;
 use App\Support\Audit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,9 +13,16 @@ use Illuminate\View\View;
 
 class CategoryController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('admin.categories.index', ['categories' => Category::query()->withCount('posts')->orderBy('name')->get()]);
+        $query = Category::query()->withCount('posts')->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->query('q').'%'));
+        $total = Category::query()->count();
+        $posts = Post::query()->whereHas('categories')->count();
+
+        return view('admin.categories.index', [
+            'categories' => $query->orderBy('name')->paginate(25)->withQueryString(),
+            'categoryStats' => ['total' => $total, 'posts' => $posts],
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

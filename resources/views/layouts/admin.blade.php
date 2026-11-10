@@ -20,7 +20,8 @@
                 {!! $navLink('admin.dashboard', 'Dashboard', 'admin.dashboard') !!}
             </ul>
             @if ($user->canAny(['manage-pages', 'manage-posts', 'manage-media', 'manage-menus', 'manage-site-content']))
-                <p class="nav-heading">Content</p>
+                <details class="nav-group" open>
+                <summary class="nav-heading">Content</summary>
                 <ul>
                     @can('manage-pages') {!! $navLink('admin.pages.index', 'Pages', 'admin.pages.*') !!} @endcan
                     @can('manage-posts')
@@ -34,14 +35,14 @@
                         <li><a href="{{ route('admin.content.index', 'testimonials') }}" @if (request()->is('admin/content/testimonials*')) aria-current="page" @endif>Testimonials</a></li>
                         <li><a href="{{ route('admin.content.index', 'partners') }}" @if (request()->is('admin/content/partners*')) aria-current="page" @endif>Partners</a></li>
                     @endcan
-                </ul>
+                </ul></details>
             @endif
             @can('view-insights')
-                <p class="nav-heading">Insights</p>
-                <ul>{!! $navLink('admin.insights.index', 'KPIs and reports', 'admin.insights.*') !!}</ul>
+                <details class="nav-group" open><summary class="nav-heading">Insights</summary>
+                <ul>{!! $navLink('admin.insights.index', 'KPIs and reports', 'admin.insights.*') !!}</ul></details>
             @endcan
             @if ($user->canAny(['manage-startups', 'review-duplicates', 'edit-vgi-frameworks', 'approve-vgi-frameworks', 'review-assessments', 'manage-integrations', 'manage-opportunities', 'verify-investors', 'manage-experts', 'manage-talent', 'moderate-marketplace']) && \App\Support\Features::enabled('registry'))
-                <p class="nav-heading">Registry</p>
+                <details class="nav-group" open><summary class="nav-heading">Registry</summary>
                 <ul>
                     @can('manage-startups') {!! $navLink('admin.startups.index', 'Startups', 'admin.startups.*') !!} @endcan
                     @can('review-duplicates') {!! $navLink('admin.duplicates.index', 'Possible duplicates', 'admin.duplicates.*') !!} @endcan
@@ -52,19 +53,19 @@
                     @if (\App\Support\Features::enabled('talent'))@can('manage-talent') {!! $navLink('admin.vacancies.index', 'Vacancies', 'admin.vacancies.*') !!} @endcan @endif
                     @if (\App\Support\Features::enabled('marketplace'))@can('moderate-marketplace') {!! $navLink('admin.marketplace.index', 'Marketplace and disputes', 'admin.marketplace.*') !!} @endcan @endif
                     @if (\App\Support\Features::enabled('ims_integration'))@can('manage-integrations') {!! $navLink('admin.integrations.index', 'Integrations', 'admin.integrations.*') !!} @endcan @endif
-                </ul>
+                </ul></details>
             @endif
             @includeIf('admin.partials.owner-modules-nav')
             @if ($user->canAny(['manage-contact-messages', 'manage-redirects', 'manage-communications']))
-                <p class="nav-heading">Engagement</p>
+                <details class="nav-group" open><summary class="nav-heading">Engagement</summary>
                 <ul>
                     @can('manage-communications') {!! $navLink('admin.communications.index', 'Announcements and email log', 'admin.communications.*') !!} @endcan
                     @can('manage-contact-messages') {!! $navLink('admin.messages.index', 'Contact messages', 'admin.messages.*') !!} @endcan
                     @can('manage-redirects') {!! $navLink('admin.redirects.index', 'Redirects', 'admin.redirects.*') !!} @endcan
-                </ul>
+                </ul></details>
             @endif
             @if ($user->canAny(['manage-users', 'manage-settings', 'manage-feature-flags', 'view-audit-log', 'view-system-health']))
-                <p class="nav-heading">System</p>
+                <details class="nav-group" open><summary class="nav-heading">System</summary>
                 <ul>
                     @can('manage-users') {!! $navLink('admin.users.index', 'Users and roles', 'admin.users.*') !!} @endcan
                     @can('manage-settings') {!! $navLink('admin.settings.edit', 'Branding and settings', 'admin.settings.*') !!} @endcan
@@ -72,7 +73,7 @@
                     @can('manage-feature-flags') {!! $navLink('admin.ai.edit', 'AI assistant', 'admin.ai.*') !!} @endcan
                     @can('view-audit-log') {!! $navLink('admin.audit.index', 'Audit log', 'admin.audit.*') !!} @endcan
                     @can('view-system-health') {!! $navLink('admin.system', 'System health', 'admin.system') !!} @endcan
-                </ul>
+                </ul></details>
             @endif
         </nav>
     </aside>

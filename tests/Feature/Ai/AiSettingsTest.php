@@ -109,6 +109,38 @@ class AiSettingsTest extends TestCase
             ->assertSee('250,000')->assertSee('50,000')->assertSee('US$ 2.00');
     }
 
+    public function test_admin_can_select_openai_and_a_supported_model(): void
+    {
+        $this->save(['provider' => 'openai', 'model' => 'gpt-4.1-mini'])
+            ->assertSessionHasNoErrors()->assertRedirect('/admin/ai');
+
+        $config = AiSettings::config();
+        $this->assertSame('openai', $config['provider']);
+        $this->assertSame('gpt-4.1-mini', $config['model']);
+        $this->assertSame(self::KEY, $config['api_key']);
+        $stored = SiteSetting::query()->where('key', 'ai.api_key_openai')->value('value');
+        $this->assertNotSame(self::KEY, $stored);
+        $otherKey = 'sk-gemini-other-test-key-0000000000000000';
+        $this->save(['provider' => 'gemini', 'model' => 'gemini-2.5-flash', 'api_key' => $otherKey])->assertSessionHasNoErrors();
+        $this->assertSame($otherKey, AiSettings::config()['api_key']);
+        $this->save(['provider' => 'openai', 'model' => 'gpt-4.1-mini', 'api_key' => ''])->assertSessionHasNoErrors();
+        $this->assertSame(self::KEY, AiSettings::config()['api_key'], 'Provider credentials remain independent when switching providers.');
+    }
+
+    public function test_unknown_models_are_rejected_for_curated_providers(): void
+    {
+        $this->save(['provider' => 'gemini', 'model' => 'made-up-model'])
+            ->assertSessionHasErrors('model');
+    }
+
+    public function test_custom_api_rejects_private_network_endpoints(): void
+    {
+        $this->save([
+            'provider' => 'custom', 'model' => '', 'custom_model' => 'local-model',
+            'base_url' => 'https://127.0.0.1/v1',
+        ])->assertSessionHasErrors('base_url');
+    }
+
     public function test_only_admins_who_manage_features_can_open_it(): void
     {
         $this->actingAs($this->userWithRole('startup_user'))->get('/admin/ai')->assertForbidden();

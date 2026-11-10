@@ -18,14 +18,17 @@ class IntegrationController extends Controller
     public function index(Request $request): View
     {
         return view('admin.integrations', [
-            'clients' => ApiClient::query()->orderBy('name')->get(),
+            'clients' => ApiClient::query()
+                ->when($request->filled('q'), fn ($q) => $q->where(fn ($q) => $q->where('name', 'like', '%'.$request->query('q').'%')->orWhere('client_id', 'like', '%'.$request->query('q').'%')))
+                ->when(in_array($request->query('client_status'), ['active', 'disabled'], true), fn ($q) => $q->where('is_active', $request->query('client_status') === 'active'))
+                ->orderBy('name')->paginate(20, ['*'], 'clients_page')->withQueryString(),
             'counts' => WebhookDelivery::query()->selectRaw('status, COUNT(*) total')->groupBy('status')->pluck('total', 'status'),
             'problems' => WebhookDelivery::query()->with('event', 'client')
                 ->where(fn ($q) => $q->where('status', 'dead')->orWhere(fn ($q) => $q->where('status', 'pending')->where('attempts', '>', 0)))
-                ->latest('updated_at')->limit(50)->get(),
+                ->latest('updated_at')->paginate(25, ['*'], 'problems_page')->withQueryString(),
             'inbox' => InboxEvent::query()->with('client')
                 ->when($request->query('inbox') === 'rejected', fn ($q) => $q->where('status', 'rejected'))
-                ->latest('received_at')->limit(50)->get(),
+                ->latest('received_at')->paginate(25, ['*'], 'inbox_page')->withQueryString(),
         ]);
     }
 

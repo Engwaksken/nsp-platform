@@ -731,10 +731,47 @@
     });
   }
 
+  function initAiProviderForm(root) {
+    qsa(root, '[data-ai-provider-form]').forEach(function (form) {
+      if (form.__nspAiProvider) return;
+      var provider = form.querySelector('#field-provider');
+      var customFields = form.querySelector('[data-custom-provider-field]');
+      var curatedFields = form.querySelector('[data-curated-model-field]');
+      var model = form.querySelector('#field-model');
+      var customModel = form.querySelector('#field-custom_model');
+      var baseUrl = form.querySelector('#field-base_url');
+      if (!provider || !customFields || !curatedFields || !model || !customModel || !baseUrl) return;
+      form.__nspAiProvider = true;
+      var catalog = {};
+      try { catalog = JSON.parse(form.getAttribute('data-model-catalog') || '{}'); } catch (e) { return; }
+      var defaultModel = form.getAttribute('data-default-model') || '';
+      function sync() {
+        var isCustom = provider.value === 'custom';
+        customFields.hidden = !isCustom;
+        curatedFields.hidden = isCustom;
+        model.disabled = isCustom;
+        model.required = !isCustom;
+        customModel.disabled = !isCustom;
+        customModel.required = isCustom;
+        baseUrl.required = isCustom;
+        if (!isCustom) {
+          var choices = catalog[provider.value] || {};
+          var selected = choices[model.value] ? model.value : (choices[defaultModel] ? defaultModel : Object.keys(choices)[0]);
+          model.replaceChildren(new Option('Choose a model', ''));
+          Object.keys(choices).forEach(function (id) { model.add(new Option(choices[id], id)); });
+          model.value = selected || '';
+        }
+      }
+      provider.addEventListener('change', sync);
+      sync();
+    });
+  }
+
   NSP.enhance = function (root) {
     root = root || document;
     initTables(root);
     initTabs(root);
+    initAiProviderForm(root);
     initInlineModals(root);
     initAlerts(root);
     initBuilder(root);

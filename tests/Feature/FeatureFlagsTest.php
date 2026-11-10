@@ -41,7 +41,7 @@ class FeatureFlagsTest extends TestCase
             ->get('/admin/features')
             ->assertOk()
             ->assertSee('Setup needed')
-            ->assertSee('Add the Anthropic API key in Admin → AI assistant.')
+            ->assertSee('Configure an API key for the selected provider in Admin → AI assistant.')
             ->assertSee('Set OIDC_ISSUER in .env.')
             ->assertSee('Register Hive IMS as a connected system', false);
     }

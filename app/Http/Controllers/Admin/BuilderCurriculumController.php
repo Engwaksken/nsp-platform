@@ -15,9 +15,20 @@ class BuilderCurriculumController extends Controller
 {
     public function __construct(private readonly CurriculumService $curricula) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('admin.builder.index', ['curricula' => BuilderCurriculum::query()->with('editor', 'publisher')->latest('version')->get()]);
+        $query = BuilderCurriculum::query()->with('editor', 'publisher')
+            ->when($request->filled('q'), fn ($q) => $q->where('name', 'like', '%'.$request->query('q').'%'))
+            ->when(array_key_exists($request->query('status'), BuilderCurriculum::STATUSES), fn ($q) => $q->where('status', $request->query('status')));
+
+        return view('admin.builder.index', [
+            'curricula' => $query->latest('version')->paginate(20)->withQueryString(),
+            'curriculumStats' => [
+                'total' => BuilderCurriculum::query()->count(),
+                'drafts' => BuilderCurriculum::query()->where('status', 'draft')->count(),
+                'published' => BuilderCurriculum::query()->where('status', 'published')->count(),
+            ],
+        ]);
     }
 
     public function edit(BuilderCurriculum $curriculum): View
