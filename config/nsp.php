@@ -24,7 +24,7 @@ return [
         'challenges' => ['default' => (bool) env('NSP_CHALLENGES_ENABLED', true), 'label' => 'Challenge Exchange', 'description' => 'Moderated innovation and market challenges with evidence, review, versions and solution proposals.'],
         'knowledge' => ['default' => (bool) env('NSP_KNOWLEDGE_ENABLED', true), 'label' => 'Knowledge Hub', 'description' => 'Research, policy briefs, templates and toolkits with review, search, bookmarks and download tracking.'],
         // Locked until the investor controller, pages and tests exist (backlog CAP-01).
-        'capital_exchange' => ['default' => false, 'label' => 'Capital Exchange', 'description' => 'Founder and investor capital pages: sharing scopes, due diligence, document requests, readiness report, pipeline and watchlist. Not built yet (CAP-01).'],
+        'capital_exchange' => ['default' => false, 'label' => 'Capital Exchange', 'description' => 'Founder and investor capital pages: what each connected investor sees (scopes with expiry), due-diligence checklists, document requests, readiness report, private investor pipeline and watchlist. Needs Funding and the startup registry. Labels, scopes and checklist templates are provisional (config/capital.php).'],
         'ai_assistant' => ['default' => (bool) env('NSP_AI_ASSISTANT_ENABLED', false), 'label' => 'AI assistant', 'description' => 'Optional writing help for founders (opt-in, labelled, rate-limited). Can be switched on only with an API key and recorded legal approval.'],
     ],
 

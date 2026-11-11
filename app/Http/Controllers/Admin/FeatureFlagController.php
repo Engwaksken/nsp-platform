@@ -13,8 +13,8 @@ use Illuminate\View\View;
 
 class FeatureFlagController extends Controller
 {
-    /** Modules that are not built yet cannot be switched on from the admin screen. */
-    public const NOT_BUILT = ['capital_exchange'];
+    /** Modules that are not built yet cannot be switched on from the admin screen (none at the moment). */
+    public const NOT_BUILT = [];
 
     /** Why a module cannot be switched on yet, or null. */
     public static function blockedReason(string $key): ?string
