@@ -23,7 +23,7 @@ class FeatureFlagController extends Controller
             return 'This module is not built yet, so it cannot be switched on.';
         }
         if ($key === 'ai_assistant' && (! AiSettings::config()['api_key'] || ! AiSettings::config()['legal_approved'])) {
-            return 'The AI assistant can be switched on only after an API key is added and the legal review is recorded in Admin → AI assistant.';
+            return 'The AI assistant can be switched on only after an API key is added and the legal review is recorded on the AI assistant admin page.';
         }
 
         return null;
@@ -42,10 +42,10 @@ class FeatureFlagController extends Controller
         if ($key === 'ai_assistant') {
             $ai = AiSettings::config();
             if (! $ai['api_key']) {
-                $missing[] = 'Configure an API key for the selected provider in Admin → AI assistant.';
+                $missing[] = 'Configure an API key for the selected provider on the AI assistant admin page.';
             }
             if (! $ai['legal_approved']) {
-                $missing[] = 'Record the legal review in Admin → AI assistant once it is done (backlog AI-605).';
+                $missing[] = 'Record the legal review on the AI assistant admin page once it is done (backlog AI-605).';
             }
         }
         if ($key === 'oidc') {

@@ -35,12 +35,12 @@
             <tbody>
             @forelse ($engagements as $engagement)
                 <tr>
-                    <td>{{ $engagement->startup?->display_name ?? '—' }}</td>
-                    <td>{{ $engagement->expert?->name ?? '—' }}</td>
+                    <td>@if ($engagement->startup){{ $engagement->startup->display_name }}@else<span class="meta">Unknown</span>@endif</td>
+                    <td>@if ($engagement->expert){{ $engagement->expert->name }}@else<span class="meta">Unknown</span>@endif</td>
                     <td>{{ $engagement->topic }}</td>
                     <td>{{ \App\Models\Experts\Engagement::TYPES[$engagement->type] }}@if ($engagement->source === 'staff_assignment') (assigned)@endif</td>
                     <td>{{ $engagement->sessions_count }}</td>
-                    <td>{{ $engagement->review ? $engagement->review->rating.'/5' : '—' }}@if ($engagement->review?->comment)<br><span class="meta">{{ \Illuminate\Support\Str::limit($engagement->review->comment, 120) }}</span>@endif</td>
+                    <td>@if ($engagement->review){{ $engagement->review->rating }}/5 @else<span class="meta">Not reviewed</span>@endif @if ($engagement->review?->comment)<br><span class="meta">{{ \Illuminate\Support\Str::limit($engagement->review->comment, 120) }}</span>@endif</td>
                     <td>{{ $engagement->created_at->format('j M Y') }}</td>
                 </tr>
             @empty

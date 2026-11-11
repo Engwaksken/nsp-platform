@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container section narrow">
-        <p><a href="{{ route('jobs.index') }}">← All jobs</a></p>
+        <p><a href="{{ route('jobs.index') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> All jobs</a></p>
         <h1>{{ $vacancy->title }}</h1>
         @include('partials.flash')
         <p class="meta">{{ $vacancy->startup->display_name }}@if ($vacancy->startup->profile?->sector) · {{ $vacancy->startup->profile->sector }}@endif

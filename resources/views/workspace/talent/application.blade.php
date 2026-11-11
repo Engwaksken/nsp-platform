@@ -4,7 +4,7 @@
 
 @section('workspace')
     <div class="container section narrow">
-        <p><a href="{{ route('workspace.talent.vacancy', [$startup, $application->vacancy]) }}">← Applications for {{ $application->vacancy->title }}</a></p>
+        <p><a href="{{ route('workspace.talent.vacancy', [$startup, $application->vacancy]) }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Applications for {{ $application->vacancy->title }}</a></p>
         <h1>{{ $application->applicant?->name ?? 'Deleted account' }}</h1>
         @include('partials.flash')
         <p class="meta">{{ $profile?->headline }}@if ($profile?->location) · {{ $profile->location }}@endif

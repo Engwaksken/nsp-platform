@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="container section narrow">
-        <p><a href="{{ route('investor.dashboard') }}">← Investor dashboard</a></p>
+        <p><a href="{{ route('investor.dashboard') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Investor dashboard</a></p>
         <h1>{{ $startup->display_name }}</h1>
         @include('partials.flash')
         <p class="meta">{{ $profile?->sector ?: 'Sector not given' }}

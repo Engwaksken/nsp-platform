@@ -16,7 +16,7 @@
     @if (!$current)
         <div class="alert alert-warning">No rubric is approved yet, so founders cannot take the assessment. Review the draft, edit it as needed, and have another administrator approve it.</div>
     @else
-        <p>Founders use <strong>{{ $current->name }} v{{ $current->version }}</strong>, approved {{ $current->approved_at->format('j M Y') }} by {{ $current->approver?->name ?? '—' }}.</p>
+        <p>Founders use <strong>{{ $current->name }} v{{ $current->version }}</strong>, approved {{ $current->approved_at->format('j M Y') }} by {{ $current->approver?->name ?? 'an unknown user' }}.</p>
     @endif
 
     <div data-tabs="Growth assessments" data-tabs-key="vgi-index">
@@ -32,7 +32,7 @@
                         <td><span class="badge badge-{{ ['approved' => 'on', 'draft' => 'draft'][$framework->status] ?? 'off' }}">{{ ucfirst($framework->status) }}</span></td>
                         <td>{{ $framework->questionCount() }}</td>
                         <td>{{ $framework->editor?->name ?? 'Seeded starter draft' }}</td>
-                        <td>{{ $framework->approved_at?->format('j M Y') ?? '—' }}@if ($framework->approval_note)<br><span class="meta">{{ $framework->approval_note }}</span>@endif</td>
+                        <td>@if ($framework->approved_at){{ $framework->approved_at->format('j M Y') }}@else<span class="meta">Not approved</span>@endif @if ($framework->approval_note)<br><span class="meta">{{ $framework->approval_note }}</span>@endif</td>
                         <td><a class="btn btn-secondary btn-sm" href="{{ route('admin.vgi.edit', $framework) }}" data-modal="lg">{{ $framework->status === 'draft' ? 'Review and edit' : 'View' }}</a></td>
                     </tr>
                 @endforeach

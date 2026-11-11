@@ -9,7 +9,7 @@
 @section('content')
     <div class="page-head"><h1>{{ $assessment->startup?->display_name }}: assessment of {{ $assessment->submitted_at->format('j M Y') }}</h1></div>
     <p class="hint">Viewing this page is recorded in the audit log.
-        Recalculating from the stored answers and rubric: <strong>{{ $reproducible ? 'matches the saved result' : 'DOES NOT MATCH — investigate' }}</strong>.</p>
+        Recalculating from the stored answers and rubric: <strong>{{ $reproducible ? 'matches the saved result' : 'DOES NOT MATCH, investigate' }}</strong>.</p>
 
     @include('workspace.growth.scores')
 
@@ -35,7 +35,7 @@
                 @foreach ($dimension['questions'] as $question)
                     @php($response = $responses->get($question['key']))
                     @php($option = collect($question['options'])->firstWhere('key', $response?->option_key))
-                    <li>{{ $question['prompt'] }} <strong>{{ $option['label'] ?? '—' }}</strong> ({{ $option['score'] ?? '—' }})
+                    <li>{{ $question['prompt'] }} <strong>{{ $option['label'] ?? 'No answer' }}</strong> ({{ $option['score'] ?? 'no score' }})
                         @if ($response?->evidence_note)<br><span class="meta">Evidence: {{ $response->evidence_note }}</span>@endif</li>
                 @endforeach
             </ul>

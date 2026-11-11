@@ -51,8 +51,8 @@
                         @foreach ($history as $entry)
                             <tr>
                                 <td><strong>{{ config('nsp.registry.consent_purposes.'.$entry->purpose.'.label', $entry->purpose) }}</strong></td>
-                                <td>{{ $entry->granted_at->format('j M Y') }}<br><span class="meta">by {{ $entry->granter?->name ?? '—' }}</span></td>
-                                <td>@if ($entry->revoked_at){{ $entry->revoked_at->format('j M Y') }}<br><span class="meta">by {{ $entry->revoker?->name ?? '—' }}</span>@else — @endif</td>
+                                <td>{{ $entry->granted_at->format('j M Y') }}<br><span class="meta">by {{ $entry->granter?->name ?? 'an unknown user' }}</span></td>
+                                <td>@if ($entry->revoked_at){{ $entry->revoked_at->format('j M Y') }}<br><span class="meta">by {{ $entry->revoker?->name ?? 'an unknown user' }}</span>@else<span class="meta">Still on</span>@endif</td>
                                 <td><span class="badge badge-{{ $entry->revoked_at ? 'off' : 'on' }}">{{ $entry->revoked_at ? 'Ended' : 'Active' }}</span></td>
                             </tr>
                         @endforeach

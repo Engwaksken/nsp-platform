@@ -143,7 +143,7 @@
                             <td><a href="{{ route('dataroom.download', $file) }}">{{ $file->title }}</a><br><span class="meta">{{ $file->original_name }}</span></td>
                             <td>{{ \App\Models\Funding\DataRoomFile::CATEGORIES[$file->category] ?? $file->category }}</td>
                             <td>{{ number_format($file->size / 1024, 0) }} KB</td>
-                            <td>{{ $file->created_at->format('j M Y') }} by {{ $file->uploader?->name ?? '—' }}</td>
+                            <td>{{ $file->created_at->format('j M Y') }} by {{ $file->uploader?->name ?? 'an unknown user' }}</td>
                             <td>@if ($canEdit)
                                 <form method="post" action="{{ route('workspace.funding.files.destroy', [$startup, $file]) }}" data-confirm="Delete “{{ $file->title }}”?">
                                     @csrf @method('DELETE') <button type="submit" class="btn btn-secondary btn-sm">Delete<span class="visually-hidden"> {{ $file->title }}</span></button>

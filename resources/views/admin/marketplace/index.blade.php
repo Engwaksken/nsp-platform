@@ -26,7 +26,7 @@
                     <td><a href="{{ route('admin.marketplace.report', $report) }}">#{{ $report->id }}</a></td>
                     <td>{{ $report->inquiry_uuid ? 'Conversation about ' : 'Listing ' }}“{{ $report->listing?->title ?? 'deleted' }}” · {{ $report->listing?->startup?->display_name }}</td>
                     <td>{{ \App\Models\Marketplace\Report::REASONS[$report->reason] ?? $report->reason }}</td>
-                    <td>{{ $report->reporter?->name ?? '—' }}</td>
+                    <td>@if ($report->reporter){{ $report->reporter->name }}@else<span class="meta">Unknown</span>@endif</td>
                     <td>{{ $report->created_at->format('j M Y') }}</td>
                 </tr>
             @empty

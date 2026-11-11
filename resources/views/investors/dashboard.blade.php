@@ -41,8 +41,8 @@
                         <tr>
                             <td><a href="{{ route('investor.startup', $introduction->startup_uuid) }}">{{ $introduction->startup?->display_name }}</a></td>
                             <td>{{ \App\Models\Funding\Introduction::STATUSES[$introduction->status] }}</td>
-                            <td>{{ \App\Models\Funding\Introduction::STAGES[$introduction->investor_stage] ?? '—' }}</td>
-                            <td>@php($grant = $grants->firstWhere('startup_uuid', $introduction->startup_uuid)){{ $grant ? 'Until '.$grant->expires_at->format('j M Y') : '—' }}</td>
+                            <td>{{ \App\Models\Funding\Introduction::STAGES[$introduction->investor_stage] ?? 'Not set' }}</td>
+                            <td>@php($grant = $grants->firstWhere('startup_uuid', $introduction->startup_uuid))@if ($grant)Until {{ $grant->expires_at->format('j M Y') }}@else<span class="meta">No access</span>@endif</td>
                         </tr>
                     @empty
                         <tr><td colspan="4" class="empty">Nothing yet. Express interest in a startup below.</td></tr>
