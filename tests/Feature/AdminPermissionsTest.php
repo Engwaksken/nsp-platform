@@ -2,14 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\Admin\FeatureFlagController;
+use App\Models\Media;
 use App\Models\Page;
 use App\Models\User;
-use App\Http\Controllers\Admin\FeatureFlagController;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\URL;
+use App\Support\Settings;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class AdminPermissionsTest extends TestCase
@@ -162,9 +164,9 @@ class AdminPermissionsTest extends TestCase
             'logo_upload' => UploadedFile::fake()->image('logo.png'),
         ])->assertRedirect()->assertSessionHas('status', 'Settings saved.');
 
-        $media = \App\Models\Media::query()->firstOrFail();
+        $media = Media::query()->firstOrFail();
         Storage::disk('public')->assertExists($media->path);
-        $this->assertSame($media->id, (int) \App\Support\Settings::get('logo_media_id'));
+        $this->assertSame($media->id, (int) Settings::get('logo_media_id'));
         $this->get('/')->assertSee($media->url(), false);
     }
 

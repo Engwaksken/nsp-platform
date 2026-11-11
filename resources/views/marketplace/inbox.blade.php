@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'My marketplace messages'])
+@extends('layouts.app', ['pageTitle' => 'My marketplace messages'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

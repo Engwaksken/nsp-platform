@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => $engagement->topic])
+@extends('layouts.app', ['pageTitle' => $engagement->topic])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Saved Knowledge resources', 'metaDescription' => 'Your saved and recently viewed Knowledge Hub resources.'])
+@extends('layouts.app', ['pageTitle' => 'Saved Knowledge resources', 'metaDescription' => 'Your saved and recently viewed Knowledge Hub resources.'])
 
 @section('content')
     <div class="container section">

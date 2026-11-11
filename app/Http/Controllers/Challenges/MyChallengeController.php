@@ -27,7 +27,7 @@ class MyChallengeController extends Controller
         $startupUuids = StartupMembership::query()->where('user_id', $user->id)->where('status', 'active')->pluck('startup_uuid');
 
         return view('challenges.mine', [
-            'challenges' => Challenge::query()->with(['reviews' => fn ($q) => $q->whereIn('decision', ['approve', 'reject', 'request_changes'])])
+            'challenges' => Challenge::query()->with(['publishedVersion', 'reviews' => fn ($q) => $q->whereIn('decision', ['approve', 'reject', 'request_changes'])])
                 ->where('submitted_by', $user->id)->latest('updated_at')->get(),
             'proposals' => ChallengeSolutionSubmission::query()->with('challenge.publishedVersion', 'startup', 'user')
                 ->where(fn ($q) => $q->where('user_id', $user->id)->orWhereIn('startup_uuid', $startupUuids))

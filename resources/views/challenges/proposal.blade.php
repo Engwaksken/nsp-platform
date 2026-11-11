@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Challenge proposal', 'metaDescription' => 'Private proposal details for the Challenge Exchange.'])
+@extends('layouts.app', ['pageTitle' => 'Challenge proposal', 'metaDescription' => 'Private proposal details for the Challenge Exchange.'])
 
 @section('content')
     <article class="container section narrow">

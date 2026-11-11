@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => $inquiry->subject])
+@extends('layouts.app', ['pageTitle' => $inquiry->subject])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

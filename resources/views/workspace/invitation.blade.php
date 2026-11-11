@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Invitation'])
+@extends('layouts.app', ['pageTitle' => 'Invitation'])
 
 @push('head')<meta name="robots" content="noindex"><meta name="referrer" content="no-referrer">@endpush
 

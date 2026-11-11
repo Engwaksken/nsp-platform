@@ -216,4 +216,15 @@ class OidcLoginTest extends TestCase
         $this->assertGuest();
         $this->assertFalse(User::query()->where('email', 'founder@startup.test')->exists());
     }
+
+    public function test_unconfirmed_local_account_is_never_linked_by_email(): void
+    {
+        config(['nsp.oidc.link_verified_email' => true]);
+        // Someone typed this address into their own account but never confirmed it.
+        $local = User::factory()->create(['email' => 'founder@startup.test', 'email_verified_at' => null]);
+
+        $this->completeLogin($this->idToken())->assertRedirect('/login')->assertSessionHasErrors('oidc');
+        $this->assertGuest();
+        $this->assertNull($local->fresh()->oidc_subject);
+    }
 }

@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Notification choices'])
+@extends('layouts.app', ['pageTitle' => 'Notification choices'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Menu;
 use App\Models\Page;
 use App\Models\Post;
 use Tests\TestCase;
@@ -26,7 +27,7 @@ class PublicSiteTest extends TestCase
     {
         $draft = $this->page(['status' => 'draft', 'published_at' => null]);
         $live = $this->page(['title' => 'Team', 'slug' => 'team']);
-        $menu = \App\Models\Menu::query()->create(['name' => 'Header', 'location' => 'header']);
+        $menu = Menu::query()->create(['name' => 'Header', 'location' => 'header']);
         $menu->items()->create(['label' => 'About link', 'page_id' => $draft->id, 'sort_order' => 1]);
         $menu->items()->create(['label' => 'Team link', 'page_id' => $live->id, 'sort_order' => 2]);
         $menu->items()->create(['label' => 'News link', 'url' => '/news', 'sort_order' => 3]);
@@ -42,20 +43,27 @@ class PublicSiteTest extends TestCase
             ->assertSee('Challenge Exchange')
             ->assertSee('Knowledge Hub')
             ->assertSee('Sign in')
-            ->assertDontSee('nav-menu-account', false);
+            ->assertDontSee('nav-menu-account', false)
+            ->assertDontSee('Go to dashboard');
 
         $this->actingAs($this->userWithRole('startup_user'))->get('/')->assertOk()
             ->assertSee('aria-controls="nav-menu-account"', false)
             ->assertSee('My workspace')
-            ->assertSee('Sign out');
+            ->assertSee('Sign out')
+            ->assertSee('Go to dashboard')
+            ->assertSee('class="btn btn-primary btn-sm nav-signin nav-dashboard" href="'.route('workspace').'"', false);
+
+        // Admins are sent to the admin dashboard.
+        $this->actingAs($this->userWithRole('platform_admin'))->get('/')->assertOk()
+            ->assertSee('class="btn btn-primary btn-sm nav-signin nav-dashboard" href="'.route('admin.dashboard').'"', false);
     }
 
     public function test_footer_has_explore_information_and_contact_columns_without_duplicates(): void
     {
-        $header = \App\Models\Menu::query()->create(['name' => 'Header', 'location' => 'header']);
+        $header = Menu::query()->create(['name' => 'Header', 'location' => 'header']);
         $header->items()->create(['label' => 'Home', 'url' => '/', 'sort_order' => 1]);
         $header->items()->create(['label' => 'FAQs', 'url' => '/faqs', 'sort_order' => 2]);
-        $footer = \App\Models\Menu::query()->create(['name' => 'Footer', 'location' => 'footer']);
+        $footer = Menu::query()->create(['name' => 'Footer', 'location' => 'footer']);
         $footer->items()->create(['label' => 'FAQs', 'url' => '/faqs', 'sort_order' => 1]);
         $footer->items()->create(['label' => 'Privacy', 'url' => '/privacy', 'sort_order' => 2]);
 

@@ -14,8 +14,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
-use Throwable;
 use Spatie\Permission\Models\Role;
+use Throwable;
 
 class UserController extends Controller
 {
