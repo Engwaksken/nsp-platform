@@ -1,11 +1,11 @@
-@extends('layouts.public', ['pageTitle' => 'Startup directory', 'metaDescription' => 'Startups in the Hive ecosystem that chose to be listed.'])
+@extends('layouts.browse', ['pageTitle' => 'Startup directory', 'metaDescription' => 'Startups in the Hive ecosystem that chose to be listed.'])
 
 @section('content')
     <div class="container section">
         <h1>Startup directory</h1>
         <p>Startups in the Hive ecosystem that chose to be listed. Each startup decides what appears here.</p>
 
-        @include('partials.stats', ['label' => 'Directory at a glance', 'stats' => \App\Support\PublicStats::directory()])
+        @include('partials.stats-summary', ['label' => 'Directory at a glance', 'stats' => \App\Support\PublicStats::directory()])
 
         <form method="get" class="filters" role="search" aria-label="Filter startups">
             <div class="form-group"><label for="q">Name or keyword</label><input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Search startups by name or keyword…" maxlength="100"></div>

@@ -1,10 +1,10 @@
-@extends('layouts.public', ['pageTitle' => 'Knowledge Hub', 'metaDescription' => 'Practical, research and market resources for founders and the wider ecosystem.'])
+@extends('layouts.browse', ['pageTitle' => 'Knowledge Hub', 'metaDescription' => 'Practical, research and market resources for founders and the wider ecosystem.'])
 
 @section('content')
     <div class="container section">
         <div class="page-head"><h1>Knowledge Hub</h1>@auth<a class="btn btn-secondary" href="{{ route('knowledge.mine') }}">Saved and recent</a>@endauth</div>
         <p>Browse resources with their source, licence and access conditions. Recommendations are suggestions, not a substitute for professional advice.</p>
-        @include('partials.stats', ['label' => 'Knowledge Hub at a glance', 'stats' => \App\Support\PublicStats::knowledge()])
+        @include('partials.stats-summary', ['label' => 'Knowledge Hub at a glance', 'stats' => \App\Support\PublicStats::knowledge()])
 
         <form method="get" action="{{ route('knowledge.index') }}" class="filters" role="search" aria-label="Search Knowledge Hub">
             <div class="form-group"><label for="knowledge-q">Search resources</label><input id="knowledge-q" name="q" value="{{ $q }}" maxlength="100"></div>

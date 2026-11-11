@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Jobs at Hive startups', 'metaDescription' => 'Jobs, internships, gigs and volunteer roles at startups in the Hive ecosystem.'])
+@extends('layouts.browse', ['pageTitle' => 'Jobs at Hive startups', 'metaDescription' => 'Jobs, internships, gigs and volunteer roles at startups in the Hive ecosystem.'])
 
 @section('content')
     <div class="container section">
@@ -6,7 +6,7 @@
         <p>Jobs, internships, short gigs and volunteer roles posted by startups on Hive NSP.
             @auth <a href="{{ route('talent.dashboard') }}">My applications</a> · <a href="{{ route('talent.profile') }}">My candidate profile</a>@else <a href="{{ route('login') }}">Sign in</a> to apply.@endauth</p>
 
-        @include('partials.stats', ['label' => 'Jobs at a glance', 'stats' => \App\Support\PublicStats::jobs()])
+        @include('partials.stats-summary', ['label' => 'Jobs at a glance', 'stats' => \App\Support\PublicStats::jobs()])
 
         <form method="get" class="filters" role="search" aria-label="Filter jobs">
             <div class="form-group"><label for="q">Keyword or skill</label><input id="q" type="search" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="e.g. marketing, Python, sales" maxlength="100"></div>

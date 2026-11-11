@@ -136,8 +136,17 @@ class MemberShellTest extends TestCase
                 ->assertSee('id="app-sidebar"', false)
                 ->assertDontSee('class="site-header"', false);
         }
-        foreach (['/', '/opportunities', '/jobs', '/knowledge'] as $url) {
+        // Browse pages (opportunities, jobs, Knowledge Hub, ...) stay in the member shell when signed in ...
+        foreach (['/opportunities', '/jobs', '/knowledge', '/marketplace', '/challenges', route('directory.index')] as $url) {
             $this->actingAs($member)->get($url)->assertOk()
+                ->assertSee('id="app-sidebar"', false)
+                ->assertDontSee('class="site-header"', false);
+        }
+        // ... the home page keeps the public site, and visitors always get the public header.
+        $this->actingAs($member)->get('/')->assertOk()->assertSee('class="site-header"', false)->assertDontSee('id="app-sidebar"', false);
+        auth()->logout();
+        foreach (['/opportunities', '/jobs', '/knowledge'] as $url) {
+            $this->get($url)->assertOk()
                 ->assertSee('class="site-header"', false)
                 ->assertDontSee('id="app-sidebar"', false);
         }

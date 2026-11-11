@@ -16,22 +16,23 @@ use Illuminate\Support\Facades\Cache;
 /**
  * Summary counts for the statistics cards on the public listing pages.
  * Only counts of what the public can already see; cached for ten minutes.
- * Each method returns rows for partials/stats.blade.php.
+ * Each method returns rows for partials/stats-summary.blade.php: the first row is the headline total;
+ * a row with 'query' links to the listing filtered that way.
  */
 class PublicStats
 {
     private static function remember(string $key, callable $build): array
     {
-        return Cache::remember('nsp.public_stats.'.$key, now()->addMinutes(10), $build);
+        return Cache::remember('nsp.public_stats.v2.'.$key, now()->addMinutes(10), $build);
     }
 
     public static function opportunities(): array
     {
         return self::remember('opportunities', fn () => [
             ['icon' => 'fa-bullhorn', 'tone' => 'orange', 'label' => 'Open opportunities', 'value' => Opportunity::query()->open()->count()],
-            ['icon' => 'fa-hourglass-half', 'tone' => 'red', 'label' => 'Closing in 14 days', 'value' => Opportunity::query()->open()->whereBetween('deadline_at', [now(), now()->addDays(14)])->count()],
-            ['icon' => 'fa-hand-holding-dollar', 'tone' => 'green', 'label' => 'Grants', 'value' => Opportunity::query()->open()->where('type', 'grant')->count()],
-            ['icon' => 'fa-calendar-days', 'tone' => 'blue', 'label' => 'Events and training', 'value' => Opportunity::query()->open()->where('type', 'event')->count()],
+            ['icon' => 'fa-hourglass-half', 'tone' => 'red', 'label' => 'Closing in 14 days', 'query' => ['closing' => 'soon'], 'value' => Opportunity::query()->open()->whereBetween('deadline_at', [now(), now()->addDays(14)])->count()],
+            ['icon' => 'fa-hand-holding-dollar', 'tone' => 'green', 'label' => 'Grants', 'query' => ['type' => 'grant'], 'value' => Opportunity::query()->open()->where('type', 'grant')->count()],
+            ['icon' => 'fa-calendar-days', 'tone' => 'blue', 'label' => 'Events and training', 'query' => ['type' => 'event'], 'value' => Opportunity::query()->open()->where('type', 'event')->count()],
         ]);
     }
 
@@ -53,9 +54,9 @@ class PublicStats
     {
         return self::remember('marketplace', fn () => [
             ['icon' => 'fa-store', 'tone' => 'orange', 'label' => 'Live listings', 'value' => Listing::query()->live()->count()],
-            ['icon' => 'fa-box-open', 'tone' => 'green', 'label' => 'Offers', 'value' => Listing::query()->live()->where('kind', 'offer')->count()],
-            ['icon' => 'fa-cart-shopping', 'tone' => 'blue', 'label' => 'Requests to buy', 'value' => Listing::query()->live()->where('kind', 'request')->count()],
-            ['icon' => 'fa-handshake', 'tone' => 'purple', 'label' => 'Partnerships', 'value' => Listing::query()->live()->where('kind', 'partnership')->count()],
+            ['icon' => 'fa-box-open', 'tone' => 'green', 'label' => 'Offers', 'query' => ['kind' => 'offer'], 'value' => Listing::query()->live()->where('kind', 'offer')->count()],
+            ['icon' => 'fa-cart-shopping', 'tone' => 'blue', 'label' => 'Requests to buy', 'query' => ['kind' => 'request'], 'value' => Listing::query()->live()->where('kind', 'request')->count()],
+            ['icon' => 'fa-handshake', 'tone' => 'purple', 'label' => 'Partnerships', 'query' => ['kind' => 'partnership'], 'value' => Listing::query()->live()->where('kind', 'partnership')->count()],
         ]);
     }
 
@@ -64,8 +65,8 @@ class PublicStats
         return self::remember('jobs', fn () => [
             ['icon' => 'fa-briefcase', 'tone' => 'orange', 'label' => 'Open roles', 'value' => Vacancy::query()->acceptingApplications()->count()],
             ['icon' => 'fa-building', 'tone' => 'blue', 'label' => 'Startups hiring', 'value' => Vacancy::query()->acceptingApplications()->distinct()->count('startup_uuid')],
-            ['icon' => 'fa-user-graduate', 'tone' => 'green', 'label' => 'Internships', 'value' => Vacancy::query()->acceptingApplications()->where('type', 'internship')->count()],
-            ['icon' => 'fa-clock', 'tone' => 'purple', 'label' => 'Full-time jobs', 'value' => Vacancy::query()->acceptingApplications()->where('type', 'full_time')->count()],
+            ['icon' => 'fa-user-graduate', 'tone' => 'green', 'label' => 'Internships', 'query' => ['type' => 'internship'], 'value' => Vacancy::query()->acceptingApplications()->where('type', 'internship')->count()],
+            ['icon' => 'fa-clock', 'tone' => 'purple', 'label' => 'Full-time jobs', 'query' => ['type' => 'full_time'], 'value' => Vacancy::query()->acceptingApplications()->where('type', 'full_time')->count()],
         ]);
     }
 
