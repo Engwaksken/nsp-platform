@@ -53,6 +53,31 @@
     });
     // On phones the site menu is a full sheet: stop the page behind it from scrolling.
     if (target.id === 'site-nav') document.documentElement.classList.toggle('nav-sheet-open', open);
+    // App shells (admin and member): on small screens the sidebar slides in over a backdrop.
+    if (target.hasAttribute('data-offcanvas')) {
+      document.documentElement.classList.toggle('nav-sheet-open', open);
+      qsa(document, '.shell-backdrop').forEach(function (backdrop) { backdrop.hidden = !open; });
+      if (open && window.matchMedia('(max-width: 960px)').matches) {
+        var first = target.querySelector('[data-offcanvas-close], a[href]');
+        if (first) first.focus();
+      }
+    }
+  }
+  function closeOffcanvas(returnFocus) {
+    qsa(document, '[data-offcanvas].is-open').forEach(function (panel) {
+      setPanel(panel, false);
+      var toggle = document.querySelector('[data-toggle-target="' + panel.id + '"]');
+      if (returnFocus && toggle) toggle.focus();
+    });
+  }
+  qsa(document, '[data-offcanvas-close]').forEach(function (closer) {
+    closer.addEventListener('click', function () { closeOffcanvas(true); });
+  });
+  // Back on a wide screen the sidebar is always shown: drop the phone state.
+  if (window.matchMedia) {
+    var wide = window.matchMedia('(min-width: 961px)');
+    var onWide = function () { if (wide.matches) closeOffcanvas(false); };
+    if (wide.addEventListener) wide.addEventListener('change', onWide); else if (wide.addListener) wide.addListener(onWide);
   }
   qsa(document, '[data-toggle-target]').forEach(function (button) {
     var target = document.getElementById(button.getAttribute('data-toggle-target'));
@@ -60,6 +85,7 @@
     button.addEventListener('click', function () { setPanel(target, !target.classList.contains('is-open')); });
   });
   document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && document.querySelector('[data-offcanvas].is-open')) { closeOffcanvas(true); return; }
     var siteNav = document.getElementById('site-nav');
     if (event.key === 'Escape' && siteNav && siteNav.classList.contains('is-open') && window.matchMedia('(max-width: 768px)').matches) {
       setPanel(siteNav, false);

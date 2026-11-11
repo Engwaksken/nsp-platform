@@ -262,19 +262,20 @@ class StartupRegistryTest extends TestCase
             'website' => 'https://bluewave.ug', 'contact_email' => 'hello@bluewave.ug']);
 
         $page = $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}/overview")->assertOk();
-        $page->assertSee('id="workspace-sidebar"', false)
+        $page->assertSee('id="app-sidebar"', false)
             ->assertSee('Next steps')
             ->assertSee('Switch startup')
             ->assertSee(route('workspace.startups.switch', $second), false)
-            ->assertSee('<a href="'.route('workspace.startups.overview', $first).'"  aria-current="page" >Dashboard</a>', false);
+            ->assertDontSee('class="site-header"', false);
+        $this->assertMatchesRegularExpression('#href="'.preg_quote(route('workspace.startups.overview', $first), '#').'"\s+aria-current="page"#', $page->getContent());
 
         $page->assertSee('class="stat-cards"', false)->assertSee('fas fa-users', false);
 
         // Deeper pages get the sidebar too, with the right section marked, stat cards and tabbed sections.
-        $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}/team")->assertOk()
-            ->assertSee('id="workspace-sidebar"', false)
-            ->assertSee('aria-current="page" >Team</a>', false)
-            ->assertSee('Invitations pending')
+        $team = $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}/team")->assertOk()
+            ->assertSee('id="app-sidebar"', false);
+        $this->assertMatchesRegularExpression('#href="'.preg_quote(route('workspace.startups.team', $first), '#').'"\s+aria-current="page"#', $team->getContent());
+        $team->assertSee('Invitations pending')
             ->assertSee('data-tabs="Team sections"', false)
             ->assertSee('data-tab="Invite someone"', false);
         $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}")->assertOk()
@@ -283,7 +284,9 @@ class StartupRegistryTest extends TestCase
         // Switching goes to the other startup's dashboard.
         $this->actingAs($owner)->post("/workspace/startups/{$second->uuid}/switch")->assertRedirect("/workspace/startups/{$second->uuid}/overview");
 
-        // Registering a new startup has no startup yet, so no sidebar.
-        $this->actingAs($owner)->get('/workspace/startups/new')->assertOk()->assertDontSee('id="workspace-sidebar"', false);
+        // Registering another startup keeps the member shell; the sidebar shows the active startup.
+        $this->actingAs($owner)->get('/workspace/startups/new')->assertOk()
+            ->assertSee('id="app-sidebar"', false)
+            ->assertSee('Register your startup');
     }
 }

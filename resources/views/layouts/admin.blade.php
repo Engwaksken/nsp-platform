@@ -28,7 +28,7 @@
     return '<li><a href="' . e(route($route)) . '" title="' . e($label) . '"' . ($active ? ' aria-current="page"' : '') . '><i class="fas ' . $icon . ' nav-item-icon" aria-hidden="true"></i><span>' . e($label) . '</span></a></li>';
 })
 <div class="admin-shell">
-    <aside class="admin-sidebar" id="admin-sidebar">
+    <aside class="admin-sidebar" id="admin-sidebar" data-offcanvas>
         <a class="brand" href="{{ route('admin.dashboard') }}">{{ $brand['site_name'] }} Admin</a>
         <nav aria-label="Admin">
             <ul>
@@ -92,6 +92,7 @@
             @endif
         </nav>
     </aside>
+    <div class="shell-backdrop" data-offcanvas-close hidden></div>
     <div class="admin-main">
         <div class="admin-topbar">
             <button type="button" class="nav-toggle btn btn-secondary btn-sm" data-toggle-target="admin-sidebar" aria-expanded="false" aria-controls="admin-sidebar">Menu</button>

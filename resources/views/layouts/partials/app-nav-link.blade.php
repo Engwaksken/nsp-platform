@@ -1,0 +1,2 @@
+{{-- One sidebar link in layouts/app. Expects $link from App\Support\MemberNavigation::groups(). --}}
+<li><a href="{{ $link['url'] }}" @if ($link['active']) aria-current="page" @endif><i class="fas {{ $link['icon'] }} nav-item-icon" aria-hidden="true"></i><span>{{ $link['label'] }}</span>@if ($link['badge'])<span class="nav-badge">{{ $link['badge'] > 99 ? '99+' : $link['badge'] }}<span class="visually-hidden"> unread</span></span>@endif</a></li>
