@@ -20,10 +20,16 @@
                 <p>No weak areas: every answer scored 50 or more. Keep reassessing every few months.</p>
             @else
                 <p class="hint">Suggested from your answers, weakest first. Each suggestion explains which answer it comes from.</p>
+                {{-- Closed: the header names the area, score and suggestion. After a failed "Dismiss with
+                     reason" every card opens, as the form does not say which suggestion it came from. --}}
+                <x-card-grid label="Suggestions" min="260px" remember="growth-gaps">
                 @foreach ($assessment->result['gaps'] as $gap)
-                    <div class="card" style="margin-bottom:.75rem">
-                        <p class="meta">{{ $gap['dimension_title'] }} · score {{ $gap['score'] }}</p>
-                        <p><strong>{{ $gap['tip'] ?: 'Improve this area' }}</strong></p>
+                    @php($inPlan = in_array($gap['question_key'], $planned, true))
+                    <x-collapsible-card id="gap-{{ $loop->index }}" icon="fa-bullseye" class="tone-amber"
+                        :title="$gap['tip'] ?: 'Improve this area'"
+                        :badge="$inPlan ? 'In your growth plan' : null" badge-tone="on"
+                        :summary="$gap['dimension_title'].' · score '.$gap['score']"
+                        :attention="$errors->has('explanation')">
                         <p class="meta">Because you answered “{{ $gap['answer'] }}” to “{{ $gap['prompt'] }}”</p>
                         @if (!empty($builderLinks[$gap['dimension_key'] ?? '']))
                             <p><a href="{{ $builderLinks[$gap['dimension_key']] }}">Open related Venture Builder step</a></p>
@@ -64,9 +70,7 @@
                                 </form>
                             </div>
                         @endif
-                        @if (in_array($gap['question_key'], $planned, true))
-                            <span class="badge badge-on">In your growth plan</span>
-                        @elseif ($membership->canEdit())
+                        @if (! $inPlan && $membership->canEdit())
                             <form method="post" action="{{ route('workspace.growth.actions.store', $startup) }}">
                                 @csrf
                                 <input type="hidden" name="assessment_uuid" value="{{ $assessment->uuid }}">
@@ -74,8 +78,9 @@
                                 <button type="submit" class="btn btn-secondary btn-sm">Add to growth plan</button>
                             </form>
                         @endif
-                    </div>
+                    </x-collapsible-card>
                 @endforeach
+                </x-card-grid>
             @endif
         </section>
 
@@ -83,14 +88,16 @@
             <section class="panel" aria-labelledby="opportunities-heading">
                 <h2 id="opportunities-heading">Open opportunities for {{ $startup->display_name }}</h2>
                 <p class="hint">Matched using the eligibility information available for this startup. Unknown criteria are not treated as confirmed eligibility.</p>
+                <div class="card-grid">
                 @foreach ($opportunityGuidance as $recommendation)
-                    <article class="card" style="margin-bottom:.75rem">
+                    <article class="card">
                         <h3><a href="{{ route('opportunities.show', $recommendation['opportunity']) }}">{{ $recommendation['opportunity']->title }}</a></h3>
                         @if ($recommendation['reasons'])<p>{{ implode(' · ', $recommendation['reasons']) }}</p>@endif
                         @if ($recommendation['unknown'])<p class="meta">Check these eligibility details: {{ implode(', ', $recommendation['unknown']) }}.</p>@endif
                         @if ($recommendation['opportunity']->deadline_at)<p class="meta">Deadline: {{ $recommendation['opportunity']->deadline_at->format('j M Y') }}</p>@endif
                     </article>
                 @endforeach
+                </div>
                 <a href="{{ route('workspace.opportunities', $startup) }}">See all recommendations</a>
             </section>
         @endif

@@ -18,7 +18,7 @@
         @if ($posts->isEmpty())
             <p class="empty">No news has been published yet.</p>
         @else
-            <div class="grid">
+            <div class="card-grid">
                 @foreach ($posts as $post)
                     @include('site.news.card', ['post' => $post])
                 @endforeach

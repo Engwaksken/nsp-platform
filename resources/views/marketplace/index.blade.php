@@ -21,7 +21,7 @@
             <button class="btn btn-secondary" type="submit">Search</button>
         </form>
 
-        <div class="grid">
+        <div class="card-grid">
             @forelse ($listings as $listing)
                 <article class="card">
                     <p><span class="badge">{{ \App\Models\Marketplace\Listing::KINDS[$listing->kind] }}</span></p>
