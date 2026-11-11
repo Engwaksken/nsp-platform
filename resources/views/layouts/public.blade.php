@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="no-js">
 <head>
     @include('partials.head')
     @stack('head')
@@ -86,6 +86,7 @@
                     @endif
                 @endforeach
             </ul>
+            <div class="nav-theme">@include('partials.theme-switch')</div>
             @auth
                 @php($unreadNotifications = \App\Models\Communication\UserNotification::query()->where('user_id', auth()->id())->whereNull('read_at')->count())
                 {{-- Signed in: the main call to action is the dashboard (admins go to the admin dashboard). --}}

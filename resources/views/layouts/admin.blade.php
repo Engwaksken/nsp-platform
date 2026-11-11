@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="no-js">
 <head>
     @php($pageTitle = trim($__env->yieldContent('title')) . ' · Admin')
     @include('partials.head')
@@ -29,7 +29,11 @@
 })
 <div class="admin-shell">
     <aside class="admin-sidebar" id="admin-sidebar" data-offcanvas>
-        <a class="brand" href="{{ route('admin.dashboard') }}">{{ $brand['site_name'] }} Admin</a>
+        <div class="app-sidebar-head">
+            <a class="brand" href="{{ route('admin.dashboard') }}">{{ $brand['site_name'] }} Admin</a>
+            {{-- Without JavaScript on small screens the menu opens in place via #admin-sidebar (see "no-js" in nsp.css). --}}
+            <a class="app-sidebar-close nojs-only" href="#main" aria-label="Close menu"><i class="fas fa-xmark" aria-hidden="true"></i></a>
+        </div>
         <nav aria-label="Admin">
             <ul>
                 {!! $navLink('admin.dashboard', 'Dashboard', 'admin.dashboard') !!}
@@ -96,8 +100,10 @@
     <div class="admin-main">
         <div class="admin-topbar">
             <button type="button" class="nav-toggle btn btn-secondary btn-sm" data-toggle-target="admin-sidebar" aria-expanded="false" aria-controls="admin-sidebar">Menu</button>
+            <a class="nav-toggle-nojs nojs-only btn btn-secondary btn-sm" href="#admin-sidebar">Menu</a>
             <a href="{{ route('home') }}">View site</a>
             <div class="actions">
+                @include('partials.theme-switch')
                 <a href="{{ route('mfa.setup') }}">{{ $user->name }}<span class="visually-hidden">: account security</span></a>
                 <form method="post" action="{{ route('logout') }}">
                     @csrf
