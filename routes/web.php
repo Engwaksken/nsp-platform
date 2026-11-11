@@ -420,6 +420,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
     Route::middleware('can:manage-communications')->prefix('communications')->name('communications.')->group(function () {
         Route::get('/', [Admin\CommunicationController::class, 'index'])->name('index');
         Route::post('/announcements', [Admin\CommunicationController::class, 'store'])->name('store');
+        Route::get('/announcements/{announcement}/edit', [Admin\CommunicationController::class, 'edit'])->name('edit');
+        Route::put('/announcements/{announcement}', [Admin\CommunicationController::class, 'update'])->name('update');
         Route::post('/announcements/{announcement}/send', [Admin\CommunicationController::class, 'send'])->name('send');
         Route::delete('/announcements/{announcement}', [Admin\CommunicationController::class, 'destroy'])->name('destroy');
     });

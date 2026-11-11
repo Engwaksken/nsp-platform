@@ -32,16 +32,30 @@ class CommunicationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'title' => ['required', 'string', 'max:200'],
-            'body' => ['required', 'string', 'max:2000'],
-            'url' => ['nullable', 'url:https,http', 'max:500'],
-            'audience' => ['required', Rule::in(array_keys(Announcement::AUDIENCES))],
-        ]);
-        $announcement = Announcement::query()->create($data + ['created_by' => $request->user()->id]);
+        $announcement = Announcement::query()->create($this->validated($request) + ['created_by' => $request->user()->id]);
         Audit::log('communications.announcement_drafted', $announcement);
 
         return back()->with('status', 'Announcement saved as a draft. Check it, then send.');
+    }
+
+    /** Edit a draft (opens in a popup from the list; a normal page without JavaScript). */
+    public function edit(Announcement $announcement): View
+    {
+        abort_unless($announcement->status === 'draft', 404);
+
+        return view('admin.communications.edit', [
+            'announcement' => $announcement,
+            'audienceSizes' => collect(Announcement::AUDIENCES)->map(fn ($label, $key) => SendAnnouncement::audienceQuery($key)->count())->all(),
+        ]);
+    }
+
+    public function update(Request $request, Announcement $announcement): RedirectResponse
+    {
+        abort_unless($announcement->status === 'draft', 404);
+        $announcement->update($this->validated($request));
+        Audit::log('communications.announcement_updated', $announcement);
+
+        return redirect()->route('admin.communications.index')->with('status', 'Draft updated.');
     }
 
     public function send(Request $request, Announcement $announcement): RedirectResponse
@@ -60,5 +74,15 @@ class CommunicationController extends Controller
         $announcement->delete();
 
         return back()->with('status', 'Draft deleted.');
+    }
+
+    private function validated(Request $request): array
+    {
+        return $request->validate([
+            'title' => ['required', 'string', 'max:200'],
+            'body' => ['required', 'string', 'max:2000'],
+            'url' => ['nullable', 'url:https,http', 'max:500'],
+            'audience' => ['required', Rule::in(array_keys(Announcement::AUDIENCES))],
+        ]);
     }
 }

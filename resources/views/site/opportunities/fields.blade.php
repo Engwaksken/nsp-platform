@@ -1,6 +1,8 @@
 {{-- Opportunity fields shared by the public submission form and the admin editor. Expects $opportunity, $staff (bool). --}}
 @php($rules = $opportunity->eligibility ?? [])
-<section class="panel" aria-labelledby="opp-details">
+{{-- Tabs keep the long form short on screen (and in the admin popup); a field with an error opens its tab. --}}
+<div data-tabs="Opportunity fields" data-tabs-key="opportunity-fields">
+<section class="panel" aria-labelledby="opp-details" data-tab="Details" data-tab-icon="fa-circle-info">
     <h2 id="opp-details">Details</h2>
     <div class="form-row">
         @include('partials.field', ['name' => 'type', 'label' => 'Type', 'type' => 'select', 'options' => \App\Models\Ecosystem\Opportunity::TYPES, 'value' => $opportunity->type, 'required' => true])
@@ -9,6 +11,10 @@
     @include('partials.field', ['name' => 'title', 'label' => 'Title', 'value' => $opportunity->title, 'required' => true, 'maxlength' => 200])
     @include('partials.field', ['name' => 'summary', 'label' => 'Short summary', 'type' => 'textarea', 'rows' => 2, 'value' => $opportunity->summary, 'required' => true, 'hint' => 'One or two sentences shown in the list.'])
     @include('partials.field', ['name' => 'body', 'label' => 'Full description (Markdown)', 'type' => 'textarea', 'rows' => 8, 'value' => $opportunity->body])
+</section>
+
+<section class="panel" aria-labelledby="opp-when" data-tab="Value, place and dates" data-tab-icon="fa-calendar-days">
+    <h2 id="opp-when">Value, place and dates</h2>
     <div class="form-row">
         @include('partials.field', ['name' => 'amount_text', 'label' => 'Value or prize', 'value' => $opportunity->amount_text, 'maxlength' => 120, 'hint' => 'For example “Up to UGX 20M” or “Free”.'])
         @include('partials.field', ['name' => 'location', 'label' => 'Location', 'value' => $opportunity->location, 'maxlength' => 160])
@@ -22,7 +28,7 @@
     @include('partials.field', ['name' => 'apply_url', 'label' => 'Where to apply (link)', 'type' => 'url', 'value' => $opportunity->apply_url, 'hint' => 'The organiser’s own application page, if any.'])
 </section>
 
-<section class="panel" aria-labelledby="opp-eligibility">
+<section class="panel" aria-labelledby="opp-eligibility" data-tab="Who can apply" data-tab-icon="fa-user-check">
     <h2 id="opp-eligibility">Who can apply</h2>
     <p class="hint">Leave a group empty if it is open to everyone. Founders see whether their startup matches.</p>
     <fieldset class="form-group">
@@ -57,7 +63,7 @@
 </section>
 
 @if ($staff)
-    <section class="panel" aria-labelledby="opp-registration">
+    <section class="panel" aria-labelledby="opp-registration" data-tab="Registration on NSP" data-tab-icon="fa-clipboard-list">
         <h2 id="opp-registration">Registration on NSP</h2>
         <div class="form-row">
             <div class="form-group"><label class="checkbox"><input type="checkbox" name="accepts_interest" value="1" @checked(old('accepts_interest', $opportunity->accepts_interest))> <span>Let people register or express interest here</span></label></div>
@@ -65,3 +71,4 @@
         </div>
     </section>
 @endif
+</div>
