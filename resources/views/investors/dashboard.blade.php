@@ -11,17 +11,22 @@
         @if ($incoming->isNotEmpty())
             <section class="panel" aria-labelledby="incoming-heading">
                 <h2 id="incoming-heading">Introduction requests</h2>
-                @foreach ($incoming as $introduction)
-                    <div class="card">
-                        <p><strong><a href="{{ route('investor.startup', $introduction->startup_uuid) }}">{{ $introduction->startup?->display_name }}</a></strong> · {{ $introduction->created_at->format('j M Y') }}</p>
-                        @if ($introduction->message)<p>{{ $introduction->message }}</p>@endif
-                        <form method="post" action="{{ route('investor.decide', $introduction) }}" class="inline-form">
-                            @csrf
-                            <button type="submit" name="decision" value="accept" class="btn btn-primary btn-sm">Accept and share contacts<span class="visually-hidden"> with {{ $introduction->startup?->display_name }}</span></button>
-                            <button type="submit" name="decision" value="decline" class="btn btn-secondary btn-sm">Decline<span class="visually-hidden"> {{ $introduction->startup?->display_name }}</span></button>
-                        </form>
-                    </div>
-                @endforeach
+                {{-- Each request waits for your answer, so the cards start open. --}}
+                <x-card-grid label="Introduction requests" min="260px" remember="investor-incoming">
+                    @foreach ($incoming as $introduction)
+                        <x-collapsible-card id="incoming-{{ $introduction->id }}" icon="fa-handshake" class="tone-green"
+                            :title="$introduction->startup?->display_name ?? 'Startup'" badge="Waiting for you" badge-tone="draft"
+                            :summary="'Asked on '.$introduction->created_at->format('j M Y')" :open="true">
+                            @if ($introduction->message)<p>{{ $introduction->message }}</p>@endif
+                            <p><a href="{{ route('investor.startup', $introduction->startup_uuid) }}">View {{ $introduction->startup?->display_name }}</a></p>
+                            <form method="post" action="{{ route('investor.decide', $introduction) }}" class="inline-form">
+                                @csrf
+                                <button type="submit" name="decision" value="accept" class="btn btn-primary btn-sm">Accept and share contacts<span class="visually-hidden"> with {{ $introduction->startup?->display_name }}</span></button>
+                                <button type="submit" name="decision" value="decline" class="btn btn-secondary btn-sm">Decline<span class="visually-hidden"> {{ $introduction->startup?->display_name }}</span></button>
+                            </form>
+                        </x-collapsible-card>
+                    @endforeach
+                </x-card-grid>
             </section>
         @endif
 
@@ -53,7 +58,7 @@
                 <a class="tag" href="{{ route('investor.dashboard') }}" @if ($filter !== 'all') aria-current="true" @endif>Fits my focus</a>
                 <a class="tag" href="{{ route('investor.dashboard', ['show' => 'all']) }}" @if ($filter === 'all') aria-current="true" @endif>All</a>
             </nav>
-            <div class="grid">
+            <div class="card-grid">
                 @forelse ($startups as $row)
                     <article class="card">
                         <h3 class="h4"><a href="{{ route('investor.startup', $row['startup']) }}">{{ $row['startup']->display_name }}</a></h3>
