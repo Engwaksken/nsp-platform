@@ -1501,3 +1501,38 @@ a.stats-chip[aria-current="true"] { border-color: var(--brand-accent); box-shado
 /* Admin settings: one save button below the tabs. */
 .form-actions-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-4); }
 .form-actions-bar .hint { margin: 0; }
+
+/* ==========================================================================
+   Capital Exchange (workspace/capital/*, investors/capital/*, capital/report)
+   ========================================================================== */
+.capital-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.capital-actions .inline-form { margin: 0; }
+.panel > .capital-actions { margin-bottom: var(--space-4); }
+.capital-split { display: grid; gap: 0 var(--space-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)); }
+.capital-scope-hint { display: block; margin-top: .1rem; font-size: .82rem; }
+.capital-tags { margin-bottom: var(--space-3); }
+.capital-item { padding: var(--space-3); }
+.capital-item + .capital-item { margin-top: var(--space-3); }
+.capital-item-title { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .5rem; margin: 0 0 .25rem; font-size: .975rem; overflow-wrap: anywhere; }
+.capital-item-title .badge { font-size: .7rem; }
+.capital-item .meta { margin: 0 0 var(--space-2); }
+.capital-row { padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); }
+.capital-feedback, .capital-move { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin: 0; }
+.capital-feedback input[type="text"] { flex: 1 1 180px; min-width: 0; }
+.capital-move select { flex: 1 1 140px; min-width: 0; width: auto; }
+.capital-row-actions { white-space: normal; }
+.capital-row-actions .inline-form { margin: 0 var(--space-2) var(--space-1) 0; }
+.capital-list { margin: 0; padding: 0; list-style: none; }
+.capital-list li { padding: var(--space-2) 0; border-bottom: 1px solid var(--line); }
+.capital-list li:last-child { border-bottom: 0; }
+.capital-list .meta { display: block; }
+.capital-bars, .capital-funnel { display: grid; gap: var(--space-3); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.capital-funnel { margin-top: 0; }
+.capital-bars li, .capital-funnel li { margin: 0; }
+.capital-funnel .meter-label .fas { width: 1.1em; margin-right: .3rem; color: var(--accent-icon); }
+.capital-checklist { display: grid; gap: var(--space-2); grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.capital-checklist li { margin: 0; }
+.capital-yes { color: var(--success); }
+.capital-no { color: var(--ink-subtle); }
+.capital-report-section h2 .fas { margin-right: .4rem; font-size: .9em; color: var(--accent-icon); }
+@media print { .capital-report-section { break-inside: avoid; } }
