@@ -23,8 +23,8 @@
             @forelse ($resources as $resource)
                 <tr><td><a href="{{ route('admin.knowledge.edit', $resource->uuid) }}" data-modal="lg">{{ $resource->title }}</a><span class="meta">{{ $resource->source ?: 'Source not recorded' }}</span></td>
                     <td>{{ \Illuminate\Support\Str::headline($resource->status) }}</td><td>{{ $resource->visibilityLabel() }}</td>
-                    <td>{{ $resource->current_version ?: '—' }}</td><td>{{ $resource->review_due_at?->format('j M Y') ?? '—' }}</td>
-                    <td>{{ $resource->uploader?->name ?? '—' }}</td></tr>
+                    <td>@if ($resource->current_version){{ $resource->current_version }}@else<span class="meta">None</span>@endif</td><td>@if ($resource->review_due_at){{ $resource->review_due_at->format('j M Y') }}@else<span class="meta">Not set</span>@endif</td>
+                    <td>@if ($resource->uploader){{ $resource->uploader->name }}@else<span class="meta">Unknown</span>@endif</td></tr>
             @empty<tr><td colspan="6" class="empty">No resources match this queue.</td></tr>@endforelse
         </tbody></table>
     </div>

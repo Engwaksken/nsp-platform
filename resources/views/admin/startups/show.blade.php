@@ -27,20 +27,20 @@
             <h2>Company</h2>
             <dl>
                 <dt>Registered name</dt><dd>{{ $startup->legal_name }}</dd>
-                <dt>Registration number</dt><dd>{{ $startup->registration_number ?: '—' }}</dd>
-                <dt>Country · founded</dt><dd>{{ $startup->country }} · {{ $startup->year_founded ?: '—' }}</dd>
-                <dt>Website</dt><dd>{{ $startup->website ?: '—' }}</dd>
-                <dt>Sector</dt><dd>{{ $profile->sector ?: '—' }}</dd>
-                <dt>Based in · team</dt><dd>{{ $profile->headquarters_location ?: '—' }} · {{ $profile->team_size ?: '—' }}</dd>
+                <dt>Registration number</dt><dd>@if ($startup->registration_number){{ $startup->registration_number }}@else<span class="meta">Not given</span>@endif</dd>
+                <dt>Country · founded</dt><dd>{{ $startup->country }} · @if ($startup->year_founded){{ $startup->year_founded }}@else<span class="meta">Not given</span>@endif</dd>
+                <dt>Website</dt><dd>@if ($startup->website){{ $startup->website }}@else<span class="meta">Not given</span>@endif</dd>
+                <dt>Sector</dt><dd>@if ($profile->sector){{ $profile->sector }}@else<span class="meta">Not given</span>@endif</dd>
+                <dt>Based in · team</dt><dd>@if ($profile->headquarters_location){{ $profile->headquarters_location }}@else<span class="meta">Not given</span>@endif · @if ($profile->team_size){{ $profile->team_size }}@else<span class="meta">Not given</span>@endif</dd>
             </dl>
         </section>
         <section class="panel">
             <h2>Private details</h2>
             <p class="hint">Shown only where the startup chose “our team and Hive staff”.</p>
             <dl>
-                <dt>Revenue and funding</dt><dd>{{ $staffMay('financials') ? ((\App\Models\Registry\StartupProfile::REVENUE_BANDS[$profile->revenue_band] ?? '—').' · '.($profile->funding_raised_amount ? number_format((float) $profile->funding_raised_amount).' '.$profile->funding_currency : '—')) : 'Not shared with Hive staff' }}</dd>
-                <dt>Traction</dt><dd>{{ $staffMay('traction') ? ($profile->traction_summary ?: '—') : 'Not shared with Hive staff' }}</dd>
-                <dt>Contact</dt><dd>{{ $staffMay('contact') ? trim($profile->contact_email.' '.$profile->contact_phone) ?: '—' : 'Not shared with Hive staff' }}</dd>
+                <dt>Revenue and funding</dt><dd>{{ $staffMay('financials') ? ((\App\Models\Registry\StartupProfile::REVENUE_BANDS[$profile->revenue_band] ?? 'Not given').' · '.($profile->funding_raised_amount ? number_format((float) $profile->funding_raised_amount).' '.$profile->funding_currency : 'Not given')) : 'Not shared with Hive staff' }}</dd>
+                <dt>Traction</dt><dd>{{ $staffMay('traction') ? ($profile->traction_summary ?: 'Not given') : 'Not shared with Hive staff' }}</dd>
+                <dt>Contact</dt><dd>{{ $staffMay('contact') ? trim($profile->contact_email.' '.$profile->contact_phone) ?: 'Not given' : 'Not shared with Hive staff' }}</dd>
             </dl>
         </section>
     </div>
@@ -87,7 +87,7 @@
             <h2>Merges</h2>
             <ul>
                 @foreach ($merges as $merge)
-                    <li>{{ $merge->source?->display_name }} → {{ $merge->target?->display_name }} on {{ $merge->merged_at->format('j M Y') }} by {{ $merge->merger?->name ?? '—' }}@if ($merge->undone_at) (undone {{ $merge->undone_at->format('j M Y') }})@endif</li>
+                    <li>{{ $merge->source?->display_name }} <i class="fas fa-arrow-right" aria-hidden="true"></i><span class="visually-hidden">to</span> {{ $merge->target?->display_name }} on {{ $merge->merged_at->format('j M Y') }} by {{ $merge->merger?->name ?? 'an unknown user' }}@if ($merge->undone_at) (undone {{ $merge->undone_at->format('j M Y') }})@endif</li>
                 @endforeach
             </ul>
         </section>

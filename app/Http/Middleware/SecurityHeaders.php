@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Integration\ApiClient;
+use App\Support\MapEmbed;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -26,6 +27,8 @@ class SecurityHeaders
             "base-uri 'self'",
             "form-action 'self' ".$this->formTargets($request),
             "object-src 'none'",
+            // Only the contact page (and its preview in admin settings) may embed a third-party frame: the location map.
+            $request->is('contact', 'admin/settings') ? 'frame-src '.MapEmbed::frameSources() : "frame-src 'self'",
         ]);
 
         $response->headers->set('Content-Security-Policy', trim($csp));

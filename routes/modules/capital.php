@@ -5,14 +5,12 @@ use App\Http\Controllers\Workspace\CapitalController;
 use Illuminate\Support\Facades\Route;
 
 /*
-| M08 Capital Exchange (owner alignment). Extends Phase 5b funding:
-| founder controls (sharing scopes, diligence, document requests, readiness,
-| activity) and the investor's pipeline, watchlist and diligence pages.
+| M08 Capital Exchange (owner alignment, backlog CAP-01). Extends Phase 5b
+| funding: founder controls (sharing scopes, diligence, document requests,
+| readiness, activity) and the investor's pipeline, watchlist and diligence pages.
 |
-| Not finished (backlog CAP-01): the pages and the investor controller are
-| missing, so every route sits behind the locked "capital_exchange" flag and
-| returns 404. The investor routes are registered only once their controller
-| exists, so route:list and route:cache keep working meanwhile.
+| Off by default: an admin switches "capital_exchange" on in Admin, System,
+| Feature flags. While it is off every route here returns 404.
 */
 Route::middleware(['auth', 'feature:capital_exchange', 'feature:registry', 'feature:funding'])->group(function () {
     Route::prefix('workspace/startups/{startup}/capital')->name('workspace.capital.')->group(function () {
@@ -29,17 +27,15 @@ Route::middleware(['auth', 'feature:capital_exchange', 'feature:registry', 'feat
     });
 });
 
-if (class_exists(InvestorCapitalController::class)) {
-    Route::middleware(['auth', 'feature:capital_exchange', 'feature:funding'])->prefix('investors')->name('investor.capital.')->group(function () {
-        Route::get('/pipeline', [InvestorCapitalController::class, 'pipeline'])->name('pipeline');
-        Route::post('/startups/{startup}/pipeline', [InvestorCapitalController::class, 'transition'])->middleware('throttle:60,1')->name('transition');
-        Route::post('/startups/{startup}/watch', [InvestorCapitalController::class, 'watch'])->name('watch');
-        Route::delete('/startups/{startup}/watch', [InvestorCapitalController::class, 'unwatch'])->name('unwatch');
-        Route::get('/startups/{startup}/readiness', [InvestorCapitalController::class, 'readiness'])->name('readiness');
-        Route::get('/startups/{startup}/diligence', [InvestorCapitalController::class, 'diligence'])->name('diligence');
-        Route::post('/startups/{startup}/diligence', [InvestorCapitalController::class, 'addItems'])->middleware('throttle:30,1')->name('diligence.store');
-        Route::put('/diligence/{item}', [InvestorCapitalController::class, 'updateItem'])->name('diligence.update');
-        Route::post('/startups/{startup}/document-requests', [InvestorCapitalController::class, 'requestDocument'])->middleware('throttle:30,1')->name('documents.store');
-        Route::post('/startups/{startup}/match-feedback', [InvestorCapitalController::class, 'feedback'])->middleware('throttle:30,1')->name('feedback');
-    });
-}
+Route::middleware(['auth', 'feature:capital_exchange', 'feature:funding'])->prefix('investors')->name('investor.capital.')->group(function () {
+    Route::get('/pipeline', [InvestorCapitalController::class, 'pipeline'])->name('pipeline');
+    Route::post('/startups/{startup}/pipeline', [InvestorCapitalController::class, 'transition'])->middleware('throttle:60,1')->name('transition');
+    Route::post('/startups/{startup}/watch', [InvestorCapitalController::class, 'watch'])->name('watch');
+    Route::delete('/startups/{startup}/watch', [InvestorCapitalController::class, 'unwatch'])->name('unwatch');
+    Route::get('/startups/{startup}/readiness', [InvestorCapitalController::class, 'readiness'])->name('readiness');
+    Route::get('/startups/{startup}/diligence', [InvestorCapitalController::class, 'diligence'])->name('diligence');
+    Route::post('/startups/{startup}/diligence', [InvestorCapitalController::class, 'addItems'])->middleware('throttle:30,1')->name('diligence.store');
+    Route::put('/diligence/{item}', [InvestorCapitalController::class, 'updateItem'])->name('diligence.update');
+    Route::post('/startups/{startup}/document-requests', [InvestorCapitalController::class, 'requestDocument'])->middleware('throttle:30,1')->name('documents.store');
+    Route::post('/startups/{startup}/match-feedback', [InvestorCapitalController::class, 'feedback'])->middleware('throttle:30,1')->name('feedback');
+});

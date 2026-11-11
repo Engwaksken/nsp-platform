@@ -21,7 +21,7 @@
         <div data-tab="Classification">
         <div class="form-row">
             @include('partials.field', ['name' => 'resource_type', 'label' => 'Resource type', 'type' => 'select', 'required' => true, 'options' => config('knowledge.resource_types'), 'value' => $resource->resource_type])
-            @include('partials.field', ['name' => 'category_id', 'label' => 'Category', 'type' => 'select', 'placeholder' => 'No category', 'options' => collect($categories)->mapWithKeys(fn ($category) => [$category->id => str_repeat('— ', $category->depth).$category->name])->all(), 'value' => $resource->category_id])
+            @include('partials.field', ['name' => 'category_id', 'label' => 'Category', 'type' => 'select', 'placeholder' => 'No category', 'options' => collect($categories)->mapWithKeys(fn ($category) => [$category->id => str_repeat("\u{00A0}\u{00A0}\u{00A0}", $category->depth).$category->name])->all(), 'value' => $resource->category_id])
             @include('partials.field', ['name' => 'license', 'label' => 'Licence', 'type' => 'select', 'required' => true, 'options' => collect(config('knowledge.licenses'))->mapWithKeys(fn ($license, $key) => [$key => $license['label']])->all(), 'value' => $resource->license])
             @include('partials.field', ['name' => 'visibility', 'label' => 'Who can view', 'type' => 'select', 'required' => true, 'options' => config('knowledge.visibilities'), 'value' => $resource->visibility])
         </div>

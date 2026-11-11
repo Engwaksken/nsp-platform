@@ -72,7 +72,7 @@
                 <div class="form-row">
                     @include('partials.field', ['name' => 'revenue_band', 'label' => 'Yearly revenue', 'type' => 'select', 'options' => \App\Models\Registry\StartupProfile::REVENUE_BANDS, 'placeholder' => 'Prefer not to say', 'value' => $profile->revenue_band])
                     @include('partials.field', ['name' => 'funding_raised_amount', 'label' => 'Funding raised so far', 'type' => 'number', 'value' => $profile->funding_raised_amount, 'attrs' => 'min="0" step="any"'])
-                    @include('partials.field', ['name' => 'funding_currency', 'label' => 'Currency', 'type' => 'select', 'options' => ['UGX' => 'UGX', 'USD' => 'USD', 'EUR' => 'EUR', 'KES' => 'KES', 'GBP' => 'GBP'], 'placeholder' => '—', 'value' => $profile->funding_currency])
+                    @include('partials.field', ['name' => 'funding_currency', 'label' => 'Currency', 'type' => 'select', 'options' => ['UGX' => 'UGX', 'USD' => 'USD', 'EUR' => 'EUR', 'KES' => 'KES', 'GBP' => 'GBP'], 'placeholder' => 'Choose currency', 'value' => $profile->funding_currency])
                 </div>
                 @include('partials.field', ['name' => 'traction_summary', 'label' => 'Traction (customers, growth, milestones)', 'type' => 'textarea', 'rows' => 3, 'value' => $profile->traction_summary])
                 <div class="form-row">

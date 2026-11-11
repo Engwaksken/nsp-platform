@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
 use App\Models\Media;
 use App\Support\Audit;
+use App\Support\MapEmbed;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,6 +48,7 @@ class SettingsController extends Controller
             'contact_phone' => ['nullable', 'string', 'max:40'],
             'contact_address' => ['nullable', 'string', 'max:300'],
             'footer_text' => ['nullable', 'string', 'max:500'],
+            'contact_map' => ['nullable', 'string', 'max:3000'],
             'social' => ['nullable', 'array'],
             'social.*' => ['nullable', 'url:https', 'max:255'],
             'routing' => ['nullable', 'array'],
@@ -55,6 +57,14 @@ class SettingsController extends Controller
             '*.regex' => 'Use a colour like #1d4ed8.',
             'social.*.url' => 'Social links must start with https://.',
         ]);
+
+        // Location map: a Google Maps / OpenStreetMap embed link or <iframe> snippet, stored as the embed address.
+        $map = MapEmbed::normalize($data['contact_map'] ?? null);
+        if (filled($data['contact_map'] ?? null) && $map === null) {
+            return back()->withInput()->withErrors(['contact_map' => 'Paste the embed link (or the whole <iframe> code) from Google Maps "Share, Embed a map" or OpenStreetMap "Share, HTML".']);
+        }
+        unset($data['contact_map']);
+        $data['contact_map_url'] = $map;
 
         foreach (['logo_upload' => 'logo_media_id', 'favicon_upload' => 'favicon_media_id'] as $uploadKey => $settingKey) {
             if (! $request->hasFile($uploadKey)) {

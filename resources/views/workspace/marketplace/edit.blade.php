@@ -4,7 +4,7 @@
 
 @section('workspace')
     <div class="container section narrow">
-        <p><a href="{{ route('workspace.marketplace', $startup) }}">← {{ $startup->display_name }} marketplace</a></p>
+        <p><a href="{{ route('workspace.marketplace', $startup) }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {{ $startup->display_name }} marketplace</a></p>
         <h1>{{ $listing->title }}</h1>
         @include('partials.flash')
         <p>Status: <span class="badge badge-{{ $listing->status === 'published' ? 'on' : ($listing->status === 'draft' ? 'draft' : 'off') }}">{{ \App\Models\Marketplace\Listing::STATUSES[$listing->status] }}</span>

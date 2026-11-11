@@ -37,49 +37,48 @@
             </section>
         @endunless
 
-        <div class="security-grid">
-            <section class="security-card" aria-labelledby="profile-heading">
-                <h2 id="profile-heading">Personal details</h2>
-                <form method="post" action="{{ route('account.profile.update') }}" novalidate>
+        <div class="account-tabs" data-tabs="Account settings" data-tabs-key="account">
+        <section class="security-card" id="personal" aria-labelledby="profile-heading" data-tab="Personal details" data-tab-icon="fa-id-card">
+            <h2 id="profile-heading">Personal details</h2>
+            <form method="post" action="{{ route('account.profile.update') }}" novalidate>
+                @csrf
+                @method('put')
+                @include('partials.field', ['name' => 'name', 'label' => 'Full name', 'value' => $user->name, 'required' => true, 'autocomplete' => 'name'])
+                @if ($canChangeCredentials)
+                    @include('partials.field', ['name' => 'email', 'label' => 'Email address', 'type' => 'email', 'value' => $user->email, 'required' => true, 'autocomplete' => 'email',
+                        'hint' => 'It changes only after you open the link we send to the new address. We also tell the old address.'])
+                    <div>
+                        @include('partials.field', ['name' => 'email_current_password', 'label' => 'Current password (only needed to change your email)', 'type' => 'password', 'value' => '', 'autocomplete' => 'current-password', 'placeholder' => false])
+                    </div>
+                @else
+                    <div class="form-group">
+                        <span class="label-like">Email address</span>
+                        <p class="static-value">{{ $user->email }}</p>
+                        <p class="hint">Your email address comes from your organisation's sign-in. Change it there.</p>
+                    </div>
+                @endif
+                <button type="submit" class="btn btn-primary">Save details</button>
+            </form>
+        </section>
+
+        <section class="security-card" id="password" aria-labelledby="password-heading" data-tab="Password" data-tab-icon="fa-key">
+            <h2 id="password-heading">Password</h2>
+            @if ($canChangeCredentials)
+                <p class="lead-muted">At least 12 characters, with letters and numbers. Changing it signs you out on your other devices.</p>
+                <form method="post" action="{{ route('account.password.update') }}" novalidate>
                     @csrf
                     @method('put')
-                    @include('partials.field', ['name' => 'name', 'label' => 'Full name', 'value' => $user->name, 'required' => true, 'autocomplete' => 'name'])
-                    @if ($canChangeCredentials)
-                        @include('partials.field', ['name' => 'email', 'label' => 'Email address', 'type' => 'email', 'value' => $user->email, 'required' => true, 'autocomplete' => 'email',
-                            'hint' => 'It changes only after you open the link we send to the new address. We also tell the old address.'])
-                        <div>
-                            @include('partials.field', ['name' => 'email_current_password', 'label' => 'Current password (only needed to change your email)', 'type' => 'password', 'value' => '', 'autocomplete' => 'current-password', 'placeholder' => false])
-                        </div>
-                    @else
-                        <div class="form-group">
-                            <span class="label-like">Email address</span>
-                            <p class="static-value">{{ $user->email }}</p>
-                            <p class="hint">Your email address comes from your organisation's sign-in. Change it there.</p>
-                        </div>
-                    @endif
-                    <button type="submit" class="btn btn-primary">Save details</button>
+                    @include('partials.field', ['name' => 'current_password', 'label' => 'Current password', 'type' => 'password', 'value' => '', 'required' => true, 'autocomplete' => 'current-password', 'placeholder' => false])
+                    @include('partials.field', ['name' => 'password', 'label' => 'New password', 'type' => 'password', 'value' => '', 'required' => true, 'autocomplete' => 'new-password', 'placeholder' => false])
+                    @include('partials.field', ['name' => 'password_confirmation', 'label' => 'Repeat new password', 'type' => 'password', 'value' => '', 'required' => true, 'autocomplete' => 'new-password', 'placeholder' => false])
+                    <button type="submit" class="btn btn-primary">Change password</button>
                 </form>
-            </section>
+            @else
+                <p class="lead-muted">You sign in through your organisation's single sign-on, so there is no {{ $brand['site_name'] }} password to change.</p>
+            @endif
+        </section>
 
-            <section class="security-card" aria-labelledby="password-heading">
-                <h2 id="password-heading">Password</h2>
-                @if ($canChangeCredentials)
-                    <p class="lead-muted">At least 12 characters, with letters and numbers. Changing it signs you out on your other devices.</p>
-                    <form method="post" action="{{ route('account.password.update') }}" novalidate>
-                        @csrf
-                        @method('put')
-                        @include('partials.field', ['name' => 'current_password', 'label' => 'Current password', 'type' => 'password', 'value' => '', 'required' => true, 'autocomplete' => 'current-password', 'placeholder' => false])
-                        @include('partials.field', ['name' => 'password', 'label' => 'New password', 'type' => 'password', 'value' => '', 'required' => true, 'autocomplete' => 'new-password', 'placeholder' => false])
-                        @include('partials.field', ['name' => 'password_confirmation', 'label' => 'Repeat new password', 'type' => 'password', 'value' => '', 'required' => true, 'autocomplete' => 'new-password', 'placeholder' => false])
-                        <button type="submit" class="btn btn-primary">Change password</button>
-                    </form>
-                @else
-                    <p class="lead-muted">You sign in through your organisation's single sign-on, so there is no {{ $brand['site_name'] }} password to change.</p>
-                @endif
-            </section>
-        </div>
-
-        <section class="security-card appearance-card" aria-labelledby="appearance-heading">
+        <section class="security-card appearance-card" id="appearance" aria-labelledby="appearance-heading" data-tab="Appearance" data-tab-icon="fa-palette">
             <h2 id="appearance-heading">Appearance</h2>
             <p class="lead-muted">Pick the colours you see in {{ $brand['site_name'] }}. Only you see them, on every device you sign in on.</p>
             @php($current = $user->theme_palette ?: \App\Support\ThemePalettes::DEFAULT)
@@ -109,13 +108,14 @@
             </div>
         </section>
 
-        <section class="security-card account-links" aria-labelledby="more-heading">
+        <section class="security-card account-links" id="more" aria-labelledby="more-heading" data-tab="More settings" data-tab-icon="fa-sliders">
             <h2 id="more-heading">More settings</h2>
             <ul>
-                <li><a href="{{ route('mfa.setup') }}"><i class="fas fa-lock" aria-hidden="true"></i> Sign-in security</a> — two-factor sign-in is <strong>{{ $user->hasMfa() ? 'on' : 'off' }}</strong>.</li>
-                <li><a href="{{ route('notifications.preferences') }}"><i class="fas fa-sliders" aria-hidden="true"></i> Notification settings</a> — choose which emails you get.</li>
+                <li><a href="{{ route('mfa.setup') }}"><i class="fas fa-lock" aria-hidden="true"></i> Sign-in security</a>: two-factor sign-in is <strong>{{ $user->hasMfa() ? 'on' : 'off' }}</strong>.</li>
+                <li><a href="{{ route('notifications.preferences') }}"><i class="fas fa-bell" aria-hidden="true"></i> Notification settings</a>: choose which emails you get.</li>
             </ul>
             <p class="lead-muted">Member since {{ $user->created_at?->format('j F Y') }}@if ($user->last_login_at) · last sign-in {{ $user->last_login_at->format('j F Y, H:i') }}@endif</p>
         </section>
+        </div>
     </div>
 @endsection

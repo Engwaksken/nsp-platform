@@ -8,7 +8,8 @@
     <form method="post" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
         @csrf @method('PUT')
 
-        <section class="panel" aria-labelledby="identity-heading">
+        <div data-tabs="Settings sections" data-tabs-key="admin-settings">
+        <section class="panel" id="identity" aria-labelledby="identity-heading" data-tab="Site identity" data-tab-icon="fa-id-badge">
             <h2 id="identity-heading">Site identity</h2>
             @include('partials.field', ['name' => 'site_name', 'label' => 'Site name', 'value' => $settings['site_name'], 'required' => true, 'maxlength' => 80])
             @include('partials.field', ['name' => 'site_tagline', 'label' => 'Tagline', 'value' => $settings['site_tagline'], 'maxlength' => 160])
@@ -33,7 +34,7 @@
             </div>
         </section>
 
-        <section class="panel" aria-labelledby="theme-heading">
+        <section class="panel" id="colours" aria-labelledby="theme-heading" data-tab="Colours and font" data-tab-icon="fa-palette">
             <h2 id="theme-heading">Colours and font</h2>
             <p class="hint">Use the approved Hive brand palette. Text on these colours is chosen automatically: white when it has enough contrast (WCAG AA: at least 4.5:1), dark text otherwise. In dark mode, links and buttons are lightened so they stay readable.</p>
             <div class="form-row">
@@ -52,17 +53,22 @@
                 'hint' => '"System" loads no web font and is fastest on slow connections.'])
         </section>
 
-        <section class="panel" aria-labelledby="contact-heading">
+        <section class="panel" id="contact" aria-labelledby="contact-heading" data-tab="Contact details" data-tab-icon="fa-address-book">
             <h2 id="contact-heading">Contact details</h2>
             <div class="form-row">
                 @include('partials.field', ['name' => 'contact_email', 'label' => 'Public email', 'type' => 'email', 'value' => $settings['contact_email'], 'hint' => 'Also receives contact-form messages unless a topic is routed below.'])
                 @include('partials.field', ['name' => 'contact_phone', 'label' => 'Phone', 'value' => $settings['contact_phone']])
             </div>
             @include('partials.field', ['name' => 'contact_address', 'label' => 'Address', 'value' => $settings['contact_address']])
+            @include('partials.field', ['name' => 'contact_map', 'label' => 'Location map on the contact page', 'type' => 'textarea', 'rows' => 3, 'value' => $settings['contact_map_url'], 'placeholder' => 'https://www.google.com/maps/embed?pb=...',
+                'hint' => 'In Google Maps, find your office, choose Share, then Embed a map, and copy the HTML. Paste it here (the whole <iframe> code or just its link). OpenStreetMap: Share, then HTML. Leave empty for no map.'])
+            @if ($settings['contact_map_url'])
+                <div class="map-preview"><iframe src="{{ $settings['contact_map_url'] }}" title="Map preview" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+            @endif
             @include('partials.field', ['name' => 'footer_text', 'label' => 'Footer text', 'type' => 'textarea', 'rows' => 2, 'value' => $settings['footer_text']])
         </section>
 
-        <section class="panel" aria-labelledby="routing-heading">
+        <section class="panel" id="routing" aria-labelledby="routing-heading" data-tab="Contact form routing" data-tab-icon="fa-route">
             <h2 id="routing-heading">Contact form routing</h2>
             <p class="hint">Send each topic to a team inbox. Leave empty to use the public email.</p>
             <div class="form-row">
@@ -72,7 +78,7 @@
             </div>
         </section>
 
-        <section class="panel" aria-labelledby="social-heading">
+        <section class="panel" id="social" aria-labelledby="social-heading" data-tab="Social links" data-tab-icon="fa-share-nodes">
             <h2 id="social-heading">Social links</h2>
             <div class="form-row">
                 @foreach (\App\Http\Controllers\Admin\SettingsController::SOCIAL as $network => $label)
@@ -80,7 +86,11 @@
                 @endforeach
             </div>
         </section>
+        </div>
 
-        <button type="submit" class="btn btn-primary">Save settings</button>
+        <div class="form-actions-bar">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk" aria-hidden="true"></i> Save settings</button>
+            <span class="hint">Saves every tab at once.</span>
+        </div>
     </form>
 @endsection

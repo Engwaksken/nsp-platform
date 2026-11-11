@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container section narrow">
-        <p><a href="{{ route('directory.index') }}">← Startup directory</a></p>
+        <p><a href="{{ route('directory.index') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Startup directory</a></p>
         <h1>{{ $startup->display_name }}</h1>
         {{-- Only the fields named in the "nsp_directory" consent. --}}
         <p class="meta">{{ $startup->profile?->sector ?: 'Sector not given' }}@if ($startup->profile?->headquarters_location) · {{ $startup->profile->headquarters_location }}@endif</p>

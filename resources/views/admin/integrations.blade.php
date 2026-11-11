@@ -29,7 +29,7 @@
                         <td>{{ $client->name }}<br><code>{{ $client->client_id }}</code></td>
                         <td>{{ $client->recipient_system }}</td>
                         <td>{{ implode(', ', $client->scopes ?? []) }}</td>
-                        <td>{{ $client->webhook_url ?: '—' }}</td>
+                        <td>@if ($client->webhook_url){{ $client->webhook_url }}@else<span class="meta">None</span>@endif</td>
                         <td>{{ $client->last_used_at?->diffForHumans() ?? 'Never' }}</td>
                         <td><span class="badge badge-{{ $client->is_active ? 'on' : 'off' }}">{{ $client->is_active ? 'Active' : 'Disabled' }}</span></td>
                     </tr>
@@ -54,7 +54,7 @@
                         <td>{{ $delivery->client?->name }}</td>
                         <td>{{ $delivery->attempts }}</td>
                         <td>{{ $delivery->last_error }}</td>
-                        <td>{{ $delivery->status === 'dead' ? 'Stopped' : ($delivery->next_attempt_at?->diffForHumans() ?? '—') }}</td>
+                        <td>@if ($delivery->status === 'dead')Stopped @elseif ($delivery->next_attempt_at){{ $delivery->next_attempt_at->diffForHumans() }}@else<span class="meta">Not scheduled</span>@endif</td>
                         <td>
                             <form method="post" action="{{ route('admin.integrations.replay', $delivery) }}">
                                 @csrf
@@ -84,9 +84,9 @@
                 @forelse ($inbox as $event)
                     <tr>
                         <td>{{ $event->received_at?->format('j M Y H:i') }}</td>
-                        <td>{{ $event->client?->name ?? '—' }}</td>
+                        <td>@if ($event->client){{ $event->client->name }}@else<span class="meta">Unknown</span>@endif</td>
                         <td><code>{{ $event->type }}</code></td>
-                        <td>@if ($event->subject_uuid)<a href="{{ route('admin.startups.show', $event->subject_uuid) }}">{{ \Illuminate\Support\Str::limit($event->subject_uuid, 13) }}</a>@else — @endif</td>
+                        <td>@if ($event->subject_uuid)<a href="{{ route('admin.startups.show', $event->subject_uuid) }}">{{ \Illuminate\Support\Str::limit($event->subject_uuid, 13) }}</a>@else<span class="meta">None</span>@endif</td>
                         <td><span class="badge badge-{{ $event->status === 'processed' ? 'on' : 'off' }}">{{ $event->status }}</span> {{ $event->error }}</td>
                     </tr>
                 @empty

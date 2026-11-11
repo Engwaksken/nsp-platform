@@ -59,8 +59,10 @@
                 </section>
             @endif
 
+            {{-- Quick actions and services share one tabbed block. --}}
+            <div class="dash-tabs" data-tabs="Workspace sections" data-tabs-key="dashboard">
             @if ($actions)
-                <section class="dash-block" aria-labelledby="actions-heading">
+                <section class="dash-block" id="quick-actions" aria-labelledby="actions-heading" data-tab="Quick actions" data-tab-icon="fa-bolt" data-tab-count="{{ count($actions) }}">
                     <div class="section-head"><h2 id="actions-heading">Quick actions</h2></div>
                     <ul class="action-tiles">
                         @foreach ($actions as [$icon, $title, $text, $url, $tone])
@@ -75,7 +77,7 @@
                 </section>
             @endif
 
-            <section class="dash-block" aria-labelledby="services-heading">
+            <section class="dash-block" id="services" aria-labelledby="services-heading" data-tab="Services" data-tab-icon="fa-grip" data-tab-count="{{ count($sections) }}">
                 <div class="section-head"><h2 id="services-heading">Services</h2></div>
                 {{-- Open by default (a visitor's own open/closed choice is remembered); closed, a card
                      shows its name and description, open it also shows its buttons. --}}
@@ -100,6 +102,7 @@
                     @endforeach
                 </x-card-grid>
             </section>
+            </div>
         </div>
 
         <aside aria-label="Your startups and roles">

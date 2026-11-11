@@ -1474,3 +1474,65 @@ main :is(p, dd, td, blockquote, .prose li, .hint) a:not(.btn):hover { text-decor
 .stats-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .7rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; text-decoration: none; transition: border-color .15s, background-color .15s; }
 a.stats-chip:hover { border-color: var(--line-strong); background: var(--surface-alt); color: var(--ink-strong); }
 a.stats-chip[aria-current="true"] { border-color: var(--brand-accent); box-shadow: 0 0 0 1px var(--brand-accent) inset; }
+
+/* Contact page: form on the left, details and location map on the right (one column on phones). */
+.contact-head { margin-bottom: var(--space-5); }
+.contact-head h1 { margin-bottom: .35rem; }
+.contact-layout { display: grid; gap: var(--space-5); grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; }
+@media (max-width: 860px) { .contact-layout { grid-template-columns: minmax(0, 1fr); } }
+.contact-form-card, .contact-details-card, .contact-map-card { padding: clamp(1.25rem, 3vw, 1.75rem); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+.contact-form-card h2, .contact-details-card h2 { display: flex; align-items: center; gap: .55rem; margin: 0 0 var(--space-4); font-size: 1.15rem; }
+.contact-form-card h2 i { color: var(--accent-icon, var(--brand-accent)); font-size: .95rem; }
+.contact-aside { display: grid; gap: var(--space-5); }
+.contact-map-card { padding: 0; overflow: hidden; }
+.contact-details { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.contact-details li { display: flex; align-items: flex-start; gap: .85rem; margin: 0; overflow-wrap: anywhere; }
+.contact-details li > span:last-child { display: grid; gap: .1rem; }
+.contact-icon { display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 40px; color: var(--tone-blue); background: var(--badge-blue-bg); border-radius: 10px; }
+.contact-label { display: block; font-size: .74rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-muted); }
+.contact-social { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.contact-social ul { display: flex; flex-wrap: wrap; gap: .45rem; margin: .5rem 0 0; padding: 0; list-style: none; }
+.contact-social a { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .75rem; font-size: .88rem; color: var(--ink); text-decoration: none; background: var(--surface-alt); border: 1px solid var(--line); border-radius: 999px; }
+.contact-social a:hover { border-color: var(--line-strong); color: var(--ink-strong); }
+.contact-map, .map-preview { position: relative; aspect-ratio: 4 / 3; background: var(--surface-alt); }
+.contact-map iframe, .map-preview iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.map-preview { max-width: 520px; margin: 0 0 var(--space-4); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+
+/* Admin settings: one save button below the tabs. */
+.form-actions-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-4); }
+.form-actions-bar .hint { margin: 0; }
+
+/* ==========================================================================
+   Capital Exchange (workspace/capital/*, investors/capital/*, capital/report)
+   ========================================================================== */
+.capital-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.capital-actions .inline-form { margin: 0; }
+.panel > .capital-actions { margin-bottom: var(--space-4); }
+.capital-split { display: grid; gap: 0 var(--space-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)); }
+.capital-scope-hint { display: block; margin-top: .1rem; font-size: .82rem; }
+.capital-tags { margin-bottom: var(--space-3); }
+.capital-item { padding: var(--space-3); }
+.capital-item + .capital-item { margin-top: var(--space-3); }
+.capital-item-title { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .5rem; margin: 0 0 .25rem; font-size: .975rem; overflow-wrap: anywhere; }
+.capital-item-title .badge { font-size: .7rem; }
+.capital-item .meta { margin: 0 0 var(--space-2); }
+.capital-row { padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); }
+.capital-feedback, .capital-move { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin: 0; }
+.capital-feedback input[type="text"] { flex: 1 1 180px; min-width: 0; }
+.capital-move select { flex: 1 1 140px; min-width: 0; width: auto; }
+.capital-row-actions { white-space: normal; }
+.capital-row-actions .inline-form { margin: 0 var(--space-2) var(--space-1) 0; }
+.capital-list { margin: 0; padding: 0; list-style: none; }
+.capital-list li { padding: var(--space-2) 0; border-bottom: 1px solid var(--line); }
+.capital-list li:last-child { border-bottom: 0; }
+.capital-list .meta { display: block; }
+.capital-bars, .capital-funnel { display: grid; gap: var(--space-3); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.capital-funnel { margin-top: 0; }
+.capital-bars li, .capital-funnel li { margin: 0; }
+.capital-funnel .meter-label .fas { width: 1.1em; margin-right: .3rem; color: var(--accent-icon); }
+.capital-checklist { display: grid; gap: var(--space-2); grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+.capital-checklist li { margin: 0; }
+.capital-yes { color: var(--success); }
+.capital-no { color: var(--ink-subtle); }
+.capital-report-section h2 .fas { margin-right: .4rem; font-size: .9em; color: var(--accent-icon); }
+@media print { .capital-report-section { break-inside: avoid; } }

@@ -23,7 +23,7 @@
                 <h2 id="fit-heading">Does {{ $activeStartup->display_name }} qualify?</h2>
                 <ul>
                     @foreach ($checks as $check)
-                        <li><strong>{{ $check['met'] === true ? '✓ Yes' : ($check['met'] === false ? '✗ No' : '? Unknown') }}</strong> · {{ $check['rule'] }}: {{ $check['detail'] }}</li>
+                        <li><strong>@if ($check['met'] === true)<i class="fas fa-check" aria-hidden="true"></i> Yes @elseif ($check['met'] === false)<i class="fas fa-xmark" aria-hidden="true"></i> No @else<i class="fas fa-circle-question" aria-hidden="true"></i> Unknown @endif</strong> · {{ $check['rule'] }}: {{ $check['detail'] }}</li>
                     @endforeach
                 </ul>
                 <p class="hint">Guidance from your profile only. The organiser decides who is eligible.</p>

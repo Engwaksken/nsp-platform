@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Workspace;
 
 use App\Capital\CapitalService;
+use App\Funding\FundingService;
 use App\Http\Controllers\Controller;
 use App\Models\Capital\DiligenceItem;
 use App\Models\Capital\DocumentRequest;
@@ -86,7 +87,7 @@ class CapitalController extends Controller
 
     public function grantScopes(Request $request, Startup $startup): RedirectResponse
     {
-        $this->membershipOr404($request, $startup);
+        $this->editorOr403($request, $startup);
         $data = $request->validate([
             'investor_user_id' => ['required', 'integer'],
             'scopes' => ['nullable', 'array'],
@@ -105,7 +106,7 @@ class CapitalController extends Controller
 
     public function revokeScopes(Request $request, Startup $startup, ShareGrant $share): RedirectResponse
     {
-        $this->membershipOr404($request, $startup);
+        $this->editorOr403($request, $startup);
         abort_unless($share->startup_uuid === $startup->uuid, 404);
         try {
             $this->capital->revokeScopes($startup, $request->user(), $share);
@@ -118,7 +119,7 @@ class CapitalController extends Controller
 
     public function updateItem(Request $request, Startup $startup, DiligenceItem $item): RedirectResponse
     {
-        $this->membershipOr404($request, $startup);
+        $this->editorOr403($request, $startup);
         abort_unless($item->startup_uuid === $startup->uuid, 404);
         $data = $request->validate([
             'status' => ['required', Rule::in(['requested', 'provided'])],
@@ -170,7 +171,7 @@ class CapitalController extends Controller
 
     public function decline(Request $request, Startup $startup, DocumentRequest $documentRequest): RedirectResponse
     {
-        $this->membershipOr404($request, $startup);
+        $this->editorOr403($request, $startup);
         abort_unless($documentRequest->startup_uuid === $startup->uuid, 404);
         $data = $request->validate(['response_note' => ['nullable', 'string', 'max:1000']]);
         try {
@@ -191,6 +192,9 @@ class CapitalController extends Controller
             'reason' => ['nullable', 'string', 'max:500'],
         ]);
         $investor = User::query()->findOrFail($data['investor_user_id']);
+        if (! app(FundingService::class)->investorProfile($investor)) {
+            return back()->withErrors(['feedback' => 'You can only give feedback on Hive-verified investors.']);
+        }
         $this->capital->feedback($startup, $investor, 'founder', $request->user(), $data['rating'], $data['reason'] ?? null);
 
         return back()->with('status', 'Thanks. Your feedback improves future matches.');

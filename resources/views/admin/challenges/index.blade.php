@@ -23,7 +23,7 @@
             @forelse ($challenges as $challenge)
                 <tr><td><a href="{{ route('admin.challenges.show', $challenge) }}">{{ $challenge->title }}</a></td>
                     <td>{{ \Illuminate\Support\Str::headline($challenge->status) }}</td><td>{{ $challenge->submitter?->name ?? 'Hive staff' }}</td>
-                    <td>{{ $challenge->publishedVersion?->version ? 'v'.$challenge->publishedVersion->version : '—' }}</td>
+                    <td>@if ($challenge->publishedVersion?->version)v{{ $challenge->publishedVersion->version }}@else<span class="meta">Not published</span>@endif</td>
                     <td class="actions"><a class="btn btn-secondary btn-sm" href="{{ route('admin.challenges.show', $challenge) }}">Review</a>
                         @can('manage-challenges')<a class="btn btn-secondary btn-sm" href="{{ route('admin.challenges.edit', $challenge) }}" data-modal="lg">Edit</a>@endcan
                     </td></tr>

@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="container section narrow">
-        <p><a href="{{ route('investor.dashboard') }}">← Investor dashboard</a></p>
+        <p><a href="{{ route('investor.dashboard') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Investor dashboard</a></p>
         <h1>{{ $startup->display_name }}</h1>
         @include('partials.flash')
         <p class="meta">{{ $profile?->sector ?: 'Sector not given' }}
@@ -57,6 +57,52 @@
                 </form>
             @endif
         </section>
+
+        @if (\App\Support\Features::enabled('capital_exchange') && Route::has('investor.capital.pipeline'))
+            <section class="panel" aria-labelledby="capital-heading">
+                <h2 id="capital-heading">Capital Exchange</h2>
+                <p class="hint">Your pipeline stage, watchlist and match feedback are private. The startup does not see them.</p>
+                <div class="capital-actions">
+                    @if ($watched)
+                        <form method="post" action="{{ route('investor.capital.unwatch', $startup) }}" class="inline-form">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-eye-slash" aria-hidden="true"></i> Stop watching</button>
+                        </form>
+                    @else
+                        <form method="post" action="{{ route('investor.capital.watch', $startup) }}" class="inline-form">
+                            @csrf <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-eye" aria-hidden="true"></i> Watch</button>
+                        </form>
+                    @endif
+                    @if ($connected)
+                        <a class="btn btn-secondary btn-sm" href="{{ route('investor.capital.diligence', $startup) }}"><i class="fas fa-list-check" aria-hidden="true"></i> Due diligence</a>
+                    @endif
+                    @if ($connected && $scopes)
+                        <a class="btn btn-secondary btn-sm" href="{{ route('investor.capital.readiness', $startup) }}"><i class="fas fa-clipboard-check" aria-hidden="true"></i> Readiness report</a>
+                    @endif
+                    <a class="btn btn-secondary btn-sm" href="{{ route('investor.capital.pipeline') }}"><i class="fas fa-table-columns" aria-hidden="true"></i> My pipeline</a>
+                </div>
+                @if ($connected && ! $scopes)
+                    <p class="meta">The founders have not shared readiness information with you.</p>
+                @endif
+
+                <form method="post" action="{{ route('investor.capital.transition', $startup) }}" class="inline-form">
+                    @csrf
+                    @include('partials.field', ['name' => 'stage', 'id' => 'capital-stage', 'label' => 'Pipeline stage', 'type' => 'select', 'value' => $pipelineItem?->stage,
+                        'placeholder' => $pipelineItem ? false : 'Not in my pipeline', 'options' => \App\Models\Capital\PipelineItem::stages()])
+                    <button type="submit" class="btn btn-primary btn-sm">{{ $pipelineItem ? 'Move' : 'Add to pipeline' }}</button>
+                </form>
+
+                <h3>Is this a useful match?</h3>
+                <form method="post" action="{{ route('investor.capital.feedback', $startup) }}" class="capital-feedback">
+                    @csrf
+                    <label class="visually-hidden" for="capital-feedback-reason">Reason (optional)</label>
+                    <input id="capital-feedback-reason" type="text" name="reason" maxlength="500" placeholder="Reason (optional)" value="{{ $matchFeedback?->reason }}">
+                    <button type="submit" name="rating" value="useful" class="btn btn-secondary btn-sm"><i class="fas fa-thumbs-up" aria-hidden="true"></i> Useful</button>
+                    <button type="submit" name="rating" value="not_useful" class="btn btn-secondary btn-sm"><i class="fas fa-thumbs-down" aria-hidden="true"></i> Not useful</button>
+                </form>
+                @if ($matchFeedback)<p class="meta">Your answer: {{ \App\Models\Capital\MatchFeedback::RATINGS[$matchFeedback->rating] ?? $matchFeedback->rating }}.</p>@endif
+            </section>
+        @endif
 
         <section class="panel" aria-labelledby="room-heading">
             <h2 id="room-heading">Data room</h2>

@@ -6,7 +6,7 @@
     @php($startup = $engagement->startup)
     @php($open = $engagement->isOpen())
     <div class="container section narrow">
-        <p>@if ($isExpert)<a href="{{ route('experts.dashboard') }}">← Expert dashboard</a>@else<a href="{{ route('workspace.experts', $startup) }}">← Experts for {{ $startup->display_name }}</a>@endif</p>
+        <p>@if ($isExpert)<a href="{{ route('experts.dashboard') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Expert dashboard</a>@else<a href="{{ route('workspace.experts', $startup) }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Experts for {{ $startup->display_name }}</a>@endif</p>
         <h1>{{ $engagement->topic }}</h1>
         @include('partials.flash')
         <p class="meta">{{ \App\Models\Experts\Engagement::TYPES[$engagement->type] }}

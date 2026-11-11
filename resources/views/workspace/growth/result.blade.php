@@ -47,12 +47,12 @@
                                 <a href="{{ route('challenges.show', $challenge) }}">{{ $challenge->publishedVersion->field('title') }}</a>
                                 · published version {{ $challenge->publishedVersion->version }}
                                 @if ($challenge->publishedVersion->published_at) · published {{ $challenge->publishedVersion->published_at->format('j M Y') }}@endif
-                                — matches {{ $gap['dimension_title'] }}
+                                · matches {{ $gap['dimension_title'] }}
                             </p>
                         @endforeach
                         @php($recommendationFeedback = $guidanceFeedback[$gap['dimension_key']] ?? null)
                         @if ($recommendationFeedback)
-                            <p class="meta">Your guidance feedback: {{ ucfirst($recommendationFeedback->feedback) }}@if ($recommendationFeedback->explanation) — {{ $recommendationFeedback->explanation }}@endif</p>
+                            <p class="meta">Your guidance feedback: {{ ucfirst($recommendationFeedback->feedback) }}@if ($recommendationFeedback->explanation). {{ $recommendationFeedback->explanation }}@endif</p>
                         @endif
                         @if ($membership->canEdit())
                             <div class="actions" aria-label="Guidance feedback for {{ $gap['dimension_title'] }}">
@@ -110,7 +110,7 @@
                     @foreach ($dimension['questions'] as $question)
                         @php($response = $responses->get($question['key']))
                         @php($option = collect($question['options'])->firstWhere('key', $response?->option_key))
-                        <li>{{ $question['prompt'] }} <strong>{{ $option['label'] ?? '—' }}</strong>
+                        <li>{{ $question['prompt'] }} <strong>{{ $option['label'] ?? 'No answer' }}</strong>
                             @if ($response?->evidence_note)<br><span class="meta">Evidence: {{ $response->evidence_note }}</span>@endif</li>
                     @endforeach
                 </ul>
