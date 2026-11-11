@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => $resource->title, 'metaDescription' => \Illuminate\Support\Str::limit($resource->summary ?: strip_tags($bodyHtml), 155)])
+@extends('layouts.browse', ['pageTitle' => $resource->title, 'metaDescription' => \Illuminate\Support\Str::limit($resource->summary ?: strip_tags($bodyHtml), 155)])
 
 @section('content')
     <article class="container section narrow">

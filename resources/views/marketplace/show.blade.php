@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => $listing->title.' · '.$listing->startup->display_name, 'metaDescription' => $listing->summary])
+@extends('layouts.browse', ['pageTitle' => $listing->title.' · '.$listing->startup->display_name, 'metaDescription' => $listing->summary])
 
 @section('content')
     <div class="container section narrow">

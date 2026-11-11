@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => $opportunity->title, 'metaDescription' => $opportunity->summary, 'canonical' => route('opportunities.show', $opportunity)])
+@extends('layouts.browse', ['pageTitle' => $opportunity->title, 'metaDescription' => $opportunity->summary, 'canonical' => route('opportunities.show', $opportunity)])
 
 @section('content')
     <article class="container section narrow">

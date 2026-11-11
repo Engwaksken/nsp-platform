@@ -1466,3 +1466,11 @@ main :is(p, dd, td, blockquote, .prose li, .hint) a:not(.btn):hover { text-decor
   .card-grid-toolbar, .collapsible-card-chevron { display: none !important; }
   .collapsible-card { break-inside: avoid; }
 }
+
+/* Public listings: one compact line of counts (partials/stats-summary) instead of stat cards. */
+.stats-summary { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin: var(--space-3) 0 var(--space-5); font-size: .92rem; color: var(--ink-muted); }
+.stats-summary strong { color: var(--ink-strong); font-weight: 700; }
+.stats-summary-total { margin-right: .35rem; font-size: 1rem; }
+.stats-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .7rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; text-decoration: none; transition: border-color .15s, background-color .15s; }
+a.stats-chip:hover { border-color: var(--line-strong); background: var(--surface-alt); color: var(--ink-strong); }
+a.stats-chip[aria-current="true"] { border-color: var(--brand-accent); box-shadow: 0 0 0 1px var(--brand-accent) inset; }

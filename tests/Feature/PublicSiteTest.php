@@ -100,16 +100,26 @@ class PublicSiteTest extends TestCase
             ->assertDontSee('Signed in as');
     }
 
-    public function test_listing_and_admin_pages_show_statistics_cards_with_icons(): void
+    public function test_listings_show_a_compact_summary_and_admin_keeps_statistics_cards(): void
     {
-        $this->get('/opportunities')->assertOk()
-            ->assertSee('vendor/fontawesome/css/solid.min.css', false)
-            ->assertSee('class="stat-cards"', false)
-            ->assertSee('fas fa-bullhorn', false)
-            ->assertSee('Open opportunities');
-        $this->get('/jobs')->assertOk()->assertSee('Startups hiring');
-        $this->get('/marketplace')->assertOk()->assertSee('Requests to buy');
-        $this->get(route('directory.index'))->assertOk()->assertSee('Listed startups');
+        // Public listings: no dashboard-style stat cards; with nothing listed yet, no counts at all.
+        foreach (['/opportunities', '/jobs', '/marketplace', route('directory.index')] as $url) {
+            $this->get($url)->assertOk()
+                ->assertSee('vendor/fontawesome/css/solid.min.css', false)
+                ->assertDontSee('class="stat-cards"', false)
+                ->assertDontSee('class="stats-summary"', false);
+        }
+
+        // The summary line: headline total, zero rows left out, filter rows as links.
+        $html = (string) $this->blade('@include("partials.stats-summary", ["label" => "Jobs", "stats" => $stats])', ['stats' => [
+            ['label' => 'Open roles', 'value' => 12],
+            ['label' => 'Internships', 'query' => ['type' => 'internship'], 'value' => 3],
+            ['label' => 'Full-time jobs', 'query' => ['type' => 'full_time'], 'value' => 0],
+        ]]);
+        $this->assertStringContainsString('<strong>12</strong> open roles', $html);
+        $this->assertStringContainsString('?type=internship', $html);
+        $this->assertStringContainsString('<strong>3</strong> internships', $html);
+        $this->assertStringNotContainsString('full-time jobs', $html);
 
         $admin = $this->userWithRole('platform_admin');
         $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('class="stat-cards"', false)->assertSee('data-tab="Modules"', false);

@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => $vacancy->title.' · '.$vacancy->startup->display_name, 'metaDescription' => \Illuminate\Support\Str::limit($vacancy->description, 150)])
+@extends('layouts.browse', ['pageTitle' => $vacancy->title.' · '.$vacancy->startup->display_name, 'metaDescription' => \Illuminate\Support\Str::limit($vacancy->description, 150)])
 
 @section('content')
     <div class="container section narrow">
