@@ -881,8 +881,101 @@
     });
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Card grids (components/card-grid + components/collapsible-card)     */
+  /* ------------------------------------------------------------------ */
+  // Collapsible cards are native <details>, so they open and close without this code. With it:
+  // - the grid's Expand all / Collapse all buttons are shown (they stay hidden without JS);
+  // - with data-card-grid-key, each visitor's open/closed choice per card is remembered for this
+  //   page in localStorage, except cards marked data-card-attention (an error or message), which stay open;
+  // - a link to an element inside a closed card (#id) opens that card;
+  // - printing opens every card, and closes them again afterwards.
+  var CARD_STORE = 'nsp-cards:';
+  function cardStore(key, value) {
+    try {
+      var name = CARD_STORE + key + ':' + window.location.pathname;
+      if (value === undefined) return JSON.parse(window.localStorage.getItem(name) || '{}') || {};
+      window.localStorage.setItem(name, JSON.stringify(value));
+    } catch (e) { /* storage blocked or full: cards simply start as the page drew them */ }
+    return {};
+  }
+  function initCardGrids(root) {
+    qsa(root, '[data-card-grid]').forEach(function (grid) {
+      if (grid.__nspCards) return;
+      grid.__nspCards = true;
+      var cards = function () { return qsa(grid, 'details.collapsible-card'); };
+      if (!cards().length) return;
+      var key = grid.getAttribute('data-card-grid-key');
+      if (key) {
+        var saved = cardStore(key);
+        cards().forEach(function (card) {
+          var id = card.getAttribute('data-card-id');
+          if (!id || card.hasAttribute('data-card-attention') || !Object.prototype.hasOwnProperty.call(saved, id)) return;
+          card.open = !!saved[id];
+        });
+        // "toggle" does not bubble: listen on each card.
+        cards().forEach(function (card) {
+          card.addEventListener('toggle', function () {
+            var id = card.getAttribute('data-card-id');
+            if (!id || card.__nspPrinting) return;
+            var state = cardStore(key);
+            state[id] = card.open;
+            cardStore(key, state);
+          });
+        });
+      }
+      var toolbar = grid.querySelector('.card-grid-toolbar');
+      if (toolbar && cards().length > 1) {
+        toolbar.hidden = false;
+        var expand = toolbar.querySelector('[data-cards-expand]');
+        var collapse = toolbar.querySelector('[data-cards-collapse]');
+        var sync = function () {
+          var all = cards();
+          var open = all.filter(function (card) { return card.open; }).length;
+          if (expand) expand.disabled = open === all.length;
+          if (collapse) collapse.disabled = open === 0;
+        };
+        var setAll = function (open, focusFrom) {
+          cards().forEach(function (card) { card.open = open; });
+          sync();
+          // The pressed button is now disabled: keep keyboard focus on its partner.
+          var partner = focusFrom === expand ? collapse : expand;
+          if (partner && document.activeElement === focusFrom) partner.focus();
+        };
+        if (expand) expand.addEventListener('click', function () { setAll(true, expand); });
+        if (collapse) collapse.addEventListener('click', function () { setAll(false, collapse); });
+        cards().forEach(function (card) { card.addEventListener('toggle', sync); });
+        sync();
+      }
+    });
+  }
+  function openCardForHash() {
+    var id = window.location.hash ? decodeURIComponent(window.location.hash.slice(1)) : '';
+    var target = id && document.getElementById(id);
+    if (!target) return;
+    for (var node = target; node; node = node.parentElement) {
+      if (node.matches && node.matches('details.collapsible-card') && !node.open) node.open = true;
+    }
+  }
+  window.addEventListener('hashchange', openCardForHash);
+  window.addEventListener('beforeprint', function () {
+    qsa(document, 'details.collapsible-card:not([open])').forEach(function (card) {
+      card.__nspPrinting = true;
+      card.open = true;
+    });
+  });
+  window.addEventListener('afterprint', function () {
+    qsa(document, 'details.collapsible-card').forEach(function (card) {
+      if (!card.__nspPrinting) return;
+      card.open = false;
+      // toggle fires asynchronously: forget the print flag after it has run.
+      window.setTimeout(function () { card.__nspPrinting = false; }, 0);
+    });
+  });
+
   NSP.enhance = function (root) {
     root = root || document;
+    initCardGrids(root);
     initTables(root);
     initTabs(root);
     initAiProviderForm(root);
@@ -896,4 +989,5 @@
   };
 
   NSP.enhance(document);
+  openCardForHash(); // after enhance, so a remembered "closed" does not hide the linked card
 })();
