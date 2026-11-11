@@ -1,55 +1,146 @@
-@extends('layouts.public', ['pageTitle' => 'My workspace'])
-
-@push('head')<meta name="robots" content="noindex">@endpush
+@extends('layouts.app', ['pageTitle' => 'My workspace'])
 
 @section('content')
-    <div class="container section">
-        <h1>Welcome, {{ $user->name }}</h1>
-        <p>This is your NSP workspace. Services appear here as they become available.</p>
+    @php($hour = (int) now()->format('G'))
+    @php($firstName = \Illuminate\Support\Str::of($user->name)->trim()->explode(' ')->first() ?: $user->name)
+    @php($noStartups = is_array($startups) && $startups === [])
 
-        @if ($registryMessage)
-            <div class="alert alert-warning" role="status">{{ $registryMessage }}</div>
-        @endif
-
-        @if (is_array($startups))
-            <section class="panel" aria-labelledby="startups-heading">
-                <h2 id="startups-heading">Your startups</h2>
-                @forelse ($startups as $startup)
-                    <p><a href="{{ route('workspace.startups.overview', $startup['uuid']) }}">{{ $startup['display_name'] }}</a> <span class="badge">{{ \App\Models\Registry\StartupMembership::ROLES[$startup['role']] ?? $startup['role'] }}</span></p>
-                @empty
-                    <p>You are not on a startup team yet. <a href="{{ route('workspace.startups.create') }}">Register your startup</a>, or ask your co-founder to invite you.</p>
-                @endforelse
-            </section>
-        @endif
-
-        <div class="grid">
-            @foreach ($sections as $section)
-                <section class="card" aria-labelledby="ws-{{ $loop->index }}">
-                    <h2 id="ws-{{ $loop->index }}" class="h3">{{ $section['title'] }}</h2>
-                    <p>{{ $section['text'] }}</p>
-                    @if (!$section['available'])
-                        <p><span class="badge">Not available yet</span></p>
-                    @elseif ($section['key'] === 'registry')
-                        <p><a class="btn btn-primary btn-sm" href="{{ route('workspace.startups.index') }}">Open my startups</a></p>
-                    @elseif ($section['key'] === 'opportunities')
-                        <p><a class="btn btn-primary btn-sm" href="{{ $active ? route('workspace.opportunities', $active->startup) : route('opportunities.index') }}">See opportunities</a></p>
-                    @elseif ($section['key'] === 'vgi' && $active)
-                        <p><a class="btn btn-primary btn-sm" href="{{ route('workspace.growth', $active->startup) }}">Open growth</a></p>
-                    @elseif ($section['key'] === 'experts')
-                        <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.experts', $active->startup) }}">Find an expert</a> @endif
-                            <a class="btn btn-secondary btn-sm" href="{{ route('experts.dashboard') }}">I am an expert or mentor</a></p>
-                    @elseif ($section['key'] === 'talent')
-                        <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.talent', $active->startup) }}">Hire</a> @endif
-                            <a class="btn btn-secondary btn-sm" href="{{ route('talent.dashboard') }}">Find a job</a></p>
-                    @elseif ($section['key'] === 'marketplace')
-                        <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.marketplace', $active->startup) }}">My listings</a> @endif
-                            <a class="btn btn-secondary btn-sm" href="{{ route('marketplace.inbox') }}">My messages</a></p>
-                    @elseif ($section['key'] === 'funding')
-                        <p>@if ($active)<a class="btn btn-primary btn-sm" href="{{ route('workspace.funding', $active->startup) }}">Open funding</a> @endif
-                            <a class="btn btn-secondary btn-sm" href="{{ route('investor.dashboard') }}">I am an investor</a></p>
-                    @endif
-                </section>
-            @endforeach
+    <section class="dash-hero" aria-labelledby="dash-title">
+        <div>
+            <span class="eyebrow">{{ now()->format('l j F') }}</span>
+            <h1 id="dash-title">{{ $hour < 12 ? 'Good morning' : ($hour < 18 ? 'Good afternoon' : 'Good evening') }}, {{ $firstName }}</h1>
+            <p>
+                @if ($active)
+                    You are working on <strong>{{ $active->startup->display_name }}</strong>. Here is what needs your attention.
+                @else
+                    Welcome to your workspace. Services appear here as they become available.
+                @endif
+            </p>
         </div>
+        <div class="actions">
+            @if ($active)
+                <a class="btn btn-primary" href="{{ route('workspace.startups.overview', $active->startup) }}">Open {{ $active->startup->display_name }}</a>
+            @elseif (\App\Support\Features::enabled('registry'))
+                <a class="btn btn-primary" href="{{ route('workspace.startups.create') }}">Register a startup</a>
+            @endif
+            <a class="btn btn-secondary" href="{{ route('notifications.index') }}">Notifications</a>
+        </div>
+    </section>
+
+    @include('partials.flash')
+    @if ($registryMessage)
+        <div class="alert alert-warning" role="status">{{ $registryMessage }}</div>
+    @endif
+
+    @include('partials.stats', ['label' => 'Your figures', 'stats' => $stats])
+
+    <div class="dash-layout">
+        <div>
+            @if ($noStartups)
+                <section class="empty-state dash-block" aria-labelledby="start-heading">
+                    <span class="empty-icon" aria-hidden="true"><i class="fas fa-rocket"></i></span>
+                    <h2 id="start-heading">Put your startup on the map</h2>
+                    <p>You are not on a startup team yet. Register your startup to get matched with opportunities, investors, experts and talent. Joining an existing startup? Ask a co-founder to invite you by email.</p>
+                    <div class="actions">
+                        <a class="btn btn-primary" href="{{ route('workspace.startups.create') }}">Register your startup</a>
+                        <a class="btn btn-secondary" href="{{ route('workspace.startups.index') }}">My startups</a>
+                    </div>
+                </section>
+            @endif
+
+            @if ($next)
+                <section class="panel dash-block" aria-labelledby="next-heading">
+                    <h2 id="next-heading">Next steps</h2>
+                    <ul class="dash-next">
+                        @foreach ($next as [$text, $label, $url])
+                            <li><span>{{ $text }}</span> <a class="btn btn-primary btn-sm" href="{{ $url }}">{{ $label }}</a></li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+
+            @if ($actions)
+                <section class="dash-block" aria-labelledby="actions-heading">
+                    <div class="section-head"><h2 id="actions-heading">Quick actions</h2></div>
+                    <ul class="action-tiles">
+                        @foreach ($actions as [$icon, $title, $text, $url, $tone])
+                            <li>
+                                <a class="action-tile tone-{{ $tone }}" href="{{ $url }}">
+                                    <span class="tile-icon" aria-hidden="true"><i class="fas {{ $icon }}"></i></span>
+                                    <span><strong>{{ $title }}</strong><span class="tile-text">{{ $text }}</span></span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+
+            <section class="dash-block" aria-labelledby="services-heading">
+                <div class="section-head"><h2 id="services-heading">Services</h2></div>
+                <div class="feature-cards">
+                    @foreach ($sections as $section)
+                        <section class="feature-card tone-{{ $section['tone'] }} @unless ($section['available']) is-soon @endunless" aria-labelledby="ws-{{ $loop->index }}">
+                            <h3 id="ws-{{ $loop->index }}"><span class="tile-icon" aria-hidden="true"><i class="fas {{ $section['icon'] }}"></i></span>{{ $section['title'] }}</h3>
+                            <p>{{ $section['text'] }}</p>
+                            @if (!$section['available'])
+                                <p><span class="badge badge-soon">Not available yet</span></p>
+                            @elseif ($section['actions'])
+                                <div class="actions">
+                                    @foreach ($section['actions'] as [$label, $url, $primary])
+                                        <a class="btn {{ $primary ? 'btn-primary' : 'btn-secondary' }} btn-sm" href="{{ $url }}">{{ $label }}</a>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="meta">Register or join a startup to use this.</p>
+                            @endif
+                        </section>
+                    @endforeach
+                </div>
+            </section>
+        </div>
+
+        <aside aria-label="Your startups and roles">
+            @if (is_array($startups) && $startups !== [])
+                <section class="panel" aria-labelledby="startups-heading">
+                    <div class="section-head">
+                        <h2 id="startups-heading">Your startups</h2>
+                        <a href="{{ route('workspace.startups.create') }}">Register another</a>
+                    </div>
+                    <ul class="list-rows">
+                        @foreach ($startups as $row)
+                            <li>
+                                <span>
+                                    <a href="{{ route('workspace.startups.overview', $row['uuid']) }}">{{ $row['display_name'] }}</a>
+                                    @if ($active && $active->startup_uuid === $row['uuid'])<span class="meta">Current startup</span>@endif
+                                </span>
+                                <span class="badge">{{ \App\Models\Registry\StartupMembership::ROLES[$row['role']] ?? $row['role'] }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+
+            @if ($roles)
+                <section class="panel" aria-labelledby="roles-heading">
+                    <h2 id="roles-heading">Your other roles</h2>
+                    <ul class="list-rows">
+                        @foreach ($roles as [$icon, $title, $status, $url])
+                            <li><span><a href="{{ $url }}"><i class="fas {{ $icon }}" aria-hidden="true"></i> {{ $title }}</a><span class="meta">{{ $status }}</span></span></li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+
+            @if ($join)
+                <section class="panel" aria-labelledby="join-heading">
+                    <h2 id="join-heading">More ways to take part</h2>
+                    <ul class="list-rows">
+                        @foreach ($join as [$icon, $title, $text, $url])
+                            <li><span><a href="{{ $url }}"><i class="fas {{ $icon }}" aria-hidden="true"></i> {{ $title }}</a><span class="meta">{{ $text }}</span></span></li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+        </aside>
     </div>
 @endsection
