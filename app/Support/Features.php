@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\FeatureFlag;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 /** Feature flags: config/nsp.php gives defaults, the feature_flags table overrides them. */
 class Features
@@ -37,7 +38,8 @@ class Features
     {
         FeatureFlag::query()->updateOrCreate(['key' => $key], [
             'enabled' => $enabled,
-            'description' => self::definitions()[$key]['description'] ?? null,
+            // The column holds 255 characters; the full text always comes from config/nsp.php.
+            'description' => Str::limit((string) (self::definitions()[$key]['description'] ?? ''), 252) ?: null,
             'updated_by' => $userId,
         ]);
         Cache::forget(self::CACHE_KEY);

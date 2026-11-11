@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\FeatureFlag;
 use App\Support\Features;
 use Tests\TestCase;
 
@@ -53,6 +54,19 @@ class FeatureFlagsTest extends TestCase
         $this->assertFalse(Features::enabled('capital_exchange'));
         $this->actingAs($admin)->get('/workspace/startups/00000000-0000-0000-0000-000000000000/capital')->assertNotFound();
         $this->actingAs($admin)->get('/investors/pipeline')->assertNotFound();
+    }
+
+    public function test_every_flag_description_fits_the_database_column_and_each_flag_can_be_switched(): void
+    {
+        // MySQL rejects text longer than the column (255); SQLite in tests does not, so check it here.
+        foreach (Features::definitions() as $key => $definition) {
+            $this->assertLessThanOrEqual(255, mb_strlen((string) ($definition['description'] ?? '')), "Description of '$key' is too long for feature_flags.description.");
+        }
+
+        $admin = $this->userWithRole('platform_admin');
+        $this->actingAs($admin)->put(route('admin.features.update', 'capital_exchange'), ['enabled' => 1])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertTrue(Features::enabled('capital_exchange'));
+        $this->assertLessThanOrEqual(255, mb_strlen((string) FeatureFlag::query()->where('key', 'capital_exchange')->value('description')));
     }
 
     public function test_unknown_flags_are_404(): void
