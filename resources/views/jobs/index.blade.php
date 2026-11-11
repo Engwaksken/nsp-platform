@@ -22,7 +22,7 @@
             <button class="btn btn-secondary" type="submit">Search</button>
         </form>
 
-        <div class="grid">
+        <div class="card-grid">
             @forelse ($vacancies as $vacancy)
                 <article class="card">
                     <h2 class="h4"><a href="{{ route('jobs.show', $vacancy) }}">{{ $vacancy->title }}</a></h2>
