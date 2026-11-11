@@ -42,12 +42,19 @@ class PublicSiteTest extends TestCase
             ->assertSee('Challenge Exchange')
             ->assertSee('Knowledge Hub')
             ->assertSee('Sign in')
-            ->assertDontSee('nav-menu-account', false);
+            ->assertDontSee('nav-menu-account', false)
+            ->assertDontSee('Go to dashboard');
 
         $this->actingAs($this->userWithRole('startup_user'))->get('/')->assertOk()
             ->assertSee('aria-controls="nav-menu-account"', false)
             ->assertSee('My workspace')
-            ->assertSee('Sign out');
+            ->assertSee('Sign out')
+            ->assertSee('Go to dashboard')
+            ->assertSee('class="btn btn-primary btn-sm nav-signin nav-dashboard" href="'.route('workspace').'"', false);
+
+        // Admins are sent to the admin dashboard.
+        $this->actingAs($this->userWithRole('platform_admin'))->get('/')->assertOk()
+            ->assertSee('class="btn btn-primary btn-sm nav-signin nav-dashboard" href="'.route('admin.dashboard').'"', false);
     }
 
     public function test_footer_has_explore_information_and_contact_columns_without_duplicates(): void
