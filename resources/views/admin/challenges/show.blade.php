@@ -3,7 +3,7 @@
 
 @section('content')
     <div class="page-head"><h1>{{ $challenge->title }}</h1>
-        @can('manage-challenges')<a class="btn btn-secondary" href="{{ route('admin.challenges.edit', $challenge) }}">Edit working copy</a>@endcan
+        @can('manage-challenges')<a class="btn btn-secondary" href="{{ route('admin.challenges.edit', $challenge) }}" data-modal="lg">Edit working copy</a>@endcan
     </div>
     @include('partials.flash')
     <p>Status: <strong>{{ \Illuminate\Support\Str::headline($challenge->status) }}</strong> · current version @if ($challenge->current_version){{ $challenge->current_version }}@else<span class="meta">None</span>@endif</p>

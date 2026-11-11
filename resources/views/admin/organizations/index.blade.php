@@ -9,7 +9,7 @@
     @endphp
     <div class="page-head">
         <h1>Organizations</h1>
-        <a class="btn btn-primary" href="#new-organization"><i class="fas fa-plus" aria-hidden="true"></i> New organization</a>
+        <a class="btn btn-primary nojs-only" href="#new-organization"><i class="fas fa-plus" aria-hidden="true"></i> New organization</a>
     </div>
     <p class="hint">Universities, ESOs, investors, development partners and corporates. Verify an organization before it can follow startups; startups decide what each one may see.</p>
     @include('partials.flash')
@@ -49,7 +49,8 @@
     </div>
     {{ $organizations->links() }}
 
-    <section class="panel" id="new-organization" aria-labelledby="new-heading">
+    {{-- With JavaScript this form opens in a popup from the "New organization" button. --}}
+    <section class="panel" id="new-organization" aria-labelledby="new-heading" data-inline-modal data-modal-trigger="New organization" data-modal-trigger-into=".page-head">
         <h2 id="new-heading">New organization</h2>
         <p class="hint">It starts as pending. Verify it on its page, then invite its first admin.</p>
         <form method="post" action="{{ route('admin.organizations.store') }}">

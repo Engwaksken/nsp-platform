@@ -33,22 +33,37 @@
 
     <div data-tabs="Organization sections" data-tabs-key="admin-organization">
         <section class="panel" id="details" aria-labelledby="details-heading" data-tab="Details" data-tab-icon="fa-building">
-            <h2 id="details-heading">Details</h2>
-            <form method="post" action="{{ route('admin.organizations.update', $organization) }}">
-                @csrf @method('PUT')
-                <div class="form-row">
-                    @include('partials.field', ['name' => 'name', 'label' => 'Name', 'value' => $organization->name, 'required' => true, 'maxlength' => 200])
-                    @include('partials.field', ['name' => 'type', 'label' => 'Type', 'type' => 'select', 'options' => config('organizations.types'), 'value' => $organization->type, 'required' => true])
-                    @include('partials.field', ['name' => 'country', 'label' => 'Country', 'type' => 'select', 'options' => \App\Models\Registry\Startup::COUNTRIES, 'placeholder' => 'Not given', 'value' => $organization->country])
-                </div>
-                @include('partials.field', ['name' => 'website', 'label' => 'Website', 'type' => 'url', 'value' => $organization->website, 'maxlength' => 255])
-                @include('partials.field', ['name' => 'description', 'label' => 'Description', 'type' => 'textarea', 'rows' => 3, 'value' => $organization->description])
-                <button type="submit" class="btn btn-primary">Save details</button>
-            </form>
+            <div class="section-head">
+                <h2 id="details-heading">Details</h2>
+                <a class="btn btn-secondary btn-sm nojs-only" href="#edit-organization">Edit details</a>
+            </div>
+            <dl class="detail-grid">
+                <div><dt>Name</dt><dd>{{ $organization->name }}</dd></div>
+                <div><dt>Type</dt><dd>{{ $organization->typeLabel() }}</dd></div>
+                <div><dt>Country</dt><dd>@if ($organization->country){{ \App\Models\Registry\Startup::COUNTRIES[$organization->country] ?? $organization->country }}@else<span class="detail-empty">Not given</span>@endif</dd></div>
+                <div><dt>Status</dt><dd>{{ $organization->statusLabel() }}</dd></div>
+                <div class="detail-wide"><dt>Website</dt><dd>@if ($organization->website)<a href="{{ $organization->website }}" rel="noopener" target="_blank">{{ $organization->website }}</a>@else<span class="detail-empty">Not given</span>@endif</dd></div>
+                <div class="detail-wide"><dt>Description</dt><dd>@if ($organization->description){!! nl2br(e($organization->description)) !!}@else<span class="detail-empty">Not given</span>@endif</dd></div>
+            </dl>
+
+            <section class="panel" id="edit-organization" aria-labelledby="edit-heading" data-inline-modal data-modal-trigger="Edit details" data-modal-trigger-class="btn btn-secondary btn-sm" data-modal-trigger-into="#details .section-head">
+                <h3 id="edit-heading">Edit details</h3>
+                <form method="post" action="{{ route('admin.organizations.update', $organization) }}">
+                    @csrf @method('PUT')
+                    <div class="form-row">
+                        @include('partials.field', ['name' => 'name', 'label' => 'Name', 'value' => $organization->name, 'required' => true, 'maxlength' => 200])
+                        @include('partials.field', ['name' => 'type', 'label' => 'Type', 'type' => 'select', 'options' => config('organizations.types'), 'value' => $organization->type, 'required' => true])
+                        @include('partials.field', ['name' => 'country', 'label' => 'Country', 'type' => 'select', 'options' => \App\Models\Registry\Startup::COUNTRIES, 'placeholder' => 'Not given', 'value' => $organization->country])
+                    </div>
+                    @include('partials.field', ['name' => 'website', 'label' => 'Website', 'type' => 'url', 'value' => $organization->website, 'maxlength' => 255])
+                    @include('partials.field', ['name' => 'description', 'label' => 'Description', 'type' => 'textarea', 'rows' => 3, 'value' => $organization->description])
+                    <button type="submit" class="btn btn-primary">Save details</button>
+                </form>
+            </section>
         </section>
 
         <section class="panel" id="members" aria-labelledby="members-heading" data-tab="Members" data-tab-icon="fa-users" data-tab-count="{{ $members->count() }}">
-            <h2 id="members-heading">Members</h2>
+            <div class="section-head"><h2 id="members-heading">Members</h2></div>
             @error('email')<div class="alert alert-danger" role="alert">{{ $message }}</div>@enderror
             <div class="table-wrap" tabindex="0" role="region" aria-label="Members">
                 <table>
@@ -74,9 +89,11 @@
                     </tbody>
                 </table>
             </div>
-            <form method="post" action="{{ route('admin.organizations.members', $organization) }}" class="panel">
+            <a class="btn btn-primary nojs-only" href="#invite-member">Invite someone</a>
+            <section class="panel" id="invite-member" aria-labelledby="invite-heading" data-inline-modal data-modal-size="sm" data-modal-trigger="Invite someone" data-modal-trigger-into="#members .section-head">
+            <form method="post" action="{{ route('admin.organizations.members', $organization) }}">
                 @csrf
-                <h3>Invite someone</h3>
+                <h3 id="invite-heading">Invite someone</h3>
                 <p class="hint">They get an email link and must sign in with that address to join.@if ($organization->status !== 'active') Verify the organization first if the invitation is refused.@endif</p>
                 <div class="form-row">
                     @include('partials.field', ['name' => 'email', 'label' => 'Email address', 'type' => 'email', 'required' => true])
@@ -84,6 +101,7 @@
                     <div><button type="submit" class="btn btn-primary">Send invitation</button></div>
                 </div>
             </form>
+            </section>
         </section>
 
         <section class="panel" id="startups" aria-labelledby="startups-heading" data-tab="Startup access" data-tab-icon="fa-handshake" data-tab-count="{{ $relationships->count() }}">
