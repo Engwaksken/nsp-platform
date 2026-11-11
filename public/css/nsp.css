@@ -1060,3 +1060,19 @@ textarea.code-input { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas
 .account-links { margin-top: var(--space-5); }
 .account-links ul { list-style: none; padding: 0; margin: 0 0 var(--space-3); display: grid; gap: var(--space-2); }
 .account-links a { font-weight: 600; }
+
+/* My challenges, challenge form, startup organizations */
+.panel h2 .count { display: inline-block; min-width: 1.6em; margin-left: .35rem; padding: 0 .45rem; font-size: .75rem; line-height: 1.6; text-align: center; color: var(--ink-muted); background: var(--surface-alt); border-radius: 999px; vertical-align: middle; }
+.panel h2 .badge { margin-left: .35rem; vertical-align: middle; }
+.review-note { margin: .5rem 0 0; padding: .5rem .75rem; font-size: .88rem; background: var(--surface-alt); border-left: 3px solid var(--brand-accent); border-radius: 4px; }
+.row-actions { white-space: nowrap; text-align: right; }
+.row-actions > * + * { margin-left: .35rem; }
+.row-actions form.inline { display: inline; }
+.steps-hint { display: grid; gap: var(--space-2); margin: 0 0 var(--space-5); padding: var(--space-4) var(--space-4) var(--space-4) 2.5rem; background: var(--surface-alt); border-radius: var(--radius); }
+.org-request { padding: var(--space-4) 0; border-bottom: 1px solid var(--line); }
+.org-request:last-child { border-bottom: 0; padding-bottom: 0; }
+.org-request h3 { margin: 0 0 .2rem; font-size: 1.05rem; }
+.org-note { margin: var(--space-3) 0; padding: .5rem .9rem; border-left: 3px solid var(--line); color: var(--ink-muted); }
+.check-row { display: flex; align-items: flex-start; gap: .6rem; margin: 0 0 .6rem; font-weight: 400; cursor: pointer; }
+.check-row input { margin-top: .3rem; flex: none; }
+@media (max-width: 640px) { .row-actions { white-space: normal; text-align: left; } .row-actions > * { margin: .25rem .35rem 0 0; } }

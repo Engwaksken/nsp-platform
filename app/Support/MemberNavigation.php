@@ -121,8 +121,7 @@ class MemberNavigation
                 $this->link('workspace.startups.team', 'Team', 'fa-users', 'workspace.startups.team*', $s),
                 $this->link('workspace.startups.consents', 'Data sharing', 'fa-shield-halved', 'workspace.startups.consents*', $s),
                 $this->link('workspace.startups.history', 'Change history', 'fa-clock-rotate-left', 'workspace.startups.history', $s),
-                $on('organizations') && view()->exists('workspace.organizations')
-                    ? $this->link('workspace.organizations', 'Organizations', 'fa-building', 'workspace.organizations*', $s) : null,
+                $on('organizations') ? $this->link('workspace.organizations', 'Organizations', 'fa-building', 'workspace.organizations*', $s) : null,
                 $this->link('workspace.startups.index', 'All my startups', 'fa-layer-group', 'workspace.startups.index|workspace.startups.create'),
             ]);
             $groups[] = $this->group('grow', 'Grow', 'fa-seedling', [
@@ -175,8 +174,7 @@ class MemberNavigation
         if ($on('challenges')) {
             $groups[] = $this->group('challenges', 'Challenges', 'fa-lightbulb', [
                 $this->link('challenges.index', 'Challenge Exchange', 'fa-lightbulb', 'challenges.index|challenges.show|challenges.proposals.*'),
-                // "My challenges" is listed once its page exists.
-                view()->exists('challenges.mine') ? $this->link('challenges.mine', 'My challenges', 'fa-list-check', 'challenges.mine|challenges.create|challenges.edit') : null,
+                $this->link('challenges.mine', 'My challenges', 'fa-list-check', 'challenges.mine|challenges.create|challenges.edit'),
             ]);
         }
 
