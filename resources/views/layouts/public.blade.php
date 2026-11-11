@@ -48,6 +48,7 @@
             $tabIcon = fn (string $paths) => '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.$paths.'</svg>';
         @endphp
         <nav class="site-nav" id="site-nav" aria-label="Main">
+            <a class="nav-link nojs-only nav-close" href="#main">Close menu</a>
             <ul class="nav-links">
                 @foreach ($menuItems->whereNull('parent_id') as $item)
                     @php($children = $menuItems->where('parent_id', $item->id))
@@ -149,6 +150,9 @@
     <button type="button" class="app-tab-menu" data-toggle-target="site-nav" aria-expanded="false" aria-controls="site-nav">
         {!! $tabIcon('<path d="M4 6h16M4 12h16M4 18h16"/>') !!}<span>Menu</span>
     </button>
+    <a class="app-tab-menu nojs-only" href="#site-nav">
+        {!! $tabIcon('<path d="M4 6h16M4 12h16M4 18h16"/>') !!}<span>Menu</span>
+    </a>
 </nav>
 
 <footer class="site-footer">
