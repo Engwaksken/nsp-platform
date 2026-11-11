@@ -593,6 +593,14 @@
       if (start < 0 && !inModal) { var saved = parseInt(storage(key) || '', 10); if (saved >= 0 && saved < panels.length) start = saved; }
       select(start < 0 ? 0 : start, false);
     });
+    // An in-page link to something inside a hidden tab (e.g. "#invite") opens that tab.
+    if (!NSP.tabHashBound) {
+      NSP.tabHashBound = true;
+      window.addEventListener('hashchange', function () {
+        var target = window.location.hash ? document.getElementById(decodeURIComponent(window.location.hash.slice(1))) : null;
+        if (target && NSP.showTabFor) NSP.showTabFor(target);
+      });
+    }
   }
 
   NSP.showTabFor = function (node) {

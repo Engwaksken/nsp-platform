@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Support\Audit;
 use App\Support\Features;
 use App\Support\SecurityAlert;
+use App\Support\ThemePalettes;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -104,6 +105,16 @@ class AccountController extends Controller
         $request->user()->forceFill(['pending_email' => null])->save();
 
         return back()->with('status', 'The email change was cancelled.');
+    }
+
+    /** The member's own colour palette (App\Support\ThemePalettes); "brand" goes back to the site colours. */
+    public function updateAppearance(Request $request): RedirectResponse
+    {
+        $data = $request->validate(['theme_palette' => ['required', Rule::in(ThemePalettes::keys())]]);
+        $palette = $data['theme_palette'] === ThemePalettes::DEFAULT ? null : $data['theme_palette'];
+        $request->user()->forceFill(['theme_palette' => $palette])->save();
+
+        return redirect()->to(route('account.edit').'#appearance-heading')->with('status', 'Your colours were saved.');
     }
 
     public function updatePassword(Request $request): RedirectResponse

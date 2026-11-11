@@ -1,4 +1,6 @@
 {{-- Shared <head> contents. Expects $brand, $brandFont, $brandFavicon from the layout view composer. --}}
+{{-- A signed-in member's own colour palette (My profile → Appearance) replaces the brand colours for them only. --}}
+@php($brand = \App\Support\ThemePalettes::apply($brand, auth()->user()))
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 {{-- Installable on phones ("Add to home screen"); see AppManifestController and public/sw.js. --}}

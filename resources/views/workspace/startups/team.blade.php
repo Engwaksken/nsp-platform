@@ -5,8 +5,18 @@
 @section('workspace')
     @php($roles = \App\Models\Registry\StartupMembership::ROLES)
     @php($isOwner = $membership->role === 'owner')
+    @php($initials = fn (?string $name) => collect(preg_split('/\s+/', trim((string) $name)))->filter()->take(2)->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->implode('') ?: '?')
     <div class="container section">
-        <h1>Team · {{ $startup->display_name }}</h1>
+        <div class="page-head">
+            <div>
+                <p class="profile-hero-eyebrow">{{ $startup->display_name }}</p>
+                <h1>Team</h1>
+                <p class="lead-muted">Who works on {{ $startup->display_name }}, their role, and who is waiting to join.</p>
+            </div>
+            @if ($membership->canManageTeam())
+                <a class="btn btn-primary" href="#invite"><i class="fas fa-user-plus" aria-hidden="true"></i> Invite someone</a>
+            @endif
+        </div>
         @include('partials.flash')
 
         @include('partials.stats', ['label' => 'Team at a glance', 'stats' => [
@@ -26,8 +36,17 @@
                     @php($self = $member->user_id === auth()->id())
                     @php($canTouch = $membership->canManageTeam() && ($isOwner || !in_array($member->role, ['owner', 'admin'], true)))
                     <tr>
-                        <td>{{ $member->user?->name ?? $member->invited_email }}@if ($self) (you)@endif
-                            @if ($member->status === 'requested' && $member->request_message)<br><span class="meta">“{{ $member->request_message }}”</span>@endif</td>
+                        <td>
+                            <div class="person-cell">
+                                <span class="person-avatar person-avatar-sm" aria-hidden="true">{{ $member->user ? $initials($member->user->name) : '@' }}</span>
+                                <div>
+                                    <strong>{{ $member->user?->name ?? $member->invited_email }}</strong>@if ($self) <span class="person-you">You</span>@endif
+                                    @if ($member->user && $member->status === 'active' && $member->accepted_at)<span class="meta">Joined {{ $member->accepted_at->format('j M Y') }}</span>
+                                    @elseif ($member->status === 'invited')<span class="meta">Invitation sent</span>@endif
+                                    @if ($member->status === 'requested' && $member->request_message)<span class="meta">“{{ $member->request_message }}”</span>@endif
+                                </div>
+                            </div>
+                        </td>
                         <td>
                             @if ($member->status === 'active' && $canTouch && !$self)
                                 <form method="post" action="{{ route('workspace.startups.team.role', [$startup, $member]) }}" class="actions">
@@ -85,10 +104,10 @@
         </section>
 
         @if ($membership->canManageTeam())
-            <section data-tab="Invite someone" data-tab-icon="fa-user-plus" aria-label="Invite someone">
+            <section id="invite" data-tab="Invite someone" data-tab-icon="fa-user-plus" aria-label="Invite someone">
             <form method="post" action="{{ route('workspace.startups.team.invite', $startup) }}" class="panel">
                 @csrf
-                <h2>Invite someone</h2>
+                <h2 id="invite-heading">Invite someone</h2>
                 <p class="hint">They get an email link and must sign in with that same email address to join.</p>
                 <div class="form-row">
                     @include('partials.field', ['name' => 'email', 'label' => 'Email address', 'type' => 'email', 'required' => true])
