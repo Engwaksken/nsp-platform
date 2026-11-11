@@ -77,25 +77,28 @@
 
             <section class="dash-block" aria-labelledby="services-heading">
                 <div class="section-head"><h2 id="services-heading">Services</h2></div>
-                <div class="feature-cards">
+                {{-- Open by default (a visitor's own open/closed choice is remembered); closed, a card
+                     shows its name and description, open it also shows its buttons. --}}
+                <x-card-grid label="Services" min="240px" remember="services">
                     @foreach ($sections as $section)
-                        <section class="feature-card tone-{{ $section['tone'] }} @unless ($section['available']) is-soon @endunless" aria-labelledby="ws-{{ $loop->index }}">
-                            <h3 id="ws-{{ $loop->index }}"><span class="tile-icon" aria-hidden="true"><i class="fas {{ $section['icon'] }}"></i></span>{{ $section['title'] }}</h3>
-                            <p>{{ $section['text'] }}</p>
-                            @if (!$section['available'])
-                                <p><span class="badge badge-soon">Not available yet</span></p>
-                            @elseif ($section['actions'])
+                        <x-collapsible-card id="ws-{{ \Illuminate\Support\Str::slug($section['title']) }}" icon="{{ $section['icon'] }}"
+                            class="tone-{{ $section['tone'] }} {{ $section['available'] ? '' : 'is-soon' }}"
+                            :title="$section['title']" :badge="$section['available'] ? null : 'Not available yet'" badge-tone="soon"
+                            :summary="$section['text']" :open="true">
+                            @if ($section['available'] && $section['actions'])
                                 <div class="actions">
                                     @foreach ($section['actions'] as [$label, $url, $primary])
                                         <a class="btn {{ $primary ? 'btn-primary' : 'btn-secondary' }} btn-sm" href="{{ $url }}">{{ $label }}</a>
                                     @endforeach
                                 </div>
-                            @else
+                            @elseif ($section['available'])
                                 <p class="meta">Register or join a startup to use this.</p>
+                            @else
+                                <p class="meta">This service is coming soon.</p>
                             @endif
-                        </section>
+                        </x-collapsible-card>
                     @endforeach
-                </div>
+                </x-card-grid>
             </section>
         </div>
 

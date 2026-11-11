@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Funding\InvestorProfile;
 use App\Models\Registry\Startup;
+use App\Models\Registry\StartupMembership;
 use App\Models\User;
 use App\Support\Features;
 use App\Support\MemberNavigation;
@@ -53,7 +54,7 @@ class MemberShellTest extends TestCase
             ->assertSee('Register a startup')
             ->assertSee('Quick actions')
             ->assertSee('Turn it on') // two-factor sign-in next step
-            ->assertDontSee('Working on')
+            ->assertDontSee('class="app-startup"', false)
             ->assertDontSee('Admin area')
             ->assertDontSee('Deal flow');
         $this->assertMatchesRegularExpression('#href="'.preg_quote(route('workspace'), '#').'"\s+aria-current="page"#', $page->getContent());
@@ -66,7 +67,7 @@ class MemberShellTest extends TestCase
         $this->actingAs($owner)->post(route('workspace.startups.switch', $startup))->assertRedirect();
 
         $html = $this->actingAs($owner)->get('/workspace')->assertOk()
-            ->assertSee('Working on')
+            ->assertSee('class="app-startup"', false)
             ->assertSee('Switch startup')
             ->assertSee(route('workspace.startups.switch', $second), false)
             ->assertSee(route('workspace.startups.team', $startup), false)
@@ -182,5 +183,40 @@ class MemberShellTest extends TestCase
             ->assertSee('Not verified')
             ->assertSee('Hive did not verify your investor profile')
             ->assertDontSee('waiting for Hive to verify');
+    }
+
+    public function test_startup_profile_shows_details_private_groups_and_team_cards(): void
+    {
+        [$owner, $startup] = $this->founderWithStartup();
+
+        $this->actingAs($owner)->get(route('workspace.startups.show', $startup))->assertOk()
+            ->assertSee('class="profile-hero"', false)
+            ->assertSee('Company details')
+            ->assertSee('class="detail-grid"', false)
+            ->assertSee('Revenue and funding')
+            ->assertSee('Owners, founders and admins') // who can see the financials by default
+            ->assertSee('class="people-grid"', false)
+            ->assertSee('role-owner', false);
+
+        $viewer = User::factory()->withRole('startup_user')->create();
+        StartupMembership::query()->create(['startup_uuid' => $startup->uuid, 'user_id' => $viewer->id, 'role' => 'viewer', 'status' => 'active', 'accepted_at' => now()]);
+        $this->actingAs($viewer)->get(route('workspace.startups.show', $startup))->assertOk()
+            ->assertSee('Only owners, founders and admins can see this.')
+            ->assertDontSee('Edit profile');
+    }
+
+    public function test_startup_form_is_split_into_tabs_and_sidebar_groups_start_closed(): void
+    {
+        [$owner, $startup] = $this->founderWithStartup();
+
+        $this->actingAs($owner)->get(route('workspace.startups.create'))->assertOk()
+            ->assertSee('data-tab="Company"', false)
+            ->assertSee('data-tab="Sector and location"', false)
+            ->assertSee('data-tab="Private details"', false);
+
+        // Like the admin sidebar, only the group holding the current page is open.
+        $html = $this->actingAs($owner)->get(route('workspace.startups.team', $startup))->assertOk()->getContent();
+        $this->assertMatchesRegularExpression('#data-nav-group="startup"\s+open#', $html);
+        $this->assertDoesNotMatchRegularExpression('#data-nav-group="grow"\s+open#', $html);
     }
 }

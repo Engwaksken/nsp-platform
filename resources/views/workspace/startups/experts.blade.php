@@ -35,42 +35,49 @@
             <button class="btn btn-secondary" type="submit">Search</button>
         </form>
 
-        <div class="grid">
-            @forelse ($rows as $row)
-                @php($expert = $row['expert'])
-                <article class="card" aria-labelledby="exp-{{ $expert->id }}">
-                    <h2 id="exp-{{ $expert->id }}" class="h4">{{ $expert->user->name }}</h2>
-                    <p><strong>{{ $expert->headline }}</strong></p>
-                    <p class="meta">{{ \App\Models\Experts\ExpertProfile::KINDS[$expert->kind] }}
-                        @if ($expert->languages) · {{ collect($expert->languages)->map(fn ($l) => \App\Models\Experts\ExpertProfile::LANGUAGES[$l] ?? $l)->join(', ') }}@endif
-                        @isset($ratings[$expert->user_id]) · Rated {{ $ratings[$expert->user_id]['average'] }}/5 by {{ $ratings[$expert->user_id]['count'] }} startups @endisset</p>
-                    <p>{{ \Illuminate\Support\Str::limit($expert->bio, 280) }}</p>
-                    <p>@foreach ($expert->areaLabels() as $label)<span class="tag">{{ $label }}</span>@endforeach</p>
-                    @if ($row['reasons'])<p class="meta">Why: {{ implode(' · ', $row['reasons']) }}</p>@endif
-                    <p class="meta">@if ($expert->offers_free) Free sessions available. @endif @if ($expert->rate_note) {{ $expert->rate_note }} @endif
-                        @if ($expert->availability) Availability: {{ $expert->availability }} @endif</p>
-                    @if ($membership->canEdit() && ! in_array($expert->user_id, $openWith, true))
-                        <details>
-                            <summary>Ask {{ $expert->user->name }}</summary>
-                            <form method="post" action="{{ route('workspace.experts.request', $startup) }}">
-                                @csrf
-                                <input type="hidden" name="expert_user_id" value="{{ $expert->user_id }}">
-                                @include('partials.field', ['name' => 'type', 'id' => 'type-'.$expert->id, 'label' => 'What you need', 'type' => 'select', 'required' => true,
-                                    'options' => $expert->offersMentoring() ? \App\Models\Experts\Engagement::TYPES : ['consultation' => 'Consultation']])
-                                @include('partials.field', ['name' => 'topic', 'id' => 'topic-'.$expert->id, 'label' => 'Topic', 'required' => true, 'maxlength' => 150])
-                                @include('partials.field', ['name' => 'details', 'id' => 'details-'.$expert->id, 'label' => 'What would help you most?', 'type' => 'textarea', 'rows' => 3])
-                                @include('partials.field', ['name' => 'preferred_times', 'id' => 'times-'.$expert->id, 'label' => 'Times that suit you', 'maxlength' => 255])
-                                <button type="submit" class="btn btn-primary btn-sm">Send request</button>
-                            </form>
-                        </details>
-                    @elseif (in_array($expert->user_id, $openWith, true))
-                        <p class="meta">You already have an open request or engagement with this expert.</p>
-                    @endif
-                </article>
-            @empty
-                <p class="empty">No verified experts match. Try fewer filters.</p>
-            @endforelse
-        </div>
+        @if (count($rows) === 0)
+            <p class="empty">No verified experts match. Try fewer filters.</p>
+        @else
+            {{-- Search results: closed, with the headline in the header. The expert whose request
+                 failed validation opens again, with its request form open. --}}
+            <x-card-grid label="Experts" min="250px" remember="experts">
+                @foreach ($rows as $row)
+                    @php($expert = $row['expert'])
+                    @php($failed = $errors->any() && (string) old('expert_user_id') === (string) $expert->user_id)
+                    <x-collapsible-card id="exp-{{ $expert->id }}" :level="2" icon="fa-user-tie" class="tone-blue"
+                        :title="$expert->user->name" :badge="\App\Models\Experts\ExpertProfile::KINDS[$expert->kind]"
+                        :summary="$expert->headline" :attention="$failed">
+                        @php($facts = collect([
+                            $expert->languages ? collect($expert->languages)->map(fn ($l) => \App\Models\Experts\ExpertProfile::LANGUAGES[$l] ?? $l)->join(', ') : null,
+                            isset($ratings[$expert->user_id]) ? 'Rated '.$ratings[$expert->user_id]['average'].'/5 by '.$ratings[$expert->user_id]['count'].' startups' : null,
+                        ])->filter())
+                        @if ($facts->isNotEmpty())<p class="meta">{{ $facts->join(' · ') }}</p>@endif
+                        <p>{{ \Illuminate\Support\Str::limit($expert->bio, 280) }}</p>
+                        <p>@foreach ($expert->areaLabels() as $label)<span class="tag">{{ $label }}</span>@endforeach</p>
+                        @if ($row['reasons'])<p class="meta">Why: {{ implode(' · ', $row['reasons']) }}</p>@endif
+                        <p class="meta">@if ($expert->offers_free) Free sessions available. @endif @if ($expert->rate_note) {{ $expert->rate_note }} @endif
+                            @if ($expert->availability) Availability: {{ $expert->availability }} @endif</p>
+                        @if ($membership->canEdit() && ! in_array($expert->user_id, $openWith, true))
+                            <details @if ($failed) open @endif>
+                                <summary>Ask {{ $expert->user->name }}</summary>
+                                <form method="post" action="{{ route('workspace.experts.request', $startup) }}">
+                                    @csrf
+                                    <input type="hidden" name="expert_user_id" value="{{ $expert->user_id }}">
+                                    @include('partials.field', ['name' => 'type', 'id' => 'type-'.$expert->id, 'label' => 'What you need', 'type' => 'select', 'required' => true,
+                                        'options' => $expert->offersMentoring() ? \App\Models\Experts\Engagement::TYPES : ['consultation' => 'Consultation']])
+                                    @include('partials.field', ['name' => 'topic', 'id' => 'topic-'.$expert->id, 'label' => 'Topic', 'required' => true, 'maxlength' => 150])
+                                    @include('partials.field', ['name' => 'details', 'id' => 'details-'.$expert->id, 'label' => 'What would help you most?', 'type' => 'textarea', 'rows' => 3])
+                                    @include('partials.field', ['name' => 'preferred_times', 'id' => 'times-'.$expert->id, 'label' => 'Times that suit you', 'maxlength' => 255])
+                                    <button type="submit" class="btn btn-primary btn-sm">Send request</button>
+                                </form>
+                            </details>
+                        @elseif (in_array($expert->user_id, $openWith, true))
+                            <p class="meta">You already have an open request or engagement with this expert.</p>
+                        @endif
+                    </x-collapsible-card>
+                @endforeach
+            </x-card-grid>
+        @endif
         </section>
 
         <section class="panel" aria-labelledby="mine-heading" data-tab="Your requests and mentors" data-tab-icon="fa-handshake-angle" data-tab-count="{{ $engagements->count() }}">

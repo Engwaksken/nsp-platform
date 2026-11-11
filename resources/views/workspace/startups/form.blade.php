@@ -4,7 +4,13 @@
 
 @section('workspace')
     <div class="container section narrow">
-        <h1>{{ $startup->exists ? 'Edit '.$startup->display_name : 'Register your startup' }}</h1>
+        <div class="page-head">
+            <div>
+                <p class="profile-hero-eyebrow">{{ $startup->exists ? 'Startup profile' : 'New startup' }}</p>
+                <h1>{{ $startup->exists ? 'Edit '.$startup->display_name : 'Register your startup' }}</h1>
+                <p class="lead-muted">{{ $startup->exists ? 'Update any tab, then save once. Nothing is lost when you switch tabs.' : 'Three short tabs. Only the two names and the country are required; you can add the rest later.' }}</p>
+            </div>
+        </div>
         @include('partials.flash')
 
         @if (!empty($matches))
@@ -33,7 +39,8 @@
             <input type="hidden" name="version" value="{{ old('version', $version) }}">
             @error('version')<div class="alert alert-danger" role="alert">{{ $message }}</div>@enderror
 
-            <section class="panel" aria-labelledby="core-heading">
+            <div data-tabs="Profile form" data-tabs-key="startup-form">
+            <section class="panel" aria-labelledby="core-heading" data-tab="Company" data-tab-icon="fa-building">
                 <h2 id="core-heading">Company</h2>
                 <p class="hint">These details are shared across Hive (NSP and program applications) once you allow it on the Data sharing page.</p>
                 @include('partials.field', ['name' => 'legal_name', 'label' => 'Registered (legal) name', 'value' => $startup->legal_name, 'required' => true, 'maxlength' => 200])
@@ -47,8 +54,8 @@
                 @include('partials.field', ['name' => 'description', 'label' => 'What does your startup do?', 'type' => 'textarea', 'rows' => 4, 'value' => $startup->description])
             </section>
 
-            <section class="panel" aria-labelledby="profile-heading">
-                <h2 id="profile-heading">Profile</h2>
+            <section class="panel" aria-labelledby="profile-heading" data-tab="Sector and location" data-tab-icon="fa-industry">
+                <h2 id="profile-heading">Sector and location</h2>
                 <div class="form-row">
                     @include('partials.field', ['name' => 'sector', 'label' => 'Sector', 'type' => 'select', 'options' => array_combine(\App\Models\Registry\StartupProfile::SECTORS, \App\Models\Registry\StartupProfile::SECTORS), 'placeholder' => 'Choose…', 'value' => $profile->sector])
                     @include('partials.field', ['name' => 'sub_sector', 'label' => 'Sub-sector', 'value' => $profile->sub_sector, 'maxlength' => 80])
@@ -59,7 +66,7 @@
                 </div>
             </section>
 
-            <section class="panel" aria-labelledby="private-heading">
+            <section class="panel" aria-labelledby="private-heading" data-tab="Private details" data-tab-icon="fa-lock">
                 <h2 id="private-heading">Private details</h2>
                 <p class="hint">Stored encrypted. Choose who can see each group; nothing here is ever public.</p>
                 <div class="form-row">
@@ -80,6 +87,7 @@
                     @endforeach
                 </fieldset>
             </section>
+            </div>
 
             @if (!empty($matches) && empty($blocked))
                 <div class="form-group">

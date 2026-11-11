@@ -147,4 +147,24 @@ class AccountProfileTest extends TestCase
             'current_password' => 'x', 'password' => 'brand-new-pass-456', 'password_confirmation' => 'brand-new-pass-456',
         ])->assertForbidden();
     }
+
+    public function test_member_can_pick_a_colour_palette_that_only_they_see(): void
+    {
+        $user = $this->member();
+        $other = $this->member();
+
+        $this->actingAs($user)->get('/account')->assertOk()->assertSee('Appearance')->assertSee('Ocean');
+
+        $this->actingAs($user)->put(route('account.appearance.update'), ['theme_palette' => 'ocean'])->assertRedirect();
+        $this->assertSame('ocean', $user->fresh()->theme_palette);
+
+        // The palette replaces the brand colours in the page head for this member only.
+        $this->actingAs($user->fresh())->get('/workspace')->assertSee('--brand-primary: #1d3557', false)->assertSee('--brand-accent: #2a7de1', false);
+        $this->actingAs($other)->get('/workspace')->assertDontSee('--brand-primary: #1d3557', false);
+
+        $this->actingAs($user)->put(route('account.appearance.update'), ['theme_palette' => 'brand'])->assertRedirect();
+        $this->assertNull($user->fresh()->theme_palette);
+
+        $this->actingAs($user)->put(route('account.appearance.update'), ['theme_palette' => 'neon'])->assertSessionHasErrors('theme_palette');
+    }
 }

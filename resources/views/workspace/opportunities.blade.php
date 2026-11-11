@@ -23,7 +23,7 @@
             @if (!$recommended)
                 <p class="empty">No open opportunities match right now. Complete your profile and growth assessment for better matches.</p>
             @else
-                <div class="grid">
+                <div class="card-grid">
                     @foreach ($recommended as $item)
                         @php($opportunity = $item['opportunity'])
                         <article class="card">

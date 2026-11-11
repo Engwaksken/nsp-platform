@@ -20,7 +20,7 @@
             <button class="btn btn-secondary" type="submit">Search</button>
         </form>
 
-        <div class="grid">
+        <div class="card-grid">
             @forelse ($startups as $startup)
                 <article class="card">
                     <h2 class="h4"><a href="{{ route('directory.show', $startup) }}">{{ $startup->display_name }}</a></h2>

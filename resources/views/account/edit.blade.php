@@ -79,6 +79,36 @@
             </section>
         </div>
 
+        <section class="security-card appearance-card" aria-labelledby="appearance-heading">
+            <h2 id="appearance-heading">Appearance</h2>
+            <p class="lead-muted">Pick the colours you see in {{ $brand['site_name'] }}. Only you see them, on every device you sign in on.</p>
+            @php($current = $user->theme_palette ?: \App\Support\ThemePalettes::DEFAULT)
+            <form method="post" action="{{ route('account.appearance.update') }}">
+                @csrf
+                @method('put')
+                <fieldset>
+                    <legend class="label">Colour palette</legend>
+                    <div class="palette-grid">
+                        @foreach (['brand' => ['label' => $brand['site_name'].' colours', 'primary' => $brand['primary_color'], 'accent' => $brand['accent_color']]] + \App\Support\ThemePalettes::PALETTES as $key => $palette)
+                            <label class="palette-option">
+                                <input type="radio" name="theme_palette" value="{{ $key }}" @checked($current === $key)>
+                                <span class="palette-swatch" aria-hidden="true">
+                                    <span style="background: {{ $palette['primary'] }}"></span><span style="background: {{ $palette['accent'] }}"></span>
+                                </span>
+                                <span class="palette-name">{{ $palette['label'] }}@if ($key === 'brand')<small>Default</small>@endif</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn btn-primary">Save colours</button>
+            </form>
+            <div class="appearance-mode">
+                <span class="label">Light or dark</span>
+                <p class="hint">Follows your device unless you choose. This choice is saved in this browser.</p>
+                @include('partials.theme-switch')
+            </div>
+        </section>
+
         <section class="security-card account-links" aria-labelledby="more-heading">
             <h2 id="more-heading">More settings</h2>
             <ul>

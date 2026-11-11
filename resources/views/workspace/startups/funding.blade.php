@@ -59,27 +59,38 @@
         {{-- 2. Introductions --}}
         <section class="panel" aria-labelledby="intro-heading" data-tab="Introductions" data-tab-icon="fa-handshake" data-tab-count="{{ $introductions->count() }}">
             <h2 id="intro-heading">Introductions</h2>
-            @forelse ($introductions as $introduction)
-                @php($investorProfile = $profiles[$introduction->investor_user_id] ?? null)
-                <div class="card">
-                    <p><strong>{{ $introduction->investor?->name ?? 'Investor' }}</strong>@if ($investorProfile?->organisation) · {{ $investorProfile->organisation }}@endif
-                        <span class="badge badge-{{ $introduction->status === 'accepted' ? 'on' : ($introduction->status === 'requested' ? 'draft' : 'off') }}">{{ \App\Models\Funding\Introduction::STATUSES[$introduction->status] }}</span></p>
-                    <p class="meta">{{ $introduction->requested_by === 'founder' ? 'You asked' : 'The investor asked' }} on {{ $introduction->created_at->format('j M Y') }}</p>
-                    @if ($introduction->message)<p>{{ $introduction->message }}</p>@endif
-                    @if ($introduction->status === 'accepted' && $introduction->investor)
-                        <p>Contact: <a href="mailto:{{ $introduction->investor->email }}">{{ $introduction->investor->email }}</a>@if ($investorProfile?->website) · <a href="{{ $investorProfile->website }}" rel="noopener nofollow" target="_blank">{{ $investorProfile->website }}</a>@endif</p>
-                    @endif
-                    @if ($introduction->status === 'requested' && $introduction->requested_by === 'investor' && $canEdit)
-                        <form method="post" action="{{ route('workspace.funding.introductions.decide', [$startup, $introduction]) }}" class="inline-form">
-                            @csrf
-                            <button type="submit" name="decision" value="accept" class="btn btn-primary btn-sm">Accept and share contacts<span class="visually-hidden"> with {{ $introduction->investor?->name }}</span></button>
-                            <button type="submit" name="decision" value="decline" class="btn btn-secondary btn-sm">Decline<span class="visually-hidden"> {{ $introduction->investor?->name }}</span></button>
-                        </form>
-                    @endif
-                </div>
-            @empty
+            @if ($introductions->isEmpty())
                 <p class="empty">No introductions yet.</p>
-            @endforelse
+            @else
+                {{-- Requests waiting for your answer open; the rest stay closed with their status in the header. --}}
+                <x-card-grid label="Introductions" min="260px" remember="funding-introductions">
+                    @foreach ($introductions as $introduction)
+                        @php($investorProfile = $profiles[$introduction->investor_user_id] ?? null)
+                        @php($waiting = $introduction->status === 'requested' && $introduction->requested_by === 'investor' && $canEdit)
+                        <x-collapsible-card id="introduction-{{ $introduction->id }}" icon="fa-handshake" class="tone-green"
+                            :title="($introduction->investor?->name ?? 'Investor').($investorProfile?->organisation ? ' · '.$investorProfile->organisation : '')"
+                            :badge="\App\Models\Funding\Introduction::STATUSES[$introduction->status]"
+                            :badge-tone="$introduction->status === 'accepted' ? 'on' : ($introduction->status === 'requested' ? 'draft' : 'off')"
+                            :summary="($introduction->requested_by === 'founder' ? 'You asked' : 'The investor asked').' on '.$introduction->created_at->format('j M Y')"
+                            :attention="$waiting">
+                            @if ($introduction->message)<p>{{ $introduction->message }}</p>@endif
+                            @if ($introduction->status === 'accepted' && $introduction->investor)
+                                <p>Contact: <a href="mailto:{{ $introduction->investor->email }}">{{ $introduction->investor->email }}</a>@if ($investorProfile?->website) · <a href="{{ $investorProfile->website }}" rel="noopener nofollow" target="_blank">{{ $investorProfile->website }}</a>@endif</p>
+                            @endif
+                            @if ($waiting)
+                                <form method="post" action="{{ route('workspace.funding.introductions.decide', [$startup, $introduction]) }}" class="inline-form">
+                                    @csrf
+                                    <button type="submit" name="decision" value="accept" class="btn btn-primary btn-sm">Accept and share contacts<span class="visually-hidden"> with {{ $introduction->investor?->name }}</span></button>
+                                    <button type="submit" name="decision" value="decline" class="btn btn-secondary btn-sm">Decline<span class="visually-hidden"> {{ $introduction->investor?->name }}</span></button>
+                                </form>
+                            @endif
+                            @if (! $introduction->message && $introduction->status !== 'accepted' && ! $waiting)
+                                <p class="meta">No message.</p>
+                            @endif
+                        </x-collapsible-card>
+                    @endforeach
+                </x-card-grid>
+            @endif
         </section>
 
         {{-- 3. Matching investors --}}
@@ -88,27 +99,34 @@
                 <h2 id="match-heading">Verified investors</h2>
                 <p class="hint">Sorted by how well each investor’s stated focus fits your request. The reasons show why.</p>
                 @php($contacted = $introductions->whereIn('status', ['requested', 'accepted'])->pluck('investor_user_id')->all())
-                @forelse ($matches as $match)
-                    @php($investor = $match['investor'])
-                    <div class="card">
-                        <h3 class="h4">{{ $investor->user->name }}@if ($investor->organisation) · {{ $investor->organisation }}@endif</h3>
-                        <p class="meta">{{ \App\Models\Funding\InvestorProfile::TYPES[$investor->investor_type] ?? $investor->investor_type }} · Ticket {{ $investor->ticketLabel() }}</p>
-                        @if ($investor->thesis)<p>{{ $investor->thesis }}</p>@endif
-                        <p>@if ($match['fits'])<span class="badge badge-on">Good fit</span>@else<span class="badge">Partial fit</span>@endif
-                            @foreach ($match['reasons'] as $reason)<span class="tag">{{ $reason }}</span>@endforeach
-                            @if ($match['misses'])<span class="meta">Outside their focus: {{ implode(', ', $match['misses']) }}</span>@endif</p>
-                        @if ($canEdit && ! in_array($investor->user_id, $contacted, true))
-                            <form method="post" action="{{ route('workspace.funding.introductions.store', $startup) }}">
-                                @csrf
-                                <input type="hidden" name="investor_user_id" value="{{ $investor->user_id }}">
-                                @include('partials.field', ['name' => 'message', 'id' => 'msg-'.$investor->id, 'label' => 'Message to '.$investor->user->name, 'type' => 'textarea', 'rows' => 2, 'required' => true])
-                                <button type="submit" class="btn btn-primary btn-sm">Request introduction</button>
-                            </form>
-                        @endif
-                    </div>
-                @empty
+                @if (count($matches) === 0)
                     <p class="empty">No verified investors are listed yet.</p>
-                @endforelse
+                @else
+                    {{-- A pick-list: closed, with fit and ticket in the header. The card whose introduction
+                         request failed validation opens again with the message. --}}
+                    <x-card-grid label="Verified investors" min="260px" remember="funding-investors">
+                        @foreach ($matches as $match)
+                            @php($investor = $match['investor'])
+                            <x-collapsible-card id="investor-{{ $investor->id }}" icon="fa-building-columns" class="tone-blue"
+                                :title="$investor->user->name.($investor->organisation ? ' · '.$investor->organisation : '')"
+                                :badge="$match['fits'] ? 'Good fit' : 'Partial fit'" :badge-tone="$match['fits'] ? 'on' : null"
+                                :summary="(\App\Models\Funding\InvestorProfile::TYPES[$investor->investor_type] ?? $investor->investor_type).' · Ticket '.$investor->ticketLabel()"
+                                :attention="$errors->any() && (string) old('investor_user_id') === (string) $investor->user_id">
+                                @if ($investor->thesis)<p>{{ $investor->thesis }}</p>@endif
+                                <p>@foreach ($match['reasons'] as $reason)<span class="tag">{{ $reason }}</span>@endforeach
+                                    @if ($match['misses'])<span class="meta">Outside their focus: {{ implode(', ', $match['misses']) }}</span>@endif</p>
+                                @if ($canEdit && ! in_array($investor->user_id, $contacted, true))
+                                    <form method="post" action="{{ route('workspace.funding.introductions.store', $startup) }}">
+                                        @csrf
+                                        <input type="hidden" name="investor_user_id" value="{{ $investor->user_id }}">
+                                        @include('partials.field', ['name' => 'message', 'id' => 'msg-'.$investor->id, 'label' => 'Message to '.$investor->user->name, 'type' => 'textarea', 'rows' => 2, 'required' => true])
+                                        <button type="submit" class="btn btn-primary btn-sm">Request introduction</button>
+                                    </form>
+                                @endif
+                            </x-collapsible-card>
+                        @endforeach
+                    </x-card-grid>
+                @endif
             </section>
         @endif
 

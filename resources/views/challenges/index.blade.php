@@ -50,7 +50,7 @@
         @if ($challenges->isEmpty())
             <p class="empty">No published challenges match. Try fewer filters.</p>
         @else
-            <div class="grid">
+            <div class="card-grid">
                 @foreach ($challenges as $challenge)
                     @php($v = $challenge->publishedVersion)
                     <article class="card">

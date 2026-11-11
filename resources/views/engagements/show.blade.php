@@ -50,29 +50,39 @@
         @if (in_array($engagement->status, ['active', 'completed'], true))
             <section class="panel" aria-labelledby="sessions-heading">
                 <h2 id="sessions-heading">Sessions</h2>
-                @forelse ($engagement->sessions as $session)
-                    <div class="card">
-                        <h3 class="h4">{{ $session->scheduled_at->format('D j M Y, H:i') }} · {{ $session->duration_minutes }} min · {{ \App\Models\Experts\ExpertSession::MODES[$session->mode] }}
-                            <span class="badge">{{ \App\Models\Experts\ExpertSession::STATUSES[$session->status] }}</span></h3>
-                        @if ($session->location)
-                            <p>@if ($session->mode === 'online')<a href="{{ $session->location }}" rel="noopener nofollow" target="_blank">Join link</a>@else{{ $session->location }}@endif</p>
-                        @endif
-                        @if ($canEdit)
-                        <form method="post" action="{{ route('engagements.sessions.update', [$engagement, $session]) }}">
-                            @csrf @method('PUT')
-                            @include('partials.field', ['name' => 'shared_notes', 'id' => 'shared-'.$session->uuid, 'label' => 'Shared notes (the startup team and the expert see these)', 'type' => 'textarea', 'rows' => 3, 'value' => $session->shared_notes])
-                            @include('partials.field', ['name' => 'private_notes', 'id' => 'private-'.$session->uuid, 'label' => $isExpert ? 'My private notes (only I see these)' : 'Team notes (only your startup team sees these)', 'type' => 'textarea', 'rows' => 2, 'value' => $isExpert ? $session->expert_notes : $session->startup_notes])
-                            @include('partials.field', ['name' => 'status', 'id' => 'status-'.$session->uuid, 'label' => 'Status', 'type' => 'select', 'value' => $session->status, 'options' => \App\Models\Experts\ExpertSession::STATUSES])
-                            <button type="submit" class="btn btn-secondary btn-sm">Save session</button>
-                        </form>
-                        @else
-                            @if ($session->shared_notes)<p><strong>Shared notes:</strong> {!! nl2br(e($session->shared_notes)) !!}</p>@endif
-                            @if ($session->startup_notes)<p><strong>Team notes:</strong> {!! nl2br(e($session->startup_notes)) !!}</p>@endif
-                        @endif
-                    </div>
-                @empty
+                @if ($engagement->sessions->isEmpty())
                     <p class="empty">No sessions yet.</p>
-                @endforelse
+                @else
+                    {{-- Scheduled sessions open; held and cancelled ones close to their header. After a
+                         failed save every card opens, as the form does not say which session it was. --}}
+                    <x-card-grid label="Sessions" min="260px" remember="engagement-sessions">
+                        @foreach ($engagement->sessions as $session)
+                            <x-collapsible-card id="session-{{ $session->uuid }}" icon="fa-calendar-day" class="tone-purple"
+                                :title="$session->scheduled_at->format('D j M Y, H:i')"
+                                :badge="\App\Models\Experts\ExpertSession::STATUSES[$session->status]"
+                                :badge-tone="['scheduled' => 'scheduled', 'completed' => 'on', 'cancelled' => 'off'][$session->status] ?? null"
+                                :summary="$session->duration_minutes.' min · '.\App\Models\Experts\ExpertSession::MODES[$session->mode]"
+                                :open="$session->status === 'scheduled'" :attention="$errors->hasAny(['shared_notes', 'private_notes', 'status'])">
+                                @if ($session->location)
+                                    <p>@if ($session->mode === 'online')<a href="{{ $session->location }}" rel="noopener nofollow" target="_blank">Join link</a>@else{{ $session->location }}@endif</p>
+                                @endif
+                                @if ($canEdit)
+                                <form method="post" action="{{ route('engagements.sessions.update', [$engagement, $session]) }}">
+                                    @csrf @method('PUT')
+                                    @include('partials.field', ['name' => 'shared_notes', 'id' => 'shared-'.$session->uuid, 'label' => 'Shared notes (the startup team and the expert see these)', 'type' => 'textarea', 'rows' => 3, 'value' => $session->shared_notes])
+                                    @include('partials.field', ['name' => 'private_notes', 'id' => 'private-'.$session->uuid, 'label' => $isExpert ? 'My private notes (only I see these)' : 'Team notes (only your startup team sees these)', 'type' => 'textarea', 'rows' => 2, 'value' => $isExpert ? $session->expert_notes : $session->startup_notes])
+                                    @include('partials.field', ['name' => 'status', 'id' => 'status-'.$session->uuid, 'label' => 'Status', 'type' => 'select', 'value' => $session->status, 'options' => \App\Models\Experts\ExpertSession::STATUSES])
+                                    <button type="submit" class="btn btn-secondary btn-sm">Save session</button>
+                                </form>
+                                @else
+                                    @if ($session->shared_notes)<p><strong>Shared notes:</strong> {!! nl2br(e($session->shared_notes)) !!}</p>@endif
+                                    @if ($session->startup_notes)<p><strong>Team notes:</strong> {!! nl2br(e($session->startup_notes)) !!}</p>@endif
+                                    @if (! $session->location && ! $session->shared_notes && ! $session->startup_notes)<p class="meta">No notes yet.</p>@endif
+                                @endif
+                            </x-collapsible-card>
+                        @endforeach
+                    </x-card-grid>
+                @endif
 
                 @if ($engagement->status === 'active' && $canEdit)
                     <h3>Plan a session</h3>

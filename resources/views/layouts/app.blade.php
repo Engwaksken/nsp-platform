@@ -35,26 +35,35 @@
         </div>
 
         @if ($nav->startup)
-            <div class="app-context">
-                <span class="app-context-label">Working on</span>
-                <strong class="app-context-name">{{ $nav->startup->display_name }}</strong>
-                <span class="app-context-role">{{ \App\Models\Registry\StartupMembership::ROLES[$nav->membership->role] ?? $nav->membership->role }}</span>
-                @if ($nav->otherStartups->isNotEmpty())
-                    <details class="app-switcher">
-                        <summary>Switch startup</summary>
-                        <ul>
-                            @foreach ($nav->otherStartups as $other)
-                                <li>
-                                    <form method="post" action="{{ route('workspace.startups.switch', $other) }}">
-                                        @csrf
-                                        <button type="submit">{{ $other->display_name }}</button>
-                                    </form>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </details>
-                @endif
-            </div>
+            {{-- Compact startup context (one row, like a nav item); a menu to switch when there are several. --}}
+            @php($startupRole = \App\Models\Registry\StartupMembership::ROLES[$nav->membership->role] ?? $nav->membership->role)
+            @php($startupInitials = collect(preg_split('/\s+/', trim($nav->startup->display_name)))->filter()->take(2)->map(fn ($p) => mb_strtoupper(mb_substr($p, 0, 1)))->implode(''))
+            @if ($nav->otherStartups->isNotEmpty())
+                <details class="app-startup">
+                    <summary class="app-startup-row" title="Switch startup">
+                        <span class="app-startup-mark" aria-hidden="true">{{ $startupInitials }}</span>
+                        <span class="app-startup-text"><strong>{{ $nav->startup->display_name }}</strong><small>{{ $startupRole }} · switch</small></span>
+                        <i class="fas fa-chevron-down app-startup-caret" aria-hidden="true"></i>
+                    </summary>
+                    <ul class="app-startup-menu">
+                        @foreach ($nav->otherStartups as $other)
+                            <li>
+                                <form method="post" action="{{ route('workspace.startups.switch', $other) }}">
+                                    @csrf
+                                    <button type="submit"><i class="fas fa-arrow-right-arrow-left" aria-hidden="true"></i> {{ $other->display_name }}</button>
+                                </form>
+                            </li>
+                        @endforeach
+                    </ul>
+                </details>
+            @else
+                <div class="app-startup">
+                    <div class="app-startup-row">
+                        <span class="app-startup-mark" aria-hidden="true">{{ $startupInitials }}</span>
+                        <span class="app-startup-text"><strong>{{ $nav->startup->display_name }}</strong><small>{{ $startupRole }}</small></span>
+                    </div>
+                </div>
+            @endif
         @endif
 
         <nav aria-label="Member">
@@ -66,7 +75,8 @@
                         @endforeach
                     </ul>
                 @else
-                    <details class="nav-group" data-nav-group="{{ $group['key'] }}" @if (in_array($group['key'], ['startup', 'grow'], true) || \App\Support\MemberNavigation::isActive($group)) open @endif>
+                    {{-- Like the admin sidebar: groups start closed, except the one holding the current page. --}}
+                    <details class="nav-group" data-nav-group="{{ $group['key'] }}" @if (\App\Support\MemberNavigation::isActive($group)) open @endif>
                         <summary class="nav-heading"><i class="fas {{ $group['icon'] }}" aria-hidden="true"></i><span>{{ $group['label'] }}</span></summary>
                         <ul>
                             @foreach ($group['links'] as $link)
@@ -114,6 +124,7 @@
                         <li class="nav-dropdown-head">Signed in as <strong>{{ $member->name }}</strong><br><span>{{ $member->email }}</span></li>
                         <li><a href="{{ route('workspace') }}">Dashboard</a></li>
                         <li><a href="{{ route('account.edit') }}">My profile</a></li>
+                        <li><a href="{{ route('account.edit') }}#appearance-heading">Appearance and colours</a></li>
                         <li><a href="{{ route('mfa.setup') }}">Sign-in security</a></li>
                         <li><a href="{{ route('notifications.preferences') }}">Notification settings</a></li>
                         @if ($member->canUseAdmin())

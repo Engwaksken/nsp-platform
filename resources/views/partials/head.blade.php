@@ -1,4 +1,6 @@
 {{-- Shared <head> contents. Expects $brand, $brandFont, $brandFavicon from the layout view composer. --}}
+{{-- A signed-in member's own colour palette (My profile → Appearance) replaces the brand colours for them only. --}}
+@php($brand = \App\Support\ThemePalettes::apply($brand, auth()->user()))
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 {{-- Installable on phones ("Add to home screen"); see AppManifestController and public/sw.js. --}}
@@ -41,7 +43,7 @@
 {{-- Font Awesome Free 6.5.2, solid icons only, self-hosted (public/vendor/fontawesome; the CSP allows no CDNs). --}}
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/fontawesome.min.css') }}?v=6.5.2">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/solid.min.css') }}?v=6.5.2">
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=24">
+<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=25">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};
@@ -55,4 +57,4 @@
         @endforeach
     }
 </style>
-<script src="{{ asset('js/nsp.js') }}?v=12" defer></script>
+<script src="{{ asset('js/nsp.js') }}?v=13" defer></script>
