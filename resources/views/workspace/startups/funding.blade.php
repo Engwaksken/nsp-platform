@@ -10,6 +10,12 @@
 
         @php($canEdit = $membership->canEdit())
 
+        @if (\App\Support\Features::enabled('capital_exchange') && Route::has('workspace.capital.index'))
+            <p class="alert alert-info" role="status"><i class="fas fa-share-nodes" aria-hidden="true"></i>
+                Choose what each connected investor sees, answer due-diligence checklists and document requests, and check your readiness in
+                <a href="{{ route('workspace.capital.index', $startup) }}">Capital Exchange</a>.</p>
+        @endif
+
         @include('partials.stats', ['label' => 'Funding at a glance', 'stats' => [
             ['icon' => 'fa-sack-dollar', 'tone' => 'amber', 'label' => 'Funding request', 'value' => $open ? $open->amountLabel() : 'None open'],
             ['icon' => 'fa-handshake', 'tone' => 'green', 'label' => 'Introductions', 'value' => $introductions->count(), 'note' => $introductions->where('status', 'accepted')->count().' accepted'],

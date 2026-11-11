@@ -33,6 +33,10 @@
         <section class="panel" aria-labelledby="pipeline-heading">
             <h2 id="pipeline-heading">My pipeline</h2>
             <p class="hint">Your stages and notes are private. Startups never see them.</p>
+            @if (\App\Support\Features::enabled('capital_exchange') && Route::has('investor.capital.pipeline'))
+                <p><a class="btn btn-secondary btn-sm" href="{{ route('investor.capital.pipeline') }}"><i class="fas fa-table-columns" aria-hidden="true"></i> Capital pipeline and watchlist</a>
+                    <span class="meta">{{ array_sum($funnel) }} startup(s) across {{ count(array_filter($funnel)) }} stage(s)</span></p>
+            @endif
             <div class="table-wrap" tabindex="0" role="region" aria-label="My pipeline">
                 <table>
                     <thead><tr><th scope="col">Startup</th><th scope="col">Introduction</th><th scope="col">My stage</th><th scope="col">Data room</th></tr></thead>
