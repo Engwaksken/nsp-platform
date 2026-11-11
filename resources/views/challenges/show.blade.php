@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => $version->title, 'metaDescription' => \Illuminate\Support\Str::limit($version->problem_description, 155), 'canonical' => route('challenges.show', $challenge)])
+@extends('layouts.browse', ['pageTitle' => $version->title, 'metaDescription' => \Illuminate\Support\Str::limit($version->problem_description, 155), 'canonical' => route('challenges.show', $challenge)])
 
 @if ($version->visibility === 'members')
     @push('head')<meta name="robots" content="noindex">@endpush

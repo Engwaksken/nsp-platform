@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Challenge Exchange', 'metaDescription' => 'Reviewed innovation and market challenges that startups can help solve.', 'canonical' => route('challenges.index')])
+@extends('layouts.browse', ['pageTitle' => 'Challenge Exchange', 'metaDescription' => 'Reviewed innovation and market challenges that startups can help solve.', 'canonical' => route('challenges.index')])
 
 @section('content')
     <div class="container section">
@@ -14,7 +14,7 @@
         @include('partials.flash')
         <p>Innovation and market challenges from government, industry, partners and communities. Every challenge listed here was reviewed by Hive before publication; only sources marked as reviewed have been checked.</p>
 
-        @include('partials.stats', ['label' => 'Challenges at a glance', 'stats' => \App\Support\PublicStats::challenges()])
+        @include('partials.stats-summary', ['label' => 'Challenges at a glance', 'stats' => \App\Support\PublicStats::challenges()])
 
         <form method="get" class="filters" role="search" aria-label="Search and filter challenges">
             <div class="form-group"><label for="q">Search</label><input id="q" type="search" name="q" value="{{ $criteria['q'] }}" placeholder="Search challenges…" maxlength="100"></div>
