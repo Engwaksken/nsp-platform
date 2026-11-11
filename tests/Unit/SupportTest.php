@@ -19,6 +19,27 @@ class SupportTest extends TestCase
         $this->assertSame(0.0, Contrast::againstWhite('red'));
     }
 
+    public function test_brand_tokens_keep_text_readable_in_light_and_dark_mode(): void
+    {
+        $this->assertSame('#ffffff', Contrast::textOn('#1e3a8a'));
+        $this->assertSame(Contrast::DARK_TEXT, Contrast::textOn('#facc15'));
+        $this->assertSame('#3a3a3c', Contrast::readable('#3a3a3c', '#ffffff'));
+        $this->assertSame('#808080', Contrast::mix('#000000', '#ffffff', 0.5));
+
+        $this->assertGreaterThanOrEqual(4.5, Contrast::ratio(Contrast::textOn('#777777'), '#777777'));
+
+        foreach (['#3a3a3c', '#1e3a8a', '#facc15', '#000000', '#ffffff', '#f1592a', '#777777', '#0ea5e9'] as $colour) {
+            $tokens = Contrast::brandTokens(['primary_color' => $colour, 'secondary_color' => $colour, 'accent_color' => $colour]);
+            $this->assertGreaterThanOrEqual(4.5, Contrast::ratio($tokens['--brand-link-dark'], Contrast::DARK_SURFACE), $colour);
+            $this->assertGreaterThanOrEqual(4.5, Contrast::ratio($tokens['--brand-accent-text-dark'], Contrast::DARK_SURFACE), $colour);
+            $this->assertGreaterThanOrEqual(4.5, Contrast::ratio($tokens['--brand-link-light'], Contrast::LIGHT_SURFACE), $colour);
+            $this->assertGreaterThanOrEqual(4.5, Contrast::ratio($tokens['--on-button-dark'], $tokens['--brand-button-dark']), $colour);
+            $this->assertGreaterThanOrEqual(3.0, Contrast::ratio($tokens['--brand-button-dark'], Contrast::DARK_PAGE), $colour);
+        }
+        // Non-hex values (never saved by the settings form) add no tokens, so the CSS fallbacks apply.
+        $this->assertSame([], Contrast::brandTokens(['primary_color' => 'red', 'secondary_color' => '#000000', 'accent_color' => '#000000']));
+    }
+
     public function test_default_branding_uses_hive_palette_with_contrast_safe_primary(): void
     {
         $this->assertSame('#3a3a3c', Settings::DEFAULTS['primary_color']);

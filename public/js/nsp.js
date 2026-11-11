@@ -94,6 +94,27 @@
     }
   });
 
+  // Colour theme switch (partials/theme-switch). public/js/theme.js applies and stores the choice.
+  var themeButtons = qsa(document, '[data-theme-choice]');
+  if (themeButtons.length && NSP.setTheme) {
+    var syncTheme = function () {
+      var current = NSP.theme();
+      themeButtons.forEach(function (button) {
+        button.setAttribute('aria-pressed', button.getAttribute('data-theme-choice') === current ? 'true' : 'false');
+      });
+    };
+    themeButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        NSP.setTheme(button.getAttribute('data-theme-choice'));
+        themeButtons.forEach(function (other) {
+          other.setAttribute('aria-pressed', other.getAttribute('data-theme-choice') === button.getAttribute('data-theme-choice') ? 'true' : 'false');
+        });
+      });
+    });
+    window.addEventListener('storage', syncTheme);
+    syncTheme();
+  }
+
   // Installable app: the service worker only adds an offline page and caches the
   // versioned CSS/JS/fonts/icons. Pages themselves are never cached.
   var swMeta = document.querySelector('meta[name="nsp-sw"]');

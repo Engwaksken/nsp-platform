@@ -5,7 +5,7 @@
     The sidebar is built by App\Support\MemberNavigation, which lists only links the member can open.
 --}}
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="no-js">
 <head>
     @include('partials.head')
     <meta name="robots" content="noindex">
@@ -30,6 +30,8 @@
                 @endif
             </a>
             <button type="button" class="app-sidebar-close" data-offcanvas-close aria-label="Close menu"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+            {{-- Without JavaScript on small screens the menu opens in place via #app-sidebar (see "no-js" in nsp.css). --}}
+            <a class="app-sidebar-close nojs-only" href="#main" aria-label="Close menu"><i class="fas fa-xmark" aria-hidden="true"></i></a>
         </div>
 
         @if ($nav->startup)
@@ -87,6 +89,7 @@
         <header class="admin-topbar app-topbar">
             <div class="app-topbar-start">
                 <button type="button" class="nav-toggle btn btn-secondary btn-sm" data-toggle-target="app-sidebar" aria-expanded="false" aria-controls="app-sidebar">Menu</button>
+                <a class="nav-toggle-nojs nojs-only btn btn-secondary btn-sm" href="#app-sidebar">Menu</a>
                 <a class="app-topbar-brand" href="{{ route('workspace') }}">{{ $brand['site_name'] }}</a>
                 @hasSection('breadcrumbs')
                     <nav class="breadcrumbs" aria-label="Breadcrumb"><ol>@yield('breadcrumbs')</ol></nav>
@@ -117,6 +120,7 @@
                             <li><a href="{{ route('admin.dashboard') }}">Admin area</a></li>
                         @endif
                         <li><a href="{{ route('home') }}">Public site</a></li>
+                        <li class="theme-switch-item"><span aria-hidden="true">Theme</span>@include('partials.theme-switch')</li>
                         <li class="nav-dropdown-foot">
                             <form method="post" action="{{ route('logout') }}">
                                 @csrf
