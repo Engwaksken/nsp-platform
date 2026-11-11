@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Ai\AiSettings;
 use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -46,7 +47,7 @@ class Settings
             }
 
             // "ai.*" rows (including the encrypted API key) belong to App\Ai\AiSettings and never reach page views.
-            return SiteSetting::query()->where('key', 'not like', \App\Ai\AiSettings::PREFIX.'%')->pluck('value', 'key')->all();
+            return SiteSetting::query()->where('key', 'not like', AiSettings::PREFIX.'%')->pluck('value', 'key')->all();
         });
 
         return array_merge(self::DEFAULTS, array_filter($stored, fn ($value) => $value !== null && $value !== ''));
