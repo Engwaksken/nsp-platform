@@ -70,8 +70,9 @@ class MemberNavigation
 
         $this->unread = UserNotification::query()->where('user_id', $user->id)->whereNull('read_at')->count();
 
-        $this->investor = Features::enabled('funding') ? InvestorProfile::query()->where('user_id', $user->id)->first() : null;
-        $this->expert = Features::enabled('experts') ? ExpertProfile::query()->where('user_id', $user->id)->first() : null;
+        // isVerified() reads the owner's is_active flag: hand it the user we already have.
+        $this->investor = Features::enabled('funding') ? InvestorProfile::query()->where('user_id', $user->id)->first()?->setRelation('user', $user) : null;
+        $this->expert = Features::enabled('experts') ? ExpertProfile::query()->where('user_id', $user->id)->first()?->setRelation('user', $user) : null;
         $this->isCandidate = Features::enabled('talent') && (
             TalentProfile::query()->where('user_id', $user->id)->exists()
             || JobApplication::query()->where('applicant_id', $user->id)->exists()

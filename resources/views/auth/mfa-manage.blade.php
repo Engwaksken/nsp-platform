@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Account security'])
+@extends('layouts.app', ['pageTitle' => 'Account security'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

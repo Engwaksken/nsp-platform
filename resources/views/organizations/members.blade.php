@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Members · '.$organization->name])
+@extends('layouts.app', ['pageTitle' => 'Members · '.$organization->name])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Expert profile'])
+@extends('layouts.app', ['pageTitle' => 'Expert profile'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

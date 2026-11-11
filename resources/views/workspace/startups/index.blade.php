@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'My startups'])
+@extends('layouts.app', ['pageTitle' => 'My startups'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
