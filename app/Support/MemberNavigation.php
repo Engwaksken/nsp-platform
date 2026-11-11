@@ -216,6 +216,7 @@ class MemberNavigation
         }
 
         $groups[] = $this->group('account', 'Account', 'fa-user-gear', [
+            $this->link('account.edit', 'My profile', 'fa-id-card', 'account.*'),
             $this->link('mfa.setup', 'Sign-in security', 'fa-lock', 'mfa.*'),
             $this->link('notifications.preferences', 'Notification settings', 'fa-sliders', 'notifications.preferences*'),
         ]);

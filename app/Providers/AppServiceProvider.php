@@ -102,7 +102,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('oidc', fn (Request $request) => Limit::perMinute(20)->by('oidc|'.$request->ip()));
 
         // Branding and menus for every page view; loaded once per request.
-        View::composer(['layouts.*', 'site.*', 'auth.*', 'workspace.*', 'admin.*'], function ($view) {
+        View::composer(['layouts.*', 'site.*', 'auth.*', 'account.*', 'workspace.*', 'admin.*'], function ($view) {
             $view->with($this->brandData());
         });
     }

@@ -1050,3 +1050,13 @@ textarea.code-input { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas
   .admin-shell { display: block; }
   a { color: inherit; }
 }
+
+/* My profile (account/edit) */
+.avatar-lg { width: 56px; height: 56px; font-size: 1.2rem; }
+.security-card.notice-card { margin-bottom: var(--space-5); border-color: var(--brand-primary); }
+.security-card.notice-card form { margin-top: var(--space-3); }
+.label-like { display: block; font-weight: 600; margin-bottom: .35rem; }
+.static-value { margin: 0; padding: .6rem .8rem; background: var(--surface-muted, rgba(0,0,0,.03)); border: 1px solid var(--line); border-radius: var(--radius-md, 8px); overflow-wrap: anywhere; }
+.account-links { margin-top: var(--space-5); }
+.account-links ul { list-style: none; padding: 0; margin: 0 0 var(--space-3); display: grid; gap: var(--space-2); }
+.account-links a { font-weight: 600; }

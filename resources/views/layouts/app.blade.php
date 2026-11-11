@@ -110,6 +110,7 @@
                     <ul class="nav-dropdown nav-dropdown-end" id="app-user-menu" data-fixed-align>
                         <li class="nav-dropdown-head">Signed in as <strong>{{ $member->name }}</strong><br><span>{{ $member->email }}</span></li>
                         <li><a href="{{ route('workspace') }}">Dashboard</a></li>
+                        <li><a href="{{ route('account.edit') }}">My profile</a></li>
                         <li><a href="{{ route('mfa.setup') }}">Sign-in security</a></li>
                         <li><a href="{{ route('notifications.preferences') }}">Notification settings</a></li>
                         @if ($member->canUseAdmin())
