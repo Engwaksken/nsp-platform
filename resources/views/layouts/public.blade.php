@@ -87,7 +87,7 @@
                 @endforeach
             </ul>
             @auth
-                @php($unreadNotifications = \App\Models\Communication\UserNotification::query()->where('user_id', auth()->id())->whereNull('read_at')->count())
+                @php($unreadNotifications = \App\Support\MemberNavigation::for(auth()->user())->unread)
                 {{-- Signed in: the main call to action is the dashboard (admins go to the admin dashboard). --}}
                 <a class="btn btn-primary btn-sm nav-signin nav-dashboard" href="{{ auth()->user()->canUseAdmin() ? route('admin.dashboard') : route('workspace') }}"><i class="fas fa-gauge-high" aria-hidden="true"></i> Go to dashboard</a>
                 <div class="nav-group nav-account">

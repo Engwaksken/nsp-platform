@@ -26,7 +26,7 @@
     @endunless
 
     <section class="panel" aria-labelledby="pending-heading">
-        <h2 id="pending-heading">Waiting for your decision <span class="badge badge-new">{{ $pending->count() }}</span></h2>
+        <h2 id="pending-heading">Waiting for your decision <span class="count">{{ $pending->count() }}</span></h2>
         @if ($pending->isEmpty())
             <p class="hint">No organization is waiting for an answer.</p>
         @else
@@ -65,7 +65,7 @@
     </section>
 
     <section class="panel" aria-labelledby="active-heading">
-        <h2 id="active-heading">Who can see your startup <span class="badge badge-on">{{ $active->count() }}</span></h2>
+        <h2 id="active-heading">Who can see your startup <span class="count">{{ $active->count() }}</span></h2>
         @if ($active->isEmpty())
             <p class="hint">No organization has access to your startup's data.</p>
         @else

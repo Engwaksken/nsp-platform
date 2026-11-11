@@ -39,6 +39,13 @@ class User extends Authenticatable implements MustVerifyEmailContract
         ];
     }
 
+    /** Up to two initials for avatars, e.g. "Olive Founder" -> "OF". */
+    public function initials(): string
+    {
+        return collect(preg_split('/\s+/', trim((string) $this->name)))->filter()->take(2)
+            ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('') ?: '?';
+    }
+
     public function canUseAdmin(): bool
     {
         return $this->is_active && $this->hasAnyRole(self::ADMIN_ROLES);

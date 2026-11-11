@@ -155,4 +155,32 @@ class MemberShellTest extends TestCase
         $this->assertSame(view()->exists('challenges.mine'), $labels->contains('My challenges'));
         $this->assertTrue(Route::has('workspace.startups.overview'));
     }
+
+    public function test_all_my_startups_keeps_the_sidebar_on_the_current_startup(): void
+    {
+        [$owner, $first] = $this->founderWithStartup('Green Fields', '80020001234567');
+        [, $second] = $this->founderWithStartup('Blue Rivers', '80020007654321', $owner);
+        $this->actingAs($owner)->post(route('workspace.startups.switch', $first))->assertRedirect();
+
+        $html = $this->actingAs($owner)->get(route('workspace.startups.index'))->assertOk()->getContent();
+        $start = strpos($html, 'id="app-sidebar"');
+        $sidebar = substr($html, $start, strpos($html, '</aside>', $start) - $start);
+        $this->assertStringContainsString(route('workspace.startups.overview', $first), $sidebar);
+        $this->assertStringNotContainsString(route('workspace.startups.overview', $second), $sidebar);
+    }
+
+    public function test_rejected_investor_profile_is_not_described_as_waiting(): void
+    {
+        $investor = $this->member();
+        $profile = new InvestorProfile(['organisation' => 'Seed Fund', 'investor_type' => 'vc', 'bio' => 'Early-stage fund.', 'currency' => 'USD',
+            'ticket_min' => 10000, 'ticket_max' => 100000, 'sectors' => [], 'countries' => ['UG'], 'instruments' => ['equity'], 'stages' => [], 'is_listed' => true]);
+        $profile->user_id = $investor->id;
+        $profile->status = 'rejected';
+        $profile->save();
+
+        $this->actingAs($investor)->get('/workspace')->assertOk()
+            ->assertSee('Not verified')
+            ->assertSee('Hive did not verify your investor profile')
+            ->assertDontSee('waiting for Hive to verify');
+    }
 }

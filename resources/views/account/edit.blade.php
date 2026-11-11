@@ -3,10 +3,9 @@
 @push('head')<meta name="robots" content="noindex">@endpush
 
 @section('content')
-    @php($initials = collect(preg_split('/\s+/', trim($user->name)))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode(''))
     <div class="security-wrap">
         <header class="security-head">
-            <span class="avatar avatar-lg" aria-hidden="true">{{ $initials }}</span>
+            <span class="avatar avatar-lg" aria-hidden="true">{{ $user->initials() }}</span>
             <div>
                 <h1>My profile</h1>
                 <p>Your name and email address on {{ $brand['site_name'] }}, and your password.</p>
@@ -14,6 +13,18 @@
         </header>
 
         @include('partials.flash')
+
+        @if ($user->pending_email)
+            <section class="security-card notice-card" aria-labelledby="pending-heading">
+                <h2 id="pending-heading">Confirm your new email address</h2>
+                <p class="lead-muted">We sent a link to <strong>{{ $user->pending_email }}</strong>. Your email address stays <strong>{{ $user->email }}</strong> until you open it while signed in. The link works for 60 minutes.</p>
+                <form method="post" action="{{ route('account.email.cancel') }}">
+                    @csrf
+                    @method('delete')
+                    <button type="submit" class="btn btn-secondary btn-sm">Cancel the change</button>
+                </form>
+            </section>
+        @endif
 
         @unless ($user->hasVerifiedEmail())
             <section class="security-card notice-card" aria-labelledby="verify-heading">
@@ -35,7 +46,7 @@
                     @include('partials.field', ['name' => 'name', 'label' => 'Full name', 'value' => $user->name, 'required' => true, 'autocomplete' => 'name'])
                     @if ($canChangeCredentials)
                         @include('partials.field', ['name' => 'email', 'label' => 'Email address', 'type' => 'email', 'value' => $user->email, 'required' => true, 'autocomplete' => 'email',
-                            'hint' => 'If you change it, we send a confirmation link to the new address and a notice to the old one.'])
+                            'hint' => 'It changes only after you open the link we send to the new address. We also tell the old address.'])
                         <div>
                             @include('partials.field', ['name' => 'email_current_password', 'label' => 'Current password (only needed to change your email)', 'type' => 'password', 'value' => '', 'autocomplete' => 'current-password', 'placeholder' => false])
                         </div>

@@ -17,7 +17,7 @@
     $member = auth()->user();
     $nav = \App\Support\MemberNavigation::for($member, ($startup ?? null) instanceof \App\Models\Registry\Startup ? $startup : null);
     $navGroups = $nav->groups();
-    $initials = collect(preg_split('/\s+/', trim($member->name)))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('') ?: '?';
+    $initials = $member->initials();
 @endphp
 <div class="admin-shell app-shell">
     <aside class="admin-sidebar app-sidebar" id="app-sidebar" data-offcanvas aria-label="Member navigation">

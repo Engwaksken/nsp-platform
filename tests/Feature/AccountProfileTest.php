@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Mail\ServiceNotice;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 /** "My profile": members change their own name, email address and password. */
@@ -56,27 +56,58 @@ class AccountProfileTest extends TestCase
         $this->assertSame('old@example.com', $user->fresh()->email);
     }
 
-    public function test_email_change_resets_verification_and_sends_confirmation(): void
+    public function test_email_changes_only_after_the_new_address_is_confirmed(): void
     {
-        Notification::fake();
+        Mail::fake();
         $user = $this->member(['email' => 'old@example.com', 'email_verified_at' => now()]);
 
         $this->actingAs($user)->put('/account/profile', ['name' => $user->name, 'email' => 'New@Example.com', 'email_current_password' => 'old-password-123'])
             ->assertRedirect()->assertSessionHasNoErrors();
 
         $user->refresh();
+        $this->assertSame('old@example.com', $user->email);
+        $this->assertNotNull($user->email_verified_at);
+        $this->assertSame('new@example.com', $user->pending_email);
+        $link = null;
+        Mail::assertQueued(ServiceNotice::class, function (ServiceNotice $mail) use (&$link) {
+            $link = $mail->url;
+
+            return $mail->hasTo('new@example.com');
+        });
+
+        // A forged or tampered link does nothing.
+        $this->actingAs($user)->get(route('account.email.confirm', ['hash' => sha1('new@example.com')]))->assertForbidden();
+        $this->assertSame('old@example.com', $user->fresh()->email);
+
+        $this->actingAs($user)->get($link)->assertRedirect(route('account.edit'));
+        $user->refresh();
         $this->assertSame('new@example.com', $user->email);
-        $this->assertNull($user->email_verified_at);
-        Notification::assertSentTo($user, VerifyEmail::class);
+        $this->assertNull($user->pending_email);
+        $this->assertNotNull($user->email_verified_at);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'account.email_changed']);
     }
 
-    public function test_email_must_be_unique(): void
+    public function test_pending_email_change_can_be_cancelled(): void
+    {
+        Mail::fake();
+        $user = $this->member();
+        $this->actingAs($user)->put('/account/profile', ['name' => $user->name, 'email' => 'next@example.com', 'email_current_password' => 'old-password-123']);
+        $this->actingAs($user)->get('/account')->assertSee('Confirm your new email address')->assertSee('next@example.com');
+
+        $this->actingAs($user)->delete(route('account.email.cancel'))->assertRedirect();
+        $this->assertNull($user->fresh()->pending_email);
+    }
+
+    public function test_email_must_be_unique_ignoring_case(): void
     {
         $this->member(['email' => 'taken@example.com']);
         $user = $this->member();
 
-        $this->actingAs($user)->put('/account/profile', ['name' => $user->name, 'email' => 'taken@example.com', 'email_current_password' => 'old-password-123'])
-            ->assertSessionHasErrors('email');
+        foreach (['taken@example.com', 'Taken@Example.COM'] as $address) {
+            $this->actingAs($user)->put('/account/profile', ['name' => $user->name, 'email' => $address, 'email_current_password' => 'old-password-123'])
+                ->assertSessionHasErrors('email');
+        }
+        $this->assertNull($user->fresh()->pending_email);
     }
 
     public function test_member_can_change_password(): void

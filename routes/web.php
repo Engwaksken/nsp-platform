@@ -110,6 +110,8 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::get('/', [AccountController::class, 'edit'])->name('edit');
     Route::put('/profile', [AccountController::class, 'updateProfile'])->middleware('throttle:10,1')->name('profile.update');
     Route::put('/password', [AccountController::class, 'updatePassword'])->middleware('throttle:6,1')->name('password.update');
+    Route::get('/email/confirm/{hash}', [AccountController::class, 'confirmEmail'])->middleware(['signed', 'throttle:6,1'])->name('email.confirm');
+    Route::delete('/email/pending', [AccountController::class, 'cancelEmail'])->name('email.cancel');
 });
 
 /*

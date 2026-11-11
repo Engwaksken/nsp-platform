@@ -78,10 +78,10 @@ class WorkspaceController extends Controller
             $next[] = ['Protect your account with two-factor sign-in (a code from an app on your phone).', 'Turn it on', route('mfa.setup')];
         }
         if ($nav->investor && ! $nav->investor->isVerified()) {
-            $next[] = ['Your investor profile is waiting for Hive to verify it.', 'View profile', route('investor.apply')];
+            $next[] = [self::profileStep('investor', $nav->investor->status), 'View profile', route('investor.apply')];
         }
         if ($nav->expert && ! $nav->expert->isVerified()) {
-            $next[] = ['Your expert profile is waiting for Hive to verify it.', 'View profile', route('experts.profile')];
+            $next[] = [self::profileStep('expert', $nav->expert->status), 'View profile', route('experts.profile')];
         }
 
         // Quick actions: each only when its feature is on and the member can open it.
@@ -104,13 +104,13 @@ class WorkspaceController extends Controller
         $join = [];
         if ($on('funding') && $nav->investor) {
             $verified = $nav->investor->isVerified();
-            $roles[] = ['fa-building-columns', 'Investor', $verified ? 'Verified' : 'Waiting for verification', route($verified ? 'investor.dashboard' : 'investor.apply')];
+            $roles[] = ['fa-building-columns', 'Investor', $verified ? 'Verified' : self::profileLabel($nav->investor->status), route($verified ? 'investor.dashboard' : 'investor.apply')];
         } elseif ($on('funding')) {
             $join[] = ['fa-building-columns', 'Invest in startups', 'Apply to be a verified investor.', route('investor.apply')];
         }
         if ($on('experts') && $nav->expert) {
             $verified = $nav->expert->isVerified();
-            $roles[] = ['fa-user-tie', 'Expert or mentor', $verified ? 'Verified' : 'Waiting for verification', route($verified ? 'experts.dashboard' : 'experts.profile')];
+            $roles[] = ['fa-user-tie', 'Expert or mentor', $verified ? 'Verified' : self::profileLabel($nav->expert->status), route($verified ? 'experts.dashboard' : 'experts.profile')];
         } elseif ($on('experts')) {
             $join[] = ['fa-user-tie', 'Mentor founders', 'Offer your expertise as a mentor or consultant.', route('experts.profile')];
         }
@@ -166,5 +166,25 @@ class WorkspaceController extends Controller
             'ims_integration' => [$startup ? ['Open programs', route('workspace.startups.programs', $startup), true] : null],
             default => [],
         }));
+    }
+
+    /** Short status for an investor or expert profile that is not (or no longer) verified. */
+    private static function profileLabel(?string $status): string
+    {
+        return match ($status) {
+            'rejected' => 'Not verified',
+            'suspended' => 'Suspended',
+            'verified' => 'Account inactive',
+            default => 'Waiting for verification',
+        };
+    }
+
+    private static function profileStep(string $kind, ?string $status): string
+    {
+        return match ($status) {
+            'rejected' => "Hive did not verify your {$kind} profile. Open it to see what to change.",
+            'suspended' => "Your {$kind} profile is suspended. Contact Hive if you think this is a mistake.",
+            default => "Your {$kind} profile is waiting for Hive to verify it.",
+        };
     }
 }
