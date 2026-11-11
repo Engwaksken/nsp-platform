@@ -25,9 +25,9 @@
                 <tbody>
                 @forelse ($applications as $application)
                     <tr>
-                        <td>{{ $application->program_title ?: '—' }}</td>
-                        <td>{{ $application->cohort_name ?: '—' }}</td>
-                        <td>{{ $application->submitted_at?->format('j M Y') ?? '—' }}</td>
+                        <td>@if ($application->program_title){{ $application->program_title }}@else<span class="meta">Not given</span>@endif</td>
+                        <td>@if ($application->cohort_name){{ $application->cohort_name }}@else<span class="meta">Not given</span>@endif</td>
+                        <td>@if ($application->submitted_at){{ $application->submitted_at->format('j M Y') }}@else<span class="meta">Not submitted</span>@endif</td>
                         <td><span class="badge badge-{{ in_array($application->status, ['Accepted', 'Selected'], true) ? 'on' : ($application->status === 'Rejected' ? 'off' : 'draft') }}">{{ $application->status }}</span></td>
                         <td>{{ ($application->status_changed_at ?? $application->updated_at)->format('j M Y') }}</td>
                     </tr>

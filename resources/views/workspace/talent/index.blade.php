@@ -29,7 +29,7 @@
                         <td>{{ \App\Models\Talent\Vacancy::TYPES[$item->type] }}</td>
                         <td><span class="badge badge-{{ $item->status === 'open' ? 'on' : ($item->status === 'draft' ? 'draft' : 'off') }}">{{ \App\Models\Talent\Vacancy::STATUSES[$item->status] }}</span></td>
                         <td>{{ $item->applications_count }}@if ($item->new_count) ({{ $item->new_count }} new)@endif</td>
-                        <td>{{ $item->closes_on?->format('j M Y') ?? '—' }}</td>
+                        <td>@if ($item->closes_on){{ $item->closes_on->format('j M Y') }}@else<span class="meta">No closing date</span>@endif</td>
                     </tr>
                 @empty
                     <tr><td colspan="5" class="empty">No vacancies yet.</td></tr>

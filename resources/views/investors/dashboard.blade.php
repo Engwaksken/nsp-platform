@@ -33,6 +33,10 @@
         <section class="panel" aria-labelledby="pipeline-heading">
             <h2 id="pipeline-heading">My pipeline</h2>
             <p class="hint">Your stages and notes are private. Startups never see them.</p>
+            @if (\App\Support\Features::enabled('capital_exchange') && Route::has('investor.capital.pipeline'))
+                <p><a class="btn btn-secondary btn-sm" href="{{ route('investor.capital.pipeline') }}"><i class="fas fa-table-columns" aria-hidden="true"></i> Capital pipeline and watchlist</a>
+                    <span class="meta">{{ array_sum($funnel) }} startup(s) across {{ count(array_filter($funnel)) }} stage(s)</span></p>
+            @endif
             <div class="table-wrap" tabindex="0" role="region" aria-label="My pipeline">
                 <table>
                     <thead><tr><th scope="col">Startup</th><th scope="col">Introduction</th><th scope="col">My stage</th><th scope="col">Data room</th></tr></thead>
@@ -41,8 +45,8 @@
                         <tr>
                             <td><a href="{{ route('investor.startup', $introduction->startup_uuid) }}">{{ $introduction->startup?->display_name }}</a></td>
                             <td>{{ \App\Models\Funding\Introduction::STATUSES[$introduction->status] }}</td>
-                            <td>{{ \App\Models\Funding\Introduction::STAGES[$introduction->investor_stage] ?? '—' }}</td>
-                            <td>@php($grant = $grants->firstWhere('startup_uuid', $introduction->startup_uuid)){{ $grant ? 'Until '.$grant->expires_at->format('j M Y') : '—' }}</td>
+                            <td>{{ \App\Models\Funding\Introduction::STAGES[$introduction->investor_stage] ?? 'Not set' }}</td>
+                            <td>@php($grant = $grants->firstWhere('startup_uuid', $introduction->startup_uuid))@if ($grant)Until {{ $grant->expires_at->format('j M Y') }}@else<span class="meta">No access</span>@endif</td>
                         </tr>
                     @empty
                         <tr><td colspan="4" class="empty">Nothing yet. Express interest in a startup below.</td></tr>

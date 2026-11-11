@@ -4,7 +4,7 @@
 
 @section('workspace')
     <div class="container section narrow">
-        <p><a href="{{ route('workspace.talent.vacancy', [$startup, $vacancy]) }}">← Applications for this role</a></p>
+        <p><a href="{{ route('workspace.talent.vacancy', [$startup, $vacancy]) }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Applications for this role</a></p>
         <h1>{{ $vacancy->title }}</h1>
         @include('partials.flash')
         <p>Status: <span class="badge badge-{{ $vacancy->status === 'open' ? 'on' : ($vacancy->status === 'draft' ? 'draft' : 'off') }}">{{ \App\Models\Talent\Vacancy::STATUSES[$vacancy->status] }}</span>

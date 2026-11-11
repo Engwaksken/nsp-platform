@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>Growth report · {{ $startup->display_name }}</title>
-    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=26">
+    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=28">
     <style>
         body { background: #fff; }
         .report { max-width: 820px; margin: 0 auto; padding: 24px 16px; }
@@ -14,7 +14,7 @@
 </head>
 <body>
 <main class="report">
-    <p class="no-print"><a href="{{ route('workspace.growth', $startup) }}">← Back to Growth</a> · Use your browser’s Print (Ctrl+P) to save as PDF.</p>
+    <p class="no-print"><a href="{{ route('workspace.growth', $startup) }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to Growth</a> · Use your browser’s Print (Ctrl+P) to save as PDF.</p>
     <h1>Growth report: {{ $startup->display_name }}</h1>
     <p class="meta">{{ $startup->legal_name }} · {{ $startup->profile?->sector }} · {{ $startup->profile?->headquarters_location }}<br>
         Assessed {{ $assessment->submitted_at->format('j F Y') }} by {{ $assessment->submitter?->name ?? 'the team' }} · {{ $assessment->framework->name }} v{{ $assessment->framework->version }}</p>
@@ -40,7 +40,7 @@
             <thead><tr><th scope="col">Action</th><th scope="col">Owner</th><th scope="col">Due</th><th scope="col">Status</th></tr></thead>
             <tbody>
             @foreach ($actions as $action)
-                <tr><td>{{ $action->title }}</td><td>{{ $action->owner?->name ?? '—' }}</td><td>{{ $action->due_date?->format('j M Y') ?? '—' }}</td><td>{{ \App\Models\Growth\GrowthAction::STATUSES[$action->status] }}</td></tr>
+                <tr><td>{{ $action->title }}</td><td>@if ($action->owner){{ $action->owner->name }}@else<span class="meta">Unassigned</span>@endif</td><td>@if ($action->due_date){{ $action->due_date->format('j M Y') }}@else<span class="meta">No due date</span>@endif</td><td>{{ \App\Models\Growth\GrowthAction::STATUSES[$action->status] }}</td></tr>
             @endforeach
             </tbody>
         </table>

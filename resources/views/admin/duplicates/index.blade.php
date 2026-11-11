@@ -23,7 +23,7 @@
                 @foreach ([$candidate->startupA, $candidate->startupB] as $startup)
                     <div class="card">
                         <strong><a href="{{ route('admin.startups.show', $startup) }}">{{ $startup->display_name }}</a></strong>
-                        <p class="meta">{{ $startup->legal_name }} · reg. {{ $startup->registration_number ?: '—' }} · {{ $startup->website_domain ?: 'no website' }}<br>
+                        <p class="meta">{{ $startup->legal_name }} · {{ $startup->registration_number ? 'reg. '.$startup->registration_number : 'no registration number' }} · {{ $startup->website_domain ?: 'no website' }}<br>
                             Registered {{ $startup->created_at->format('j M Y') }} · {{ $startup->status }}</p>
                     </div>
                 @endforeach
@@ -45,7 +45,7 @@
                     </div>
                 </form>
             @else
-                <p class="meta">{{ $candidate->status === 'merged' ? 'Merged' : 'Marked as different' }} by {{ $candidate->decider?->name ?? '—' }} on {{ $candidate->decided_at?->format('j M Y') }}: “{{ $candidate->notes }}”</p>
+                <p class="meta">{{ $candidate->status === 'merged' ? 'Merged' : 'Marked as different' }} by {{ $candidate->decider?->name ?? 'an unknown user' }} on {{ $candidate->decided_at?->format('j M Y') }}: “{{ $candidate->notes }}”</p>
             @endif
         </section>
     @empty
@@ -64,7 +64,7 @@
                         <tr>
                             <td>{{ $merge->source?->display_name }}</td>
                             <td>{{ $merge->target?->display_name }}</td>
-                            <td>{{ $merge->merged_at->format('j M Y H:i') }} · {{ $merge->merger?->name ?? '—' }}</td>
+                            <td>{{ $merge->merged_at->format('j M Y H:i') }} · @if ($merge->merger){{ $merge->merger->name }}@else<span class="meta">Unknown</span>@endif</td>
                             <td>{{ $merge->reason }}</td>
                             <td>
                                 @if ($merge->undone_at)

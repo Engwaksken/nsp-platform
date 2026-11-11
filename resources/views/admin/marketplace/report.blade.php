@@ -4,7 +4,7 @@
 @section('content')
     <div class="page-head"><h1>Report #{{ $report->id }}</h1><a class="btn btn-secondary" href="{{ route('admin.marketplace.index') }}">All reports</a></div>
     @include('partials.flash')
-    <p class="meta">{{ \App\Models\Marketplace\Report::REASONS[$report->reason] ?? $report->reason }} · reported by {{ $report->reporter?->name ?? '—' }} ({{ $report->reporter?->email }}) on {{ $report->created_at->format('j M Y H:i') }}
+    <p class="meta">{{ \App\Models\Marketplace\Report::REASONS[$report->reason] ?? $report->reason }} · reported by {{ $report->reporter?->name ?? 'an unknown user' }} ({{ $report->reporter?->email }}) on {{ $report->created_at->format('j M Y H:i') }}
         · <span class="badge">{{ \App\Models\Marketplace\Report::STATUSES[$report->status] }}</span></p>
     @if ($report->details)<p>{!! nl2br(e($report->details)) !!}</p>@endif
 
@@ -49,6 +49,6 @@
             </form>
         </section>
     @else
-        <p>{{ \App\Models\Marketplace\Report::STATUSES[$report->status] }} by {{ $report->resolver?->name ?? '—' }} on {{ $report->resolved_at?->format('j M Y') }}: {{ $report->resolution_note }}</p>
+        <p>{{ \App\Models\Marketplace\Report::STATUSES[$report->status] }} by {{ $report->resolver?->name ?? 'an unknown user' }} on {{ $report->resolved_at?->format('j M Y') }}: {{ $report->resolution_note }}</p>
     @endif
 @endsection

@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container section narrow">
-        <p><a href="{{ route('marketplace.index') }}">← Marketplace</a></p>
+        <p><a href="{{ route('marketplace.index') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Marketplace</a></p>
         <p><span class="badge">{{ \App\Models\Marketplace\Listing::KINDS[$listing->kind] }}</span></p>
         <h1>{{ $listing->title }}</h1>
         @include('partials.flash')

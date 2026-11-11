@@ -4,7 +4,7 @@
 
 @section('workspace')
     <div class="container section">
-        <p><a href="{{ route('workspace.talent', $startup) }}">← All vacancies</a></p>
+        <p><a href="{{ route('workspace.talent', $startup) }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> All vacancies</a></p>
         <h1>{{ $vacancy->title }}</h1>
         @include('partials.flash')
         <p class="meta">{{ \App\Models\Talent\Vacancy::TYPES[$vacancy->type] }} · <span class="badge">{{ \App\Models\Talent\Vacancy::STATUSES[$vacancy->status] }}</span>
@@ -25,10 +25,10 @@
                 @forelse ($applications as $application)
                     <tr>
                         <td><a href="{{ route('workspace.talent.application', [$startup, $application]) }}">{{ $application->applicant?->name ?? 'Deleted account' }}</a>@if ($application->invited) <span class="badge">Invited</span>@endif</td>
-                        <td>{{ $profiles[$application->applicant_id]->headline ?? '—' }}</td>
+                        <td>{{ $profiles[$application->applicant_id]->headline ?? 'Not given' }}</td>
                         <td>{{ \App\Models\Talent\JobApplication::STATUSES[$application->status] }}</td>
                         <td>{{ $application->created_at->format('j M Y') }}</td>
-                        <td>{{ $application->cv_path ? 'Yes' : '—' }}</td>
+                        <td>{{ $application->cv_path ? 'Yes' : 'No' }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="5" class="empty">No applications{{ $status ? ' at this stage' : ' yet' }}.</td></tr>

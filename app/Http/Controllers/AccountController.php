@@ -114,7 +114,7 @@ class AccountController extends Controller
         $palette = $data['theme_palette'] === ThemePalettes::DEFAULT ? null : $data['theme_palette'];
         $request->user()->forceFill(['theme_palette' => $palette])->save();
 
-        return redirect()->to(route('account.edit').'#appearance-heading')->with('status', 'Your colours were saved.');
+        return redirect()->to(route('account.edit').'#appearance')->with('status', 'Your colours were saved.');
     }
 
     public function updatePassword(Request $request): RedirectResponse

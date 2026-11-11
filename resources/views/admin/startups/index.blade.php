@@ -25,8 +25,8 @@
             @forelse ($startups as $startup)
                 <tr>
                     <td><a href="{{ route('admin.startups.show', $startup) }}">{{ $startup->display_name }}</a><br><span class="meta">{{ $startup->legal_name }}</span></td>
-                    <td>{{ $startup->registration_number ?: '—' }}</td>
-                    <td>{{ $startup->profile?->sector ?: '—' }}</td>
+                    <td>@if ($startup->registration_number){{ $startup->registration_number }}@else<span class="meta">Not given</span>@endif</td>
+                    <td>@if ($startup->profile?->sector){{ $startup->profile->sector }}@else<span class="meta">Not given</span>@endif</td>
                     <td>{{ $startup->active_memberships_count }}</td>
                     <td>{{ $startup->profile?->profile_completion ?? 0 }}%</td>
                     <td>{{ $startup->created_at->format('j M Y') }}</td>

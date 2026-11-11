@@ -25,8 +25,8 @@
                 <tr>
                     <td><a href="{{ route('admin.users.edit', $user) }}" data-modal>{{ $user->name }}</a></td>
                     <td>{{ $user->email }}</td>
-                    <td>{{ $user->roles->pluck('name')->join(', ') ?: '—' }}</td>
-                    <td>{{ collect([$user->oidc_subject ? 'Hive SSO' : null, $user->password ? 'Password' : null])->filter()->join(', ') ?: '—' }}</td>
+                    <td>@if ($user->roles->isNotEmpty()){{ $user->roles->pluck('name')->join(', ') }}@else<span class="meta">None</span>@endif</td>
+                    <td>@if ($user->oidc_subject || $user->password){{ collect([$user->oidc_subject ? 'Hive SSO' : null, $user->password ? 'Password' : null])->filter()->join(', ') }}@else<span class="meta">None</span>@endif</td>
                     <td><span class="badge badge-{{ $user->is_active ? 'on' : 'off' }}">{{ $user->is_active ? 'Active' : 'Inactive' }}</span></td>
                     <td>{{ $user->last_login_at?->diffForHumans() ?? 'Never' }}</td>
                 </tr>

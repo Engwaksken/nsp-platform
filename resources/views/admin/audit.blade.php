@@ -37,7 +37,7 @@
                 @forelse ($logs as $log)
                     <tr>
                         <td>{{ $log->created_at->format('j M Y H:i:s') }}</td>
-                        <td>{{ $log->user_id ?? '—' }}</td>
+                        <td>@if ($log->user_id !== null){{ $log->user_id }}@else<span class="meta">Unknown</span>@endif</td>
                         <td>{{ $log->method }}</td>
                         <td><span class="badge badge-{{ $log->success ? 'on' : 'off' }}">{{ $log->success ? 'Success' : 'Failed' }}</span></td>
                         <td>{{ $log->reason }}</td>

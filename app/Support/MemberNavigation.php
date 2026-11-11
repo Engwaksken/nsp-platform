@@ -143,6 +143,8 @@ class MemberNavigation
         if ($on('funding') && $s) {
             $groups[] = $this->group('funding', 'Funding', 'fa-sack-dollar', [
                 $this->link('workspace.funding', 'Fundraising', 'fa-hand-holding-dollar', 'workspace.funding*', $s),
+                // Capital Exchange founder pages also need the registry flag (routes/modules/capital.php).
+                $on('capital_exchange') && $on('registry') ? $this->link('workspace.capital.index', 'Capital Exchange', 'fa-share-nodes', 'workspace.capital.*', $s) : null,
             ]);
         }
         if ($on('experts') && $s) {
@@ -183,6 +185,7 @@ class MemberNavigation
             $groups[] = $this->group('investor', 'Investor', 'fa-building-columns', [
                 // The dashboard sends unverified investors back to their profile, so list it only once verified.
                 $this->investor->isVerified() ? $this->link('investor.dashboard', 'Deal flow', 'fa-chart-line', 'investor.dashboard|investor.startup') : null,
+                $this->investor->isVerified() && $on('capital_exchange') ? $this->link('investor.capital.pipeline', 'Capital pipeline', 'fa-table-columns', 'investor.capital.*') : null,
                 $this->link('investor.apply', 'Investor profile', 'fa-id-card-clip', 'investor.apply'),
             ]);
         }

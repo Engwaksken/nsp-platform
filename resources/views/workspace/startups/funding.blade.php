@@ -10,6 +10,12 @@
 
         @php($canEdit = $membership->canEdit())
 
+        @if (\App\Support\Features::enabled('capital_exchange') && Route::has('workspace.capital.index'))
+            <p class="alert alert-info" role="status"><i class="fas fa-share-nodes" aria-hidden="true"></i>
+                Choose what each connected investor sees, answer due-diligence checklists and document requests, and check your readiness in
+                <a href="{{ route('workspace.capital.index', $startup) }}">Capital Exchange</a>.</p>
+        @endif
+
         @include('partials.stats', ['label' => 'Funding at a glance', 'stats' => [
             ['icon' => 'fa-sack-dollar', 'tone' => 'amber', 'label' => 'Funding request', 'value' => $open ? $open->amountLabel() : 'None open'],
             ['icon' => 'fa-handshake', 'tone' => 'green', 'label' => 'Introductions', 'value' => $introductions->count(), 'note' => $introductions->where('status', 'accepted')->count().' accepted'],
@@ -143,7 +149,7 @@
                             <td><a href="{{ route('dataroom.download', $file) }}">{{ $file->title }}</a><br><span class="meta">{{ $file->original_name }}</span></td>
                             <td>{{ \App\Models\Funding\DataRoomFile::CATEGORIES[$file->category] ?? $file->category }}</td>
                             <td>{{ number_format($file->size / 1024, 0) }} KB</td>
-                            <td>{{ $file->created_at->format('j M Y') }} by {{ $file->uploader?->name ?? '—' }}</td>
+                            <td>{{ $file->created_at->format('j M Y') }} by {{ $file->uploader?->name ?? 'an unknown user' }}</td>
                             <td>@if ($canEdit)
                                 <form method="post" action="{{ route('workspace.funding.files.destroy', [$startup, $file]) }}" data-confirm="Delete “{{ $file->title }}”?">
                                     @csrf @method('DELETE') <button type="submit" class="btn btn-secondary btn-sm">Delete<span class="visually-hidden"> {{ $file->title }}</span></button>

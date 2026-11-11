@@ -29,7 +29,7 @@
                     <td>{{ $announcement->title }}<br><span class="meta">{{ \Illuminate\Support\Str::limit($announcement->body, 120) }}</span></td>
                     <td>{{ \App\Models\Communication\Announcement::AUDIENCES[$announcement->audience] }}</td>
                     <td>{{ ucfirst($announcement->status) }}@if ($announcement->sent_at) {{ $announcement->sent_at->format('j M Y') }} by {{ $announcement->sender?->name }}@endif</td>
-                    <td>{{ $announcement->status === 'sent' ? $announcement->recipients : '—' }}</td>
+                    <td>@if ($announcement->status === 'sent'){{ $announcement->recipients }}@else<span class="meta">Not sent</span>@endif</td>
                     <td>@if ($announcement->status === 'draft')
                             <div class="inline-form">
                                 <form method="post" action="{{ route('admin.communications.send', $announcement) }}" data-confirm="Send “{{ $announcement->title }}” to {{ \App\Models\Communication\Announcement::AUDIENCES[$announcement->audience] }}?">@csrf <button type="submit" class="btn btn-primary btn-sm">Send<span class="visually-hidden"> {{ $announcement->title }}</span></button></form>
@@ -59,7 +59,7 @@
             @forelse ($deliveries as $delivery)
                 <tr>
                     <td>{{ $delivery->created_at->format('j M Y H:i') }}</td>
-                    <td>{{ $delivery->user?->name ?? '—' }}</td>
+                    <td>@if ($delivery->user){{ $delivery->user->name }}@else<span class="meta">Unknown</span>@endif</td>
                     <td>{{ \App\Communication\Notifier::types()[$delivery->type]['label'] ?? $delivery->type }}</td>
                     <td>{{ $delivery->subject }}</td>
                     <td><span class="badge badge-{{ $delivery->status === 'sent' ? 'on' : ($delivery->status === 'failed' ? 'off' : 'draft') }}">{{ ucfirst($delivery->status) }}</span>

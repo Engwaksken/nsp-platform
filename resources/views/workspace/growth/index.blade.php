@@ -11,7 +11,7 @@
             <div class="card"><h2>Coming soon</h2><p>Hive has not published the growth assessment yet. You will be able to assess your startup and build a growth plan here.</p></div>
         @else
             @include('partials.stats', ['label' => 'Growth at a glance', 'stats' => [
-                ['icon' => 'fa-gauge-high', 'tone' => 'green', 'label' => 'Growth score', 'value' => $latest ? number_format($latest->displayScore(), 1) : '—', 'note' => $latest ? 'out of 100' : 'Not assessed yet'],
+                ['icon' => 'fa-gauge-high', 'tone' => 'green', 'label' => 'Growth score', 'value' => $latest ? number_format($latest->displayScore(), 1) : 'None', 'note' => $latest ? 'out of 100' : 'Not assessed yet'],
                 ['icon' => 'fa-seedling', 'tone' => 'green', 'label' => 'Stage', 'value' => $latest ? $latest->displayBand() : 'Not assessed'],
                 ['icon' => 'fa-list-check', 'tone' => 'blue', 'label' => 'Open actions', 'value' => $actions->where('status', '!=', 'done')->count(), 'note' => $actions->where('status', 'done')->count().' done'],
                 ['icon' => 'fa-clock-rotate-left', 'tone' => 'purple', 'label' => 'Assessments', 'value' => $history->count()],
@@ -52,7 +52,7 @@
                             <tbody>@foreach ($dimensionTrends as $trend)
                                 <tr><th scope="row">{{ $trend['title'] }}</th>
                                     <td>{{ $trend['score'] === null ? 'Insufficient information' : number_format($trend['score'], 1) }}</td>
-                                    <td>{{ $trend['previous'] === null ? '—' : number_format($trend['previous'], 1) }}</td>
+                                    <td>@if ($trend['previous'] === null)<span class="meta">None</span>@else{{ number_format($trend['previous'], 1) }}@endif</td>
                                     <td>{{ $trend['change'] === null ? 'Not comparable' : ucfirst($trend['direction']).' ('.($trend['change'] > 0 ? '+' : '').number_format($trend['change'], 1).')' }}</td>
                                 </tr>
                             @endforeach</tbody>
@@ -74,8 +74,8 @@
                                 <tr>
                                     <td><strong>{{ $action->title }}</strong>@if ($action->details)<br><span class="meta">{{ $action->details }}</span>@endif
                                         @foreach ($action->updates->take(2) as $update)<br><span class="meta">{{ $update->created_at->format('j M') }} · {{ $update->user?->name }}: {{ $update->note }}</span>@endforeach</td>
-                                    <td>{{ $action->owner?->name ?? '—' }}</td>
-                                    <td>{{ $action->due_date?->format('j M Y') ?? '—' }}@if ($action->due_date?->isPast() && $action->status !== 'done')<br><span class="badge badge-draft">Overdue</span>@endif</td>
+                                    <td>@if ($action->owner){{ $action->owner->name }}@else<span class="meta">Unassigned</span>@endif</td>
+                                    <td>@if ($action->due_date){{ $action->due_date->format('j M Y') }}@else<span class="meta">No due date</span>@endif @if ($action->due_date?->isPast() && $action->status !== 'done')<br><span class="badge badge-draft">Overdue</span>@endif</td>
                                     <td><span class="badge badge-{{ ['done' => 'on', 'doing' => 'scheduled'][$action->status] ?? 'draft' }}">{{ \App\Models\Growth\GrowthAction::STATUSES[$action->status] }}</span></td>
                                     <td>
                                         <form method="post" action="{{ route('workspace.growth.actions.update', [$startup, $action]) }}">

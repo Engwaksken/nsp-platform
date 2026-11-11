@@ -33,6 +33,7 @@ class Settings
         'contact_email' => null,
         'contact_phone' => null,
         'contact_address' => null,
+        'contact_map_url' => null,
         'footer_text' => null,
         'social_links' => null,
         'contact_routing' => null,
