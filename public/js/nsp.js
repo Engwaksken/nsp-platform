@@ -53,6 +53,31 @@
     });
     // On phones the site menu is a full sheet: stop the page behind it from scrolling.
     if (target.id === 'site-nav') document.documentElement.classList.toggle('nav-sheet-open', open);
+    // App shells (admin and member): on small screens the sidebar slides in over a backdrop.
+    if (target.hasAttribute('data-offcanvas')) {
+      document.documentElement.classList.toggle('nav-sheet-open', open);
+      qsa(document, '.shell-backdrop').forEach(function (backdrop) { backdrop.hidden = !open; });
+      if (open && window.matchMedia('(max-width: 960px)').matches) {
+        var first = target.querySelector('[data-offcanvas-close], a[href]');
+        if (first) first.focus();
+      }
+    }
+  }
+  function closeOffcanvas(returnFocus) {
+    qsa(document, '[data-offcanvas].is-open').forEach(function (panel) {
+      setPanel(panel, false);
+      var toggle = document.querySelector('[data-toggle-target="' + panel.id + '"]');
+      if (returnFocus && toggle) toggle.focus();
+    });
+  }
+  qsa(document, '[data-offcanvas-close]').forEach(function (closer) {
+    closer.addEventListener('click', function () { closeOffcanvas(true); });
+  });
+  // Back on a wide screen the sidebar is always shown: drop the phone state.
+  if (window.matchMedia) {
+    var wide = window.matchMedia('(min-width: 961px)');
+    var onWide = function () { if (wide.matches) closeOffcanvas(false); };
+    if (wide.addEventListener) wide.addEventListener('change', onWide); else if (wide.addListener) wide.addListener(onWide);
   }
   qsa(document, '[data-toggle-target]').forEach(function (button) {
     var target = document.getElementById(button.getAttribute('data-toggle-target'));
@@ -60,6 +85,7 @@
     button.addEventListener('click', function () { setPanel(target, !target.classList.contains('is-open')); });
   });
   document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && document.querySelector('[data-offcanvas].is-open')) { closeOffcanvas(true); return; }
     var siteNav = document.getElementById('site-nav');
     if (event.key === 'Escape' && siteNav && siteNav.classList.contains('is-open') && window.matchMedia('(max-width: 768px)').matches) {
       setPanel(siteNav, false);
@@ -67,6 +93,27 @@
       if (tab) tab.focus();
     }
   });
+
+  // Colour theme switch (partials/theme-switch). public/js/theme.js applies and stores the choice.
+  var themeButtons = qsa(document, '[data-theme-choice]');
+  if (themeButtons.length && NSP.setTheme) {
+    var syncTheme = function () {
+      var current = NSP.theme();
+      themeButtons.forEach(function (button) {
+        button.setAttribute('aria-pressed', button.getAttribute('data-theme-choice') === current ? 'true' : 'false');
+      });
+    };
+    themeButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        NSP.setTheme(button.getAttribute('data-theme-choice'));
+        themeButtons.forEach(function (other) {
+          other.setAttribute('aria-pressed', other.getAttribute('data-theme-choice') === button.getAttribute('data-theme-choice') ? 'true' : 'false');
+        });
+      });
+    });
+    window.addEventListener('storage', syncTheme);
+    syncTheme();
+  }
 
   // Installable app: the service worker only adds an offline page and caches the
   // versioned CSS/JS/fonts/icons. Pages themselves are never cached.
@@ -546,6 +593,14 @@
       if (start < 0 && !inModal) { var saved = parseInt(storage(key) || '', 10); if (saved >= 0 && saved < panels.length) start = saved; }
       select(start < 0 ? 0 : start, false);
     });
+    // An in-page link to something inside a hidden tab (e.g. "#invite") opens that tab.
+    if (!NSP.tabHashBound) {
+      NSP.tabHashBound = true;
+      window.addEventListener('hashchange', function () {
+        var target = window.location.hash ? document.getElementById(decodeURIComponent(window.location.hash.slice(1))) : null;
+        if (target && NSP.showTabFor) NSP.showTabFor(target);
+      });
+    }
   }
 
   NSP.showTabFor = function (node) {
@@ -834,8 +889,101 @@
     });
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Card grids (components/card-grid + components/collapsible-card)     */
+  /* ------------------------------------------------------------------ */
+  // Collapsible cards are native <details>, so they open and close without this code. With it:
+  // - the grid's Expand all / Collapse all buttons are shown (they stay hidden without JS);
+  // - with data-card-grid-key, each visitor's open/closed choice per card is remembered for this
+  //   page in localStorage, except cards marked data-card-attention (an error or message), which stay open;
+  // - a link to an element inside a closed card (#id) opens that card;
+  // - printing opens every card, and closes them again afterwards.
+  var CARD_STORE = 'nsp-cards:';
+  function cardStore(key, value) {
+    try {
+      var name = CARD_STORE + key + ':' + window.location.pathname;
+      if (value === undefined) return JSON.parse(window.localStorage.getItem(name) || '{}') || {};
+      window.localStorage.setItem(name, JSON.stringify(value));
+    } catch (e) { /* storage blocked or full: cards simply start as the page drew them */ }
+    return {};
+  }
+  function initCardGrids(root) {
+    qsa(root, '[data-card-grid]').forEach(function (grid) {
+      if (grid.__nspCards) return;
+      grid.__nspCards = true;
+      var cards = function () { return qsa(grid, 'details.collapsible-card'); };
+      if (!cards().length) return;
+      var key = grid.getAttribute('data-card-grid-key');
+      if (key) {
+        var saved = cardStore(key);
+        cards().forEach(function (card) {
+          var id = card.getAttribute('data-card-id');
+          if (!id || card.hasAttribute('data-card-attention') || !Object.prototype.hasOwnProperty.call(saved, id)) return;
+          card.open = !!saved[id];
+        });
+        // "toggle" does not bubble: listen on each card.
+        cards().forEach(function (card) {
+          card.addEventListener('toggle', function () {
+            var id = card.getAttribute('data-card-id');
+            if (!id || card.__nspPrinting) return;
+            var state = cardStore(key);
+            state[id] = card.open;
+            cardStore(key, state);
+          });
+        });
+      }
+      var toolbar = grid.querySelector('.card-grid-toolbar');
+      if (toolbar && cards().length > 1) {
+        toolbar.hidden = false;
+        var expand = toolbar.querySelector('[data-cards-expand]');
+        var collapse = toolbar.querySelector('[data-cards-collapse]');
+        var sync = function () {
+          var all = cards();
+          var open = all.filter(function (card) { return card.open; }).length;
+          if (expand) expand.disabled = open === all.length;
+          if (collapse) collapse.disabled = open === 0;
+        };
+        var setAll = function (open, focusFrom) {
+          cards().forEach(function (card) { card.open = open; });
+          sync();
+          // The pressed button is now disabled: keep keyboard focus on its partner.
+          var partner = focusFrom === expand ? collapse : expand;
+          if (partner && document.activeElement === focusFrom) partner.focus();
+        };
+        if (expand) expand.addEventListener('click', function () { setAll(true, expand); });
+        if (collapse) collapse.addEventListener('click', function () { setAll(false, collapse); });
+        cards().forEach(function (card) { card.addEventListener('toggle', sync); });
+        sync();
+      }
+    });
+  }
+  function openCardForHash() {
+    var id = window.location.hash ? decodeURIComponent(window.location.hash.slice(1)) : '';
+    var target = id && document.getElementById(id);
+    if (!target) return;
+    for (var node = target; node; node = node.parentElement) {
+      if (node.matches && node.matches('details.collapsible-card') && !node.open) node.open = true;
+    }
+  }
+  window.addEventListener('hashchange', openCardForHash);
+  window.addEventListener('beforeprint', function () {
+    qsa(document, 'details.collapsible-card:not([open])').forEach(function (card) {
+      card.__nspPrinting = true;
+      card.open = true;
+    });
+  });
+  window.addEventListener('afterprint', function () {
+    qsa(document, 'details.collapsible-card').forEach(function (card) {
+      if (!card.__nspPrinting) return;
+      card.open = false;
+      // toggle fires asynchronously: forget the print flag after it has run.
+      window.setTimeout(function () { card.__nspPrinting = false; }, 0);
+    });
+  });
+
   NSP.enhance = function (root) {
     root = root || document;
+    initCardGrids(root);
     initTables(root);
     initTabs(root);
     initAiProviderForm(root);
@@ -849,4 +997,5 @@
   };
 
   NSP.enhance(document);
+  openCardForHash(); // after enhance, so a remembered "closed" does not hide the linked card
 })();

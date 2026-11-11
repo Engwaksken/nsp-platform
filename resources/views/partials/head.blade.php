@@ -1,9 +1,15 @@
 {{-- Shared <head> contents. Expects $brand, $brandFont, $brandFavicon from the layout view composer. --}}
+{{-- A signed-in member's own colour palette (My profile → Appearance) replaces the brand colours for them only. --}}
+@php($brand = \App\Support\ThemePalettes::apply($brand, auth()->user()))
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 {{-- Installable on phones ("Add to home screen"); see AppManifestController and public/sw.js. --}}
 <link rel="manifest" href="{{ route('app.manifest') }}">
-<meta name="theme-color" content="{{ preg_match('/^#[0-9a-fA-F]{3,8}$/', (string) $brand['primary_color']) ? $brand['primary_color'] : '#3a3a3c' }}">
+{{-- Browser toolbar colour: the brand colour in light mode, the dark surface in dark mode; theme.js follows a chosen theme. --}}
+@php($themeLight = preg_match('/^#[0-9a-fA-F]{3,8}$/', (string) $brand['primary_color']) ? $brand['primary_color'] : '#3a3a3c')
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="{{ $themeLight }}" data-light="{{ $themeLight }}" data-dark="#1b1d21">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1d21" data-light="{{ $themeLight }}" data-dark="#1b1d21">
+<meta name="color-scheme" content="light dark">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -11,6 +17,8 @@
 <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}?v=1">
 <meta name="nsp-sw" content="{{ asset('sw.js') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
+{{-- Blocking on purpose: sets the "js" class and the saved colour theme before the first paint. --}}
+<script src="{{ asset('js/theme.js') }}?v=1"></script>
 <title>{{ trim(($pageTitle ?? '') !== '' ? $pageTitle . ' | ' . $brand['site_name'] : $brand['site_name']) }}</title>
 @if (!empty($metaDescription ?? $brand['meta_description']))
     <meta name="description" content="{{ $metaDescription ?? $brand['meta_description'] }}">
@@ -35,7 +43,7 @@
 {{-- Font Awesome Free 6.5.2, solid icons only, self-hosted (public/vendor/fontawesome; the CSP allows no CDNs). --}}
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/fontawesome.min.css') }}?v=6.5.2">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/solid.min.css') }}?v=6.5.2">
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=19">
+<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=25">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};
@@ -43,6 +51,10 @@
         --brand-accent: {{ $brand['accent_color'] }};
         {{-- From the fixed Settings::FONTS list; e() would turn the quotes into &#039; and break the CSS. --}}
         --brand-font: {!! str_replace(['<', '>', '{', '}', ';'], '', $brandFont) !!};
+        {{-- Readable text on and in the brand colours, light and dark (only #rrggbb values; see App\Support\Contrast). --}}
+        @foreach (\App\Support\Contrast::brandTokens($brand) as $token => $value)
+        {{ $token }}: {{ $value }};
+        @endforeach
     }
 </style>
-<script src="{{ asset('js/nsp.js') }}?v=10" defer></script>
+<script src="{{ asset('js/nsp.js') }}?v=13" defer></script>

@@ -38,9 +38,10 @@ class ConsentController extends Controller
                 ? $this->registry->grantConsent($startup, $request->user(), $purpose)
                 : $this->registry->revokeConsent($startup, $request->user(), $purpose);
         } catch (RegistryException $exception) {
-            return back()->withErrors(['consent' => $exception->getMessage()]);
+            // consent_purpose: the Data sharing page opens that purpose's card to show the result.
+            return back()->withErrors(['consent' => $exception->getMessage()])->with('consent_purpose', $purpose);
         }
 
-        return back()->with('status', $grant ? 'Sharing turned on.' : 'Sharing turned off. It stops from now on.');
+        return back()->with('status', $grant ? 'Sharing turned on.' : 'Sharing turned off. It stops from now on.')->with('consent_purpose', $purpose);
     }
 }

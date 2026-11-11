@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Organization invitation'])
+@extends('layouts.app', ['pageTitle' => 'Organization invitation'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

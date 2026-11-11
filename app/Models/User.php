@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -37,6 +37,13 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'mfa_recovery_codes' => 'encrypted:array',
             'mfa_enabled_at' => 'datetime',
         ];
+    }
+
+    /** Up to two initials for avatars, e.g. "Olive Founder" -> "OF". */
+    public function initials(): string
+    {
+        return collect(preg_split('/\s+/', trim((string) $this->name)))->filter()->take(2)
+            ->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('') ?: '?';
     }
 
     public function canUseAdmin(): bool

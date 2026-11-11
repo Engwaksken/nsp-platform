@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'My startups'])
+@extends('layouts.app', ['pageTitle' => 'My startups'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 
@@ -28,26 +28,26 @@
                 <a class="btn btn-primary" href="{{ route('workspace.startups.create') }}">Register a startup</a>
             </div>
         @else
-            <div class="grid">
+            {{-- Open while there is one row of startups; with more, closed so the list stays short. --}}
+            <x-card-grid label="My startups" remember="startups">
                 @foreach ($memberships as $membership)
-                    @php($startup = $membership->startup)
-                    <section class="card" aria-labelledby="startup-{{ $startup->uuid }}">
-                        <h2 id="startup-{{ $startup->uuid }}" class="h3">{{ $startup->display_name }}
-                            @if ($active?->startup_uuid === $startup->uuid)<span class="badge badge-on">Current</span>@endif
-                        </h2>
-                        <p class="meta">{{ \App\Models\Registry\StartupMembership::ROLES[$membership->role] }} · Profile {{ $startup->profile?->profile_completion ?? 0 }}% complete</p>
+                    @php($listed = $membership->startup)
+                    <x-collapsible-card id="startup-{{ $listed->uuid }}" :level="2" icon="fa-rocket" :title="$listed->display_name"
+                        :badge="$active?->startup_uuid === $listed->uuid ? 'Current' : null" badge-tone="on"
+                        :summary="\App\Models\Registry\StartupMembership::ROLES[$membership->role].' · Profile '.($listed->profile?->profile_completion ?? 0).'% complete'"
+                        :open="$memberships->count() <= 4">
                         <div class="actions">
-                            <a class="btn btn-secondary btn-sm" href="{{ route('workspace.startups.overview', $startup) }}">Open<span class="visually-hidden"> {{ $startup->display_name }}</span></a>
-                            @if ($active?->startup_uuid !== $startup->uuid)
-                                <form method="post" action="{{ route('workspace.startups.switch', $startup) }}">
+                            <a class="btn btn-secondary btn-sm" href="{{ route('workspace.startups.overview', $listed) }}">Open<span class="visually-hidden"> {{ $listed->display_name }}</span></a>
+                            @if ($active?->startup_uuid !== $listed->uuid)
+                                <form method="post" action="{{ route('workspace.startups.switch', $listed) }}">
                                     @csrf
-                                    <button type="submit" class="btn btn-secondary btn-sm">Work on this startup<span class="visually-hidden">: {{ $startup->display_name }}</span></button>
+                                    <button type="submit" class="btn btn-secondary btn-sm">Work on this startup<span class="visually-hidden">: {{ $listed->display_name }}</span></button>
                                 </form>
                             @endif
                         </div>
-                    </section>
+                    </x-collapsible-card>
                 @endforeach
-            </div>
+            </x-card-grid>
         @endif
 
         @if ($requests->isNotEmpty())

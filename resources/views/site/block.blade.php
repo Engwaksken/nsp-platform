@@ -112,7 +112,7 @@
             <section class="section section-alt">
                 <div class="container">
                     <h2>{{ $block['heading'] ?: 'Latest news' }}</h2>
-                    <div class="grid">
+                    <div class="card-grid">
                         @foreach ($block['data'] as $post)
                             @include('site.news.card', ['post' => $post])
                         @endforeach

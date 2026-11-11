@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => $startup->display_name.' · Investor view'])
+@extends('layouts.app', ['pageTitle' => $startup->display_name.' · Investor view'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

@@ -1,8 +1,9 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -100,6 +101,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
     Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
         ->middleware('throttle:6,1')->name('verification.send');
+});
+
+/*
+| My profile (name, email address, password)
+*/
+Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
+    Route::get('/', [AccountController::class, 'edit'])->name('edit');
+    Route::put('/profile', [AccountController::class, 'updateProfile'])->middleware('throttle:10,1')->name('profile.update');
+    Route::put('/password', [AccountController::class, 'updatePassword'])->middleware('throttle:6,1')->name('password.update');
+    Route::get('/email/confirm/{hash}', [AccountController::class, 'confirmEmail'])->middleware(['signed', 'throttle:6,1'])->name('email.confirm');
+    Route::delete('/email/pending', [AccountController::class, 'cancelEmail'])->name('email.cancel');
+    Route::put('/appearance', [AccountController::class, 'updateAppearance'])->middleware('throttle:30,1')->name('appearance.update');
 });
 
 /*

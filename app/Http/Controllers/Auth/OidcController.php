@@ -109,7 +109,8 @@ class OidcController extends Controller
         $existing = User::query()->where('email', $email)->first();
         if ($existing) {
             // Never merge accounts on email alone unless the owner enabled it and the IdP verified the address.
-            if (! config('nsp.oidc.link_verified_email') || ! $emailVerified || $existing->oidc_subject !== null) {
+            // The local account must have confirmed the address too: an unconfirmed email proves nothing about who owns it.
+            if (! config('nsp.oidc.link_verified_email') || ! $emailVerified || ! $existing->hasVerifiedEmail() || $existing->oidc_subject !== null) {
                 return 'An NSP account already uses this email. Ask an administrator to link it to your Hive login.';
             }
             $existing->forceFill(['oidc_issuer' => $issuer, 'oidc_subject' => $subject, 'email_verified_at' => now()])->save();

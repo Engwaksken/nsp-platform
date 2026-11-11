@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="no-js">
 <head>
     @include('partials.head')
     @stack('head')
@@ -48,6 +48,7 @@
             $tabIcon = fn (string $paths) => '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.$paths.'</svg>';
         @endphp
         <nav class="site-nav" id="site-nav" aria-label="Main">
+            <a class="nav-link nojs-only nav-close" href="#main">Close menu</a>
             <ul class="nav-links">
                 @foreach ($menuItems->whereNull('parent_id') as $item)
                     @php($children = $menuItems->where('parent_id', $item->id))
@@ -86,8 +87,11 @@
                     @endif
                 @endforeach
             </ul>
+            <div class="nav-theme">@include('partials.theme-switch')</div>
             @auth
-                @php($unreadNotifications = \App\Models\Communication\UserNotification::query()->where('user_id', auth()->id())->whereNull('read_at')->count())
+                @php($unreadNotifications = \App\Support\MemberNavigation::for(auth()->user())->unread)
+                {{-- Signed in: the main call to action is the dashboard (admins go to the admin dashboard). --}}
+                <a class="btn btn-primary btn-sm nav-signin nav-dashboard" href="{{ auth()->user()->canUseAdmin() ? route('admin.dashboard') : route('workspace') }}"><i class="fas fa-gauge-high" aria-hidden="true"></i> Go to dashboard</a>
                 <div class="nav-group nav-account">
                     <button type="button" class="nav-group-toggle nav-account-toggle" aria-expanded="false" aria-controls="nav-menu-account">
                         Account
@@ -146,6 +150,9 @@
     <button type="button" class="app-tab-menu" data-toggle-target="site-nav" aria-expanded="false" aria-controls="site-nav">
         {!! $tabIcon('<path d="M4 6h16M4 12h16M4 18h16"/>') !!}<span>Menu</span>
     </button>
+    <a class="app-tab-menu nojs-only" href="#site-nav">
+        {!! $tabIcon('<path d="M4 6h16M4 12h16M4 18h16"/>') !!}<span>Menu</span>
+    </a>
 </nav>
 
 <footer class="site-footer">

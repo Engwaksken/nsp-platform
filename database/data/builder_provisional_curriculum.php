@@ -123,7 +123,7 @@ return [
                     ['market_understanding'],
                     ['Try a competitor product yourself and note the experience.']),
                 $step('customer_discovery', 'Customer discovery',
-                    "Test willingness to act: pre-orders, letters of intent, sign-ups, pilots or deposits. Words are cheap; commitments are evidence.",
+                    'Test willingness to act: pre-orders, letters of intent, sign-ups, pilots or deposits. Words are cheap; commitments are evidence.',
                     [
                         $field('experiment', 'What you asked customers to commit to', 'textarea'),
                         $field('people_asked', 'People asked', 'number'),
@@ -136,7 +136,7 @@ return [
                     ['customer_validation', 'market_understanding'],
                     ['Prepare a one-page offer customers can say yes or no to.']),
                 $step('market_validation_conclusion', 'Market-validation conclusion',
-                    "Decide whether the market justifies building the product now. Summarise size, alternatives and the commitments you collected. A reviewer checks this brief.",
+                    'Decide whether the market justifies building the product now. Summarise size, alternatives and the commitments you collected. A reviewer checks this brief.',
                     [
                         $field('decision', 'Decision', 'select', true, '', ['proceed' => 'Proceed', 'pivot' => 'Pivot segment or offer', 'pause' => 'Pause']),
                         $field('rationale', 'Rationale', 'textarea'),
@@ -155,7 +155,7 @@ return [
             'outputs' => ['Solution canvas', 'MVP plan', 'Test results'],
             'steps' => [
                 $step('value_proposition', 'Value proposition',
-                    "State the specific outcome customers get, in one sentence, and how it beats their current alternative.",
+                    'State the specific outcome customers get, in one sentence, and how it beats their current alternative.',
                     [
                         $field('value_statement', 'Value proposition (one sentence)', 'text'),
                         $field('gains', 'Gains for the customer', 'list'),
@@ -167,7 +167,7 @@ return [
                     ['product_readiness', 'problem_clarity'],
                     ['Test the sentence with three customers and note their reaction.']),
                 $step('solution_concept', 'Solution concept',
-                    "Describe how the solution works and which features are essential for the first version. Everything else goes on a later list.",
+                    'Describe how the solution works and which features are essential for the first version. Everything else goes on a later list.',
                     [
                         $field('how_it_works', 'How it works', 'textarea'),
                         $field('must_have_features', 'Must-have features for version 1', 'list'),
@@ -180,7 +180,7 @@ return [
                     ['product_readiness'],
                     ['Sketch the main user flow on paper and walk a customer through it.']),
                 $step('prototype_mvp', 'Prototype / MVP plan',
-                    "Plan the smallest product that lets real customers get the core outcome. Set a build budget, a date, and what you will measure.",
+                    'Plan the smallest product that lets real customers get the core outcome. Set a build budget, a date, and what you will measure.',
                     [
                         $field('mvp_description', 'What the MVP includes', 'textarea'),
                         $field('launch_date', 'Target date for first users', 'date'),
@@ -193,7 +193,7 @@ return [
                     ['product_readiness'],
                     ['Break the MVP into weekly milestones.']),
                 $step('product_testing', 'Product testing',
-                    "Put the MVP in front of real users and record what happened against your success metrics. Include failures. A reviewer checks the results.",
+                    'Put the MVP in front of real users and record what happened against your success metrics. Include failures. A reviewer checks the results.',
                     [
                         $field('testers', 'Number of users who tested', 'number'),
                         $field('results', 'Results against success metrics', 'textarea'),
@@ -212,7 +212,7 @@ return [
             'outputs' => ['Business model canvas', 'Costs and revenue worksheet'],
             'steps' => [
                 $step('revenue_model', 'Revenue model',
-                    "Choose how you will earn money (sale, subscription, commission, licensing …) and who pays.",
+                    'Choose how you will earn money (sale, subscription, commission, licensing …) and who pays.',
                     [
                         $field('model_type', 'Main revenue model', 'select', true, '', ['one_off' => 'One-off sale', 'subscription' => 'Subscription', 'commission' => 'Commission / transaction fee', 'licensing' => 'Licensing', 'other' => 'Other']),
                         $field('revenue_streams', 'Revenue streams', 'list'),
@@ -224,7 +224,7 @@ return [
                     ['business_model_strength'],
                     ['Compare how two competitors charge.']),
                 $step('pricing', 'Pricing',
-                    "Set an initial price and explain how you chose it: customer value, competitor prices and your costs.",
+                    'Set an initial price and explain how you chose it: customer value, competitor prices and your costs.',
                     [
                         $field('price', 'Initial price (UGX)', 'number'),
                         $field('price_unit', 'Per (unit, month, transaction …)', 'text'),
@@ -236,7 +236,7 @@ return [
                     ['business_model_strength', 'financial_readiness'],
                     ['Run a quick price test with two price points.']),
                 $step('unit_economics', 'Unit economics',
-                    "Work out what it costs to win and serve one customer and what that customer brings in. Use your best current numbers and say which are estimates.",
+                    'Work out what it costs to win and serve one customer and what that customer brings in. Use your best current numbers and say which are estimates.',
                     [
                         $field('acquisition_cost', 'Cost to acquire one customer (UGX)', 'number'),
                         $field('cost_to_serve', 'Cost to serve one customer per year (UGX)', 'number'),
@@ -249,7 +249,7 @@ return [
                     ['business_model_strength', 'financial_readiness'],
                     ['Track actual acquisition spend for the next month.']),
                 $step('financial_assumptions', 'Financial assumptions',
-                    "Write down the assumptions behind a 12–24 month projection: growth, costs, hiring and cash needs. Attach the worksheet. A reviewer checks this step.",
+                    'Write down the assumptions behind a 12–24 month projection: growth, costs, hiring and cash needs. Attach the worksheet. A reviewer checks this step.',
                     [
                         $field('assumptions', 'Key assumptions', 'list'),
                         $field('monthly_burn', 'Expected monthly costs (UGX)', 'number'),
@@ -269,7 +269,7 @@ return [
             'outputs' => ['Go-to-market plan', 'Traction and evidence log'],
             'steps' => [
                 $step('go_to_market', 'Go-to-market plan',
-                    "Decide which channels you will use to reach the first 100 customers, the message for each, and the budget.",
+                    'Decide which channels you will use to reach the first 100 customers, the message for each, and the budget.',
                     [
                         $field('channels', 'Channels', 'list'),
                         $field('message', 'Core message', 'text'),
@@ -281,7 +281,7 @@ return [
                     ['commercialization_readiness', 'market_traction'],
                     ['Pick one channel and run it for two weeks.']),
                 $step('sales_experiments', 'Sales experiments',
-                    "Run small, time-boxed sales experiments and log results: what you tried, how many people, how many bought.",
+                    'Run small, time-boxed sales experiments and log results: what you tried, how many people, how many bought.',
                     [
                         $field('experiments', 'Experiments run', 'list', true, 'One per line: channel — reached — converted.'),
                         $field('best_channel', 'Best-performing channel', 'text'),
@@ -293,7 +293,7 @@ return [
                     ['market_traction'],
                     ['Set a target conversion rate before each experiment.']),
                 $step('partnerships_distribution', 'Partnerships and distribution',
-                    "Identify partners who can help you reach customers or deliver at lower cost, and the status of each conversation.",
+                    'Identify partners who can help you reach customers or deliver at lower cost, and the status of each conversation.',
                     [
                         $field('partners', 'Target partners and status', 'list'),
                         $field('partner_value', 'What each side gains', 'textarea'),
@@ -304,7 +304,7 @@ return [
                     ['commercialization_readiness', 'scalability'],
                     ['Draft a one-page partnership proposal.']),
                 $step('commercialization_readiness', 'Commercialization readiness',
-                    "Summarise whether the venture is ready to sell at scale: product, channels, operations, legal and support. A reviewer checks this step.",
+                    'Summarise whether the venture is ready to sell at scale: product, channels, operations, legal and support. A reviewer checks this step.',
                     [
                         $field('readiness_summary', 'Readiness summary', 'textarea'),
                         $field('gaps', 'Gaps to close before scaling sales', 'list'),
@@ -323,7 +323,7 @@ return [
             'outputs' => ['Readiness summary', 'Scaling roadmap', 'Pitch materials'],
             'steps' => [
                 $step('team_operations', 'Team and operations',
-                    "Map the team you have, the roles you need next, and the processes that must work when you are bigger.",
+                    'Map the team you have, the roles you need next, and the processes that must work when you are bigger.',
                     [
                         $field('current_team', 'Current team and roles', 'list'),
                         $field('hiring_plan', 'Next hires', 'list'),
@@ -335,7 +335,7 @@ return [
                     ['team_capacity', 'scalability'],
                     ['Write a one-paragraph role description for the next hire.']),
                 $step('funding_readiness', 'Funding readiness',
-                    "Decide how much you need, what for, and which kind of funding fits (grant, loan, equity, revenue). Check your documents are in order.",
+                    'Decide how much you need, what for, and which kind of funding fits (grant, loan, equity, revenue). Check your documents are in order.',
                     [
                         $field('amount_needed', 'Amount needed (UGX)', 'number'),
                         $field('use_of_funds', 'Use of funds', 'list'),
@@ -348,7 +348,7 @@ return [
                     ['financial_readiness'],
                     ['List three funders whose criteria match your stage.']),
                 $step('scaling_roadmap', 'Scaling roadmap',
-                    "Plan the next 18–36 months: markets, milestones, and what must be true to move from one stage to the next.",
+                    'Plan the next 18–36 months: markets, milestones, and what must be true to move from one stage to the next.',
                     [
                         $field('milestones', 'Milestones with dates', 'list'),
                         $field('new_markets', 'Markets or segments to enter', 'list', false),
@@ -360,7 +360,7 @@ return [
                     ['scalability'],
                     ['Identify the single constraint most likely to slow growth.']),
                 $step('pitch_next_milestones', 'Pitch and next milestones',
-                    "Prepare a short pitch built on the evidence from earlier steps, and commit to the next three milestones. A reviewer checks this step.",
+                    'Prepare a short pitch built on the evidence from earlier steps, and commit to the next three milestones. A reviewer checks this step.',
                     [
                         $field('pitch_summary', 'Pitch in five sentences', 'textarea'),
                         $field('deck_link', 'Link to pitch deck', 'url', false),

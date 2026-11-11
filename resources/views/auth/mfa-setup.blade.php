@@ -1,4 +1,4 @@
-@extends('layouts.public', ['pageTitle' => 'Set up two-factor sign-in'])
+@extends('layouts.app', ['pageTitle' => 'Set up two-factor sign-in'])
 
 @push('head')<meta name="robots" content="noindex">@endpush
 

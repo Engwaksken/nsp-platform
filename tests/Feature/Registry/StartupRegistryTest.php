@@ -246,6 +246,65 @@ class StartupRegistryTest extends TestCase
         $this->actingAs($owner)->put("/workspace/startups/{$startup->uuid}/sharing/unknown_purpose", ['grant' => 1])->assertSessionHasErrors('consent');
     }
 
+    public function test_data_sharing_page_shows_each_purpose_as_a_collapsible_card(): void
+    {
+        $owner = $this->founder();
+        $startup = $this->registered($owner);
+        $this->actingAs($owner)->put("/workspace/startups/{$startup->uuid}/sharing/ims_prefill", ['grant' => 1])->assertSessionHasNoErrors();
+
+        $page = $this->actingAs($owner)->get("/workspace/startups/{$startup->uuid}/sharing")->assertOk()
+            ->assertSee('data-card-grid-key="consents"', false)
+            ->assertSee('Expand all')
+            ->assertSee('History');
+        $html = $page->getContent();
+        $purposes = config('nsp.registry.consent_purposes');
+        $this->assertSame(count($purposes), substr_count($html, 'class="card collapsible-card'));
+
+        foreach ($purposes as $purpose => $definition) {
+            $card = $this->cardHtml($html, "purpose-{$purpose}");
+            $this->assertStringContainsString(e($definition['label']), $card);
+            $this->assertStringContainsString(e($definition['text']), $card);
+            $this->assertStringContainsString('action="'.route('workspace.startups.consents.update', [$startup, $purpose]).'"', $card);
+            if ($purpose === 'ims_prefill') {
+                $this->assertStringContainsString('<span class="badge badge-on">On</span>', $card);
+                $this->assertStringContainsString('On since '.now()->format('j M Y'), $card);
+                $this->assertStringContainsString('name="grant" value="0"', $card);
+                $this->assertStringContainsString('data-confirm=', $card);
+                $this->assertStringContainsString('Turn off<span class="visually-hidden">: '.e($definition['label']).'</span>', $card);
+            } else {
+                $this->assertStringContainsString('<span class="badge badge-off">Off</span>', $card);
+                $this->assertStringContainsString('name="grant" value="1"', $card);
+                $this->assertStringContainsString('Turn on<span class="visually-hidden">: '.e($definition['label']).'</span>', $card);
+                // Closed unless it was just changed.
+                $this->assertStringNotContainsString(' open ', strstr($card, '>', true));
+            }
+        }
+
+        // The card just changed opens to show the result; the others stay closed.
+        $this->actingAs($owner)->put("/workspace/startups/{$startup->uuid}/sharing/nsp_directory", ['grant' => 1]);
+        $html = $this->actingAs($owner)->withSession(['consent_purpose' => 'nsp_directory'])->get("/workspace/startups/{$startup->uuid}/sharing")->getContent();
+        $this->assertStringContainsString('data-card-attention', strstr($this->cardHtml($html, 'purpose-nsp_directory'), '>', true));
+        $this->assertStringNotContainsString(' open ', strstr($this->cardHtml($html, 'purpose-investor_listing'), '>', true));
+
+        // Team members see the choices but no buttons.
+        $member = $this->founder('member@example.org');
+        $this->actingAs($member)->post('/invitations/'.app(RegistryService::class)->invite($startup, $owner, 'member@example.org', 'team_member').'/accept');
+        $this->actingAs($member)->get("/workspace/startups/{$startup->uuid}/sharing")->assertOk()
+            ->assertSee('Only owners and founders can change these choices.')
+            ->assertDontSee('name="grant"', false);
+    }
+
+    /** The <details> element with this id, from its opening tag to its closing tag. */
+    private function cardHtml(string $html, string $id): string
+    {
+        $start = strpos($html, '<details class="card collapsible-card');
+        $start = strpos($html, 'id="'.$id.'"', $start);
+        $this->assertNotFalse($start, "Card {$id} not found");
+        $open = strrpos(substr($html, 0, $start), '<details');
+
+        return substr($html, $open, strpos($html, '</details>', $open) - $open);
+    }
+
     public function test_registry_pages_are_hidden_when_the_feature_is_off(): void
     {
         Features::set('registry', false, null);
@@ -262,19 +321,20 @@ class StartupRegistryTest extends TestCase
             'website' => 'https://bluewave.ug', 'contact_email' => 'hello@bluewave.ug']);
 
         $page = $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}/overview")->assertOk();
-        $page->assertSee('id="workspace-sidebar"', false)
+        $page->assertSee('id="app-sidebar"', false)
             ->assertSee('Next steps')
             ->assertSee('Switch startup')
             ->assertSee(route('workspace.startups.switch', $second), false)
-            ->assertSee('<a href="'.route('workspace.startups.overview', $first).'"  aria-current="page" >Dashboard</a>', false);
+            ->assertDontSee('class="site-header"', false);
+        $this->assertMatchesRegularExpression('#href="'.preg_quote(route('workspace.startups.overview', $first), '#').'"\s+aria-current="page"#', $page->getContent());
 
         $page->assertSee('class="stat-cards"', false)->assertSee('fas fa-users', false);
 
         // Deeper pages get the sidebar too, with the right section marked, stat cards and tabbed sections.
-        $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}/team")->assertOk()
-            ->assertSee('id="workspace-sidebar"', false)
-            ->assertSee('aria-current="page" >Team</a>', false)
-            ->assertSee('Invitations pending')
+        $team = $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}/team")->assertOk()
+            ->assertSee('id="app-sidebar"', false);
+        $this->assertMatchesRegularExpression('#href="'.preg_quote(route('workspace.startups.team', $first), '#').'"\s+aria-current="page"#', $team->getContent());
+        $team->assertSee('Invitations pending')
             ->assertSee('data-tabs="Team sections"', false)
             ->assertSee('data-tab="Invite someone"', false);
         $this->actingAs($owner)->get("/workspace/startups/{$first->uuid}")->assertOk()
@@ -283,7 +343,9 @@ class StartupRegistryTest extends TestCase
         // Switching goes to the other startup's dashboard.
         $this->actingAs($owner)->post("/workspace/startups/{$second->uuid}/switch")->assertRedirect("/workspace/startups/{$second->uuid}/overview");
 
-        // Registering a new startup has no startup yet, so no sidebar.
-        $this->actingAs($owner)->get('/workspace/startups/new')->assertOk()->assertDontSee('id="workspace-sidebar"', false);
+        // Registering another startup keeps the member shell; the sidebar shows the active startup.
+        $this->actingAs($owner)->get('/workspace/startups/new')->assertOk()
+            ->assertSee('id="app-sidebar"', false)
+            ->assertSee('Register your startup');
     }
 }

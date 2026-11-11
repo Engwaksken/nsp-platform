@@ -35,7 +35,7 @@
 
         <section class="panel" aria-labelledby="theme-heading">
             <h2 id="theme-heading">Colours and font</h2>
-            <p class="hint">Use the approved Hive brand palette. White text is shown on the primary and secondary colours, so they need enough contrast (WCAG AA: at least 4.5:1).</p>
+            <p class="hint">Use the approved Hive brand palette. Text on these colours is chosen automatically: white when it has enough contrast (WCAG AA: at least 4.5:1), dark text otherwise. In dark mode, links and buttons are lightened so they stay readable.</p>
             <div class="form-row">
                 @foreach (['primary_color' => 'Primary colour', 'secondary_color' => 'Secondary colour', 'accent_color' => 'Accent (focus and highlights)'] as $key => $label)
                     @php($ratio = \App\Support\Contrast::againstWhite(old($key, $settings[$key])))
@@ -43,7 +43,7 @@
                         <label for="field-{{ $key }}">{{ $label }}</label>
                         <input id="field-{{ $key }}" type="color" name="{{ $key }}" value="{{ old($key, $settings[$key]) }}" required>
                         <p class="hint">{{ $settings[$key] }} · contrast with white {{ number_format($ratio, 1) }}:1
-                            @if ($ratio < 4.5 && $key !== 'accent_color')<strong class="error"> (too low for white text)</strong>@endif</p>
+                            @if ($ratio < 4.5) · dark text will be used on it @endif</p>
                         @error($key)<p class="error">{{ $message }}</p>@enderror
                     </div>
                 @endforeach

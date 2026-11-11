@@ -29,7 +29,7 @@
         @if ($opportunities->isEmpty())
             <p class="empty">No open opportunities match. Try fewer filters.</p>
         @else
-            <div class="grid">
+            <div class="card-grid">
                 @foreach ($opportunities as $opportunity)
                     <article class="card">
                         <p class="meta">{{ \App\Models\Ecosystem\Opportunity::TYPES[$opportunity->type] }}@if ($opportunity->organisation) · {{ $opportunity->organisation }}@endif</p>

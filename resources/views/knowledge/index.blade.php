@@ -19,7 +19,7 @@
             @if ($recommendations->isNotEmpty())<section class="panel"><h2>Recommended for you</h2><ul>@foreach ($recommendations as $row)<li><a href="{{ route('knowledge.show', $row['resource']) }}">{{ $row['resource']->title }}</a> — {{ implode(' · ', $row['reasons']) }}</li>@endforeach</ul></section>@endif
         @endauth
         <p class="meta">Search method: {{ ucfirst($engine) }}. Only resources available to you are included.</p>
-        <div class="grid">
+        <div class="card-grid">
             @forelse ($resources as $resource)
                 <article class="card"><p class="meta">{{ config('knowledge.resource_types.'.$resource->resource_type, $resource->resource_type) }} @if ($resource->category) · {{ $resource->category->name }}@endif</p>
                     <h2><a href="{{ route('knowledge.show', $resource) }}">{{ $resource->title }}</a></h2>
