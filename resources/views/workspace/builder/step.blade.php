@@ -4,13 +4,13 @@
 
 @section('workspace')
     <div class="container section">
-        <p><a href="{{ route('workspace.builder', $startup) }}">← Venture Builder</a></p>
+        <p><a href="{{ route('workspace.builder', $startup) }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Venture Builder</a></p>
         <h1>{{ $submission->step->module->title }}: {{ $submission->step->title }}</h1>
         @include('partials.flash')
         @if ($submission->step->guidance)<div class="panel">{!! \App\Support\Markdown::render($submission->step->guidance) !!}</div>@endif
         @if (!$membership->canEdit() || !$submission->isEditable())
             <p>This step is read-only for your role or current status.</p>
-            @foreach ($submission->step->fields ?? [] as $field)<p><strong>{{ $field['label'] }}</strong><br>{{ $submission->responses[$field['key']] ?? '—' }}</p>@endforeach
+            @foreach ($submission->step->fields ?? [] as $field)<p><strong>{{ $field['label'] }}</strong><br>{{ $submission->responses[$field['key']] ?? 'Not answered' }}</p>@endforeach
         @else
             <form method="post" action="{{ route('workspace.builder.step.save', [$startup, $submission]) }}" class="panel">
                 @csrf @method('PUT')
@@ -69,7 +69,7 @@
                 @endif
             @endcan
         @if ($submission->reviews->isNotEmpty())
-            <section class="panel"><h2>Review history</h2>@foreach ($submission->reviews as $review)<p><strong>{{ $review->decision === 'validated' ? 'Validated' : 'Changes requested' }}</strong> — {{ $review->feedback }} <small>by {{ $review->reviewer?->name ?? 'former reviewer' }} at {{ $review->created_at }}</small></p>@endforeach</section>
+            <section class="panel"><h2>Review history</h2>@foreach ($submission->reviews as $review)<p><strong>{{ $review->decision === 'validated' ? 'Validated' : 'Changes requested' }}:</strong> {{ $review->feedback }} <small>by {{ $review->reviewer?->name ?? 'former reviewer' }} at {{ $review->created_at }}</small></p>@endforeach</section>
         @endif
         @if ($submission->step->output_template)
             <section class="panel" aria-labelledby="document-heading">

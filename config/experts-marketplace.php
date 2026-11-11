@@ -57,7 +57,7 @@ return [
             'Cancellations and refunds follow the NSP policy shown at booking time: :policy',
             'Either side can raise a concern with Hive through the engagement page. Hive may read the engagement conversation only to handle a complaint, and records that it did so.',
         ],
-        'label' => 'Recorded acceptance — not a legal e-signature',
+        'label' => 'Recorded acceptance (not a legal e-signature)',
     ],
 
     'payments' => [

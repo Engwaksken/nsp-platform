@@ -23,6 +23,6 @@
             @if ($resource->hasFile() || $resource->external_url)<a class="btn btn-primary" href="{{ route('knowledge.download', $resource) }}">{{ $resource->hasFile() ? 'Download resource' : 'Open source link' }}</a>@endif
             @auth<form method="post" action="{{ route('knowledge.bookmark', $resource) }}">@csrf<button class="btn btn-secondary" type="submit">{{ $isBookmarked ? 'Remove saved resource' : 'Save resource' }}</button></form>@endauth
         </div>
-        @if ($related)<section class="panel"><h2>Related resources</h2><ul>@foreach ($related as $row)<li><a href="{{ route('knowledge.show', $row['resource']) }}">{{ $row['resource']->title }}</a> — {{ $row['why'] }}</li>@endforeach</ul></section>@endif
+        @if ($related)<section class="panel"><h2>Related resources</h2><ul>@foreach ($related as $row)<li><a href="{{ route('knowledge.show', $row['resource']) }}">{{ $row['resource']->title }}</a> ({{ $row['why'] }})</li>@endforeach</ul></section>@endif
     </article>
 @endsection

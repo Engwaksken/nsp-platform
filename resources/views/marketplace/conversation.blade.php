@@ -5,7 +5,7 @@
 @section('content')
     @php($canWrite = in_array($side, ['inquirer', 'team'], true))
     <div class="container section narrow">
-        <p>@if ($side === 'inquirer')<a href="{{ route('marketplace.inbox') }}">← My messages</a>@else<a href="{{ route('workspace.marketplace', $inquiry->startup_uuid) }}">← {{ $inquiry->startup?->display_name }} marketplace</a>@endif</p>
+        <p>@if ($side === 'inquirer')<a href="{{ route('marketplace.inbox') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> My messages</a>@else<a href="{{ route('workspace.marketplace', $inquiry->startup_uuid) }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {{ $inquiry->startup?->display_name }} marketplace</a>@endif</p>
         <h1>{{ $inquiry->subject }}</h1>
         @include('partials.flash')
         <p class="meta">About @if ($inquiry->listing?->isLive())<a href="{{ route('marketplace.show', $inquiry->listing) }}">{{ $inquiry->listing->title }}</a>@else{{ $inquiry->listing?->title ?? 'a removed listing' }}@endif

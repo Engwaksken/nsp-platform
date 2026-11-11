@@ -75,9 +75,9 @@ class PortfolioSnapshot
 
         return [
             ['Growth score', number_format((float) $assessment->displayScore(), 1).' / 100'],
-            ['Band', (string) ($assessment->displayBand() ?? '—')],
-            ['Assessed', $assessment->submitted_at?->format('j M Y') ?? '—'],
-            ['Rubric', $assessment->framework ? $assessment->framework->name.' v'.$assessment->framework->version : '—'],
+            ['Band', (string) ($assessment->displayBand() ?? 'Not set')],
+            ['Assessed', $assessment->submitted_at?->format('j M Y') ?? 'Not recorded'],
+            ['Rubric', $assessment->framework ? $assessment->framework->name.' v'.$assessment->framework->version : 'Not recorded'],
         ];
     }
 
@@ -91,7 +91,7 @@ class PortfolioSnapshot
         return [
             ['Raising now', 'Yes'],
             ['Amount sought', $request->amountLabel()],
-            ['Instruments', implode(', ', array_map(fn ($i) => str_replace('_', ' ', (string) $i), (array) $request->instruments)) ?: '—'],
+            ['Instruments', implode(', ', array_map(fn ($i) => str_replace('_', ' ', (string) $i), (array) $request->instruments)) ?: 'Not given'],
         ];
     }
 

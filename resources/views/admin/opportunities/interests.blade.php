@@ -20,7 +20,7 @@
             @forelse ($interests as $interest)
                 <tr>
                     <td>{{ $interest->user?->name }}<br><span class="meta">{{ $interest->user?->email }}</span></td>
-                    <td>{{ $interest->startup?->display_name ?? '—' }}</td>
+                    <td>@if ($interest->startup){{ $interest->startup->display_name }}@else<span class="meta">None</span>@endif</td>
                     <td>{{ $interest->message }}</td>
                     <td>{{ $interest->created_at->format('j M Y') }}</td>
                     <td>
