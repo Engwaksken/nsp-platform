@@ -7,6 +7,10 @@
 | `docs/diagrams/nsp-erd.dbml` | The same schema as text (136 tables, 262 relationships) | Paste into [dbdiagram.io](https://dbdiagram.io) for an automatic full-schema diagram; it can also export SQL, PDF and PNG |
 | `docs/design/nsp-figma-tokens.json` | Design tokens from `public/css/nsp.css`: colours, fonts, radii, shadows and spacing, with Light and Dark themes | Figma plugin **Tokens Studio for Figma** → Load from file |
 
+### Using the diagrams in MeeSoft Diagram Designer
+
+Diagram Designer cannot open `.drawio` files or import shapes from other tools (its own `.ddd` format is undocumented), but it imports pictures. Every page of the diagrams is also saved as a high-resolution PNG in `docs/diagrams/images/` (`erd-*.png` for the ER diagram, `flow-*.png` for the flowcharts). In Diagram Designer use **Edit, Insert picture** (or drag the file onto the page), then add your own notes and shapes around it. To change the diagrams themselves, edit the `.drawio` file in diagrams.net and re-export the page as PNG (File, Export as, PNG) or EMF for a sharper vector picture.
+
 The ER diagram and tokens are generated from the code, so they match the live system. Regenerate them after schema or style changes (scripts: ask the developer; they read `information_schema` from a migrated database and the `:root` blocks of `nsp.css`).
 
 ## Getting the UI into Figma
