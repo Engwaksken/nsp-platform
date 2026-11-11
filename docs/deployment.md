@@ -73,6 +73,32 @@ Data-room files (`storage/app/private/data-room`) and candidate CVs (`storage/ap
 
 **Rollback:** `git reset --hard <previous production commit>` (see `git log --oneline -5`), restore the database dump if a migration ran, then clear and rebuild the caches.
 
+## Updates straight from `main` (Composer on the server)
+Use this instead of the `production` branch when the host has Composer on the command line. The server checks out `main`, so there is no release build; `vendor/` is installed on the server.
+
+Every update (in the app folder):
+```
+git pull origin main
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan optimize:clear
+php artisan optimize
+```
+`optimize:clear` already clears the view, config, route and application caches, so separate `view:clear`, `config:clear` and `cache:clear` are not needed. After a change to roles or permissions also run `php artisan db:seed --class=RolesAndPermissionsSeeder --force` (`bash deploy/after-pull.sh` does all of the above, including maintenance mode and Composer, in one step).
+
+If the post-merge hook from `deploy/install-hooks.sh` is installed, `git pull` already runs `deploy/after-pull.sh`, which installs the libraries itself on a `main` checkout. Running the commands above as well is harmless. Remove the `deploy/auto-update.sh` cron job: it follows the `production` branch.
+
+**Switching an existing server from `production` to `main` (once):**
+1. Back up the database and `storage/app` (see above).
+2. Check Composer: `composer --version`. Without it: `php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && php composer-setup.php --install-dir="$HOME" && rm composer-setup.php`, then use `php ~/composer.phar` wherever `composer` appears.
+3. `php artisan down`
+4. Keep any local edits: `git stash push -m "live edits before switching to main"` (untracked files such as `.htaccess`, `.user.ini` and `php.ini` are not touched).
+5. `git fetch origin main && git checkout -B main origin/main` (git removes the tracked `vendor/`; the next step puts it back).
+6. `composer install --no-dev --optimize-autoloader`
+7. `php artisan migrate --force && php artisan db:seed --class=RolesAndPermissionsSeeder --force && php artisan optimize:clear && php artisan optimize && php artisan up`
+
+**Rollback on `main`:** `git reset --hard <previous commit>`, `composer install --no-dev --optimize-autoloader`, restore the database dump if a migration ran, then `php artisan optimize:clear && php artisan optimize`.
+
 ## After deploying
 - Set `NSP_BACKUP_PASSWORD` (store it in the password manager), run `php artisan nsp:backup` once, and arrange the daily off-server copy (`operations-runbook.md` §3).
 - Set `NSP_HEALTH_TOKEN` and point an uptime monitor at `/health` (`operations-runbook.md` §2).
