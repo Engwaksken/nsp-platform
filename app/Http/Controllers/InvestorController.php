@@ -6,6 +6,7 @@ use App\Capital\CapitalService;
 use App\Capital\VentureSignals;
 use App\Ecosystem\Eligibility;
 use App\Funding\FundingService;
+use App\Models\Capital\MatchFeedback;
 use App\Models\Capital\PipelineItem;
 use App\Models\Capital\WatchlistEntry;
 use App\Models\Funding\DataRoomAccessLog;
@@ -136,6 +137,7 @@ class InvestorController extends Controller
             'scopes' => $scopes,
             'watched' => WatchlistEntry::query()->where('investor_user_id', $user->id)->where('startup_uuid', $startup->uuid)->exists(),
             'pipelineItem' => PipelineItem::query()->where('investor_user_id', $user->id)->where('startup_uuid', $startup->uuid)->first(),
+            'matchFeedback' => MatchFeedback::query()->where('startup_uuid', $startup->uuid)->where('investor_user_id', $user->id)->where('side', 'investor')->first(),
         ]);
     }
 
