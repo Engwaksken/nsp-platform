@@ -1,0 +1,2412 @@
+// Hive NSP database schema, generated from the migrated database (136 tables).
+// Paste into https://dbdiagram.io to view and arrange.
+
+TableGroup "Identity, access and audit" {
+  audit_logs
+  feature_flags
+  login_audits
+  model_has_permissions
+  model_has_roles
+  password_reset_tokens
+  permissions
+  roles
+  role_has_permissions
+  sessions
+  session_actions
+  site_settings
+  users
+}
+
+TableGroup "Startup registry" {
+  connect_codes
+  data_sharing_consents
+  startups
+  startup_aliases
+  startup_duplicate_candidates
+  startup_field_changes
+  startup_founders
+  startup_funding_profiles
+  startup_memberships
+  startup_merges
+  startup_profiles
+  startup_program_records
+}
+
+TableGroup "Organizations" {
+  organizations
+  organization_memberships
+  organization_startup_relationships
+}
+
+TableGroup "Funding and Capital Exchange" {
+  capital_document_requests
+  capital_share_grants
+  data_room_access_logs
+  data_room_files
+  data_room_grants
+  due_diligence_items
+  funding_requests
+  investment_pipeline_events
+  investment_pipeline_items
+  investor_interactions
+  investor_introductions
+  investor_match_feedback
+  investor_profiles
+  investor_watchlist
+  payment_intents
+  payment_ledger_entries
+  payment_webhook_receipts
+}
+
+TableGroup "Growth (VGI) and Venture Builder" {
+  builder_curricula
+  builder_documents
+  builder_document_versions
+  builder_modules
+  builder_step_definitions
+  builder_step_events
+  growth_actions
+  growth_updates
+  venture_builder_enrollments
+  venture_step_comments
+  venture_step_evidence
+  venture_step_reviews
+  venture_step_revisions
+  venture_step_submissions
+  vgi_assessments
+  vgi_frameworks
+  vgi_guidance_feedback
+  vgi_override_logs
+  vgi_responses
+}
+
+TableGroup "Experts and mentoring" {
+  expert_availability
+  expert_bookings
+  expert_categories
+  expert_category_profile
+  expert_complaints
+  expert_contracts
+  expert_conversations
+  expert_engagements
+  expert_messages
+  expert_profiles
+  expert_reviews
+  expert_services
+  expert_sessions
+  expert_verifications
+}
+
+TableGroup "Talent and jobs" {
+  hiring_pipeline_events
+  interviews
+  job_applications
+  talent_profiles
+  vacancies
+  vacancy_invitations
+}
+
+TableGroup "Marketplace, opportunities and challenges" {
+  challenges
+  challenge_bookmarks
+  challenge_evidence
+  challenge_reviews
+  challenge_solution_submissions
+  challenge_versions
+  marketplace_inquiries
+  marketplace_listings
+  marketplace_messages
+  marketplace_reports
+  opportunities
+  opportunity_bookmarks
+  opportunity_interests
+  recommendation_feedback
+}
+
+TableGroup "Knowledge Hub" {
+  knowledge_bookmarks
+  knowledge_categories
+  knowledge_downloads
+  knowledge_index_metadata
+  knowledge_recent_views
+  knowledge_resources
+  knowledge_resource_tag
+  knowledge_resource_versions
+  knowledge_tags
+}
+
+TableGroup "Content and site" {
+  categories
+  category_post
+  contact_messages
+  faqs
+  media
+  menus
+  menu_items
+  pages
+  page_revisions
+  partners
+  posts
+  seo_redirects
+  testimonials
+}
+
+TableGroup "Communication, integration and AI" {
+  ai_consents
+  ai_interactions
+  announcements
+  api_clients
+  email_deliveries
+  integration_inbox
+  notification_preferences
+  registry_outbox_events
+  user_notifications
+  webhook_deliveries
+}
+
+TableGroup "Framework (queues and cache)" {
+  cache
+  cache_locks
+  failed_jobs
+  jobs
+  job_batches
+  migrations
+}
+
+Table ai_consents {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [not null]
+  version "varchar(20)" [not null]
+  granted_at timestamp [not null]
+  revoked_at timestamp [null]
+}
+
+Table ai_interactions {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [null]
+  startup_uuid "char(36)" [null]
+  task "varchar(30)" [not null]
+  model "varchar(60)" [null]
+  status "varchar(20)" [not null]
+  input_chars "int(10)" [not null]
+  output_chars "int(10)" [not null]
+  input_tokens "int(10)" [not null]
+  output_tokens "int(10)" [not null]
+  error "varchar(255)" [null]
+  created_at timestamp [not null]
+}
+
+Table announcements {
+  id "bigint(20)" [pk, not null]
+  title "varchar(200)" [not null]
+  body text [not null]
+  url "varchar(500)" [null]
+  audience "varchar(20)" [not null]
+  status "varchar(20)" [not null]
+  recipients "int(10)" [not null]
+  created_by "bigint(20)" [null]
+  sent_by "bigint(20)" [null]
+  sent_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table api_clients {
+  id "bigint(20)" [pk, not null]
+  client_id "varchar(60)" [not null, unique]
+  name "varchar(255)" [not null]
+  secret_hash "varchar(255)" [not null]
+  webhook_secret text [not null]
+  redirect_uris longtext [null]
+  webhook_url "varchar(255)" [null]
+  recipient_system "varchar(20)" [not null]
+  scopes longtext [not null]
+  is_active "tinyint(1)" [not null]
+  last_used_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table audit_logs {
+  id "bigint(20)" [pk, not null]
+  actor_id "bigint(20)" [null]
+  action "varchar(80)" [not null]
+  subject_type "varchar(120)" [null]
+  subject_id "varchar(64)" [null]
+  changes longtext [null]
+  ip_hash "varchar(64)" [null]
+  user_agent "varchar(255)" [null]
+  created_at timestamp [not null]
+}
+
+Table builder_curricula {
+  id "bigint(20)" [pk, not null]
+  name "varchar(255)" [not null]
+  version "int(10)" [not null]
+  status "varchar(20)" [not null]
+  methodology_status "varchar(20)" [not null]
+  description text [null]
+  copied_from_id "bigint(20)" [null]
+  created_by "bigint(20)" [null]
+  updated_by "bigint(20)" [null]
+  published_by "bigint(20)" [null]
+  published_at timestamp [null]
+  note text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (name, version) [unique]
+  }
+}
+
+Table builder_documents {
+  id "bigint(20)" [pk, not null]
+  submission_id "bigint(20)" [not null, unique]
+  startup_uuid "char(36)" [not null]
+  title "varchar(255)" [not null]
+  current_version "int(10)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table builder_document_versions {
+  id "bigint(20)" [pk, not null]
+  document_id "bigint(20)" [not null]
+  number "int(10)" [not null]
+  source "varchar(20)" [not null]
+  body longtext [not null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [not null]
+  indexes {
+    (document_id, number) [unique]
+  }
+}
+
+Table builder_modules {
+  id "bigint(20)" [pk, not null]
+  curriculum_id "bigint(20)" [not null]
+  position "int(10)" [not null]
+  key "varchar(80)" [not null]
+  title "varchar(255)" [not null]
+  description text [null]
+  outputs longtext [null]
+  is_active "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (curriculum_id, key) [unique]
+  }
+}
+
+Table builder_step_definitions {
+  id "bigint(20)" [pk, not null]
+  curriculum_id "bigint(20)" [not null]
+  module_id "bigint(20)" [not null]
+  position "int(10)" [not null]
+  key "varchar(80)" [not null]
+  title "varchar(255)" [not null]
+  guidance text [null]
+  fields longtext [not null]
+  checklist longtext [null]
+  evidence_requirement "varchar(10)" [not null]
+  requires_review "tinyint(1)" [not null]
+  output_template text [null]
+  vgi_dimension_keys longtext [null]
+  prerequisites longtext [null]
+  task_suggestions longtext [null]
+  is_active "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (curriculum_id, key) [unique]
+  }
+}
+
+Table builder_step_events {
+  id "bigint(20)" [pk, not null]
+  submission_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  action "varchar(40)" [not null]
+  from_status "varchar(20)" [null]
+  to_status "varchar(20)" [null]
+  user_id "bigint(20)" [null]
+  note "varchar(500)" [null]
+  created_at timestamp [not null]
+}
+
+Table cache {
+  key "varchar(255)" [pk, not null]
+  value mediumtext [not null]
+  expiration "int(11)" [not null]
+}
+
+Table cache_locks {
+  key "varchar(255)" [pk, not null]
+  owner "varchar(255)" [not null]
+  expiration "int(11)" [not null]
+}
+
+Table capital_document_requests {
+  id "bigint(20)" [pk, not null]
+  introduction_uuid "char(36)" [not null]
+  startup_uuid "char(36)" [not null]
+  investor_user_id "bigint(20)" [not null]
+  title "varchar(200)" [not null]
+  category "varchar(30)" [not null]
+  message text [null]
+  status "varchar(20)" [not null]
+  data_room_file_uuid "char(36)" [null]
+  response_note text [null]
+  responded_by "bigint(20)" [null]
+  responded_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table capital_share_grants {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  investor_user_id "bigint(20)" [not null]
+  scopes longtext [not null]
+  granted_by "bigint(20)" [null]
+  expires_at timestamp [null]
+  revoked_by "bigint(20)" [null]
+  revoked_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table categories {
+  id "bigint(20)" [pk, not null]
+  name "varchar(255)" [not null]
+  slug "varchar(255)" [not null, unique]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table category_post {
+  category_id "bigint(20)" [pk, not null]
+  post_id "bigint(20)" [pk, not null]
+}
+
+Table challenges {
+  id "bigint(20)" [pk, not null]
+  uuid "char(36)" [not null, unique]
+  slug "varchar(255)" [not null, unique]
+  title "varchar(255)" [not null]
+  problem_description text [not null]
+  sector "varchar(80)" [null]
+  geography "varchar(255)" [null]
+  country "varchar(10)" [null]
+  region "varchar(120)" [null]
+  market_opportunity text [null]
+  existing_solutions text [null]
+  policy_considerations text [null]
+  research_references longtext [null]
+  priority "varchar(20)" [not null]
+  category "varchar(40)" [null]
+  tags longtext [null]
+  issuer_name "varchar(255)" [null]
+  issuer_type "varchar(40)" [null]
+  organization_id "bigint(20)" [null]
+  submitted_by "bigint(20)" [null]
+  visibility "varchar(20)" [not null]
+  status "varchar(30)" [not null]
+  vgi_dimension_keys longtext [null]
+  builder_step_keys longtext [null]
+  expert_categories longtext [null]
+  current_version "int(10)" [not null]
+  published_version_id "bigint(20)" [null]
+  submitted_at timestamp [null]
+  reviewed_at timestamp [null]
+  published_at timestamp [null]
+  archived_at timestamp [null]
+  last_reviewed_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table challenge_bookmarks {
+  id "bigint(20)" [pk, not null]
+  challenge_id "bigint(20)" [not null]
+  user_id "bigint(20)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (challenge_id, user_id) [unique]
+  }
+}
+
+Table challenge_evidence {
+  id "bigint(20)" [pk, not null]
+  challenge_id "bigint(20)" [not null]
+  source_title "varchar(255)" [not null]
+  url "varchar(500)" [null]
+  disk "varchar(20)" [null]
+  path "varchar(255)" [null]
+  original_name "varchar(200)" [null]
+  mime_type "varchar(120)" [null]
+  size "bigint(20)" [null]
+  evidence_type "varchar(40)" [not null]
+  validated "tinyint(1)" [not null]
+  validated_by "bigint(20)" [null]
+  validated_at timestamp [null]
+  validation_note text [null]
+  added_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table challenge_reviews {
+  id "bigint(20)" [pk, not null]
+  challenge_id "bigint(20)" [not null]
+  challenge_version_id "bigint(20)" [null]
+  reviewer_id "bigint(20)" [null]
+  decision "varchar(30)" [not null]
+  reason "varchar(40)" [null]
+  comments text [null]
+  source_validation_notes text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table challenge_solution_submissions {
+  id "bigint(20)" [pk, not null]
+  uuid "char(36)" [not null, unique]
+  challenge_id "bigint(20)" [not null]
+  user_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [null]
+  summary text [not null]
+  approach text [null]
+  status "varchar(20)" [not null]
+  status_changed_by "bigint(20)" [null]
+  status_changed_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table challenge_versions {
+  id "bigint(20)" [pk, not null]
+  challenge_id "bigint(20)" [not null]
+  version "int(10)" [not null]
+  title "varchar(255)" [not null]
+  problem_description text [not null]
+  sector "varchar(80)" [null]
+  country "varchar(10)" [null]
+  region "varchar(120)" [null]
+  priority "varchar(20)" [not null]
+  category "varchar(40)" [null]
+  issuer_name "varchar(255)" [null]
+  issuer_type "varchar(40)" [null]
+  visibility "varchar(20)" [not null]
+  tags_text text [null]
+  content longtext [not null]
+  created_by "bigint(20)" [null]
+  approved_by "bigint(20)" [null]
+  approved_at timestamp [null]
+  published_by "bigint(20)" [null]
+  published_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (challenge_id, version) [unique]
+  }
+}
+
+Table connect_codes {
+  id "bigint(20)" [pk, not null]
+  code_hash "varchar(64)" [not null, unique]
+  api_client_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  user_id "bigint(20)" [not null]
+  redirect_uri "varchar(255)" [not null]
+  expires_at timestamp [not null]
+  used_at timestamp [null]
+  created_at timestamp [not null]
+}
+
+Table contact_messages {
+  id "bigint(20)" [pk, not null]
+  topic "varchar(40)" [not null]
+  name "varchar(255)" [not null]
+  email "varchar(255)" [not null]
+  subject "varchar(255)" [not null]
+  message text [not null]
+  consent_given "tinyint(1)" [not null]
+  consent_text_version "varchar(20)" [not null]
+  ip_hash "varchar(64)" [null]
+  status "varchar(20)" [not null]
+  routed_to "varchar(255)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table data_room_access_logs {
+  id "bigint(20)" [pk, not null]
+  file_uuid "char(36)" [not null]
+  startup_uuid "char(36)" [not null]
+  user_id "bigint(20)" [null]
+  access_type "varchar(20)" [not null]
+  ip_hash "varchar(64)" [null]
+  accessed_at timestamp [not null]
+}
+
+Table data_room_files {
+  uuid "char(36)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  title "varchar(255)" [not null]
+  category "varchar(30)" [not null]
+  disk "varchar(20)" [not null]
+  path "varchar(255)" [not null]
+  original_name "varchar(255)" [not null]
+  mime_type "varchar(120)" [not null]
+  size "bigint(20)" [not null]
+  uploaded_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table data_room_grants {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  investor_user_id "bigint(20)" [not null]
+  granted_by "bigint(20)" [null]
+  expires_at timestamp [null]
+  revoked_by "bigint(20)" [null]
+  revoked_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table data_sharing_consents {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  purpose "varchar(40)" [not null]
+  recipient_system "varchar(20)" [not null]
+  scope longtext [not null]
+  granted_by "bigint(20)" [null]
+  granted_at timestamp [not null]
+  revoked_by "bigint(20)" [null]
+  revoked_at timestamp [null]
+  policy_version "varchar(20)" [not null]
+}
+
+Table due_diligence_items {
+  id "bigint(20)" [pk, not null]
+  introduction_uuid "char(36)" [not null]
+  startup_uuid "char(36)" [not null]
+  investor_user_id "bigint(20)" [not null]
+  title "varchar(200)" [not null]
+  category "varchar(30)" [not null]
+  status "varchar(20)" [not null]
+  due_date date [null]
+  notes text [null]
+  data_room_file_uuid "char(36)" [null]
+  created_by "bigint(20)" [null]
+  updated_by "bigint(20)" [null]
+  reminded_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table email_deliveries {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [null]
+  type "varchar(30)" [not null]
+  mailable "varchar(120)" [not null]
+  subject "varchar(255)" [not null]
+  status "varchar(20)" [not null]
+  error text [null]
+  sent_at timestamp [null]
+  failed_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_availability {
+  id "bigint(20)" [pk, not null]
+  expert_user_id "bigint(20)" [not null]
+  weekday "tinyint(3)" [not null]
+  start_time "varchar(5)" [not null]
+  end_time "varchar(5)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_bookings {
+  uuid "char(36)" [pk, not null]
+  expert_user_id "bigint(20)" [null]
+  startup_uuid "char(36)" [not null]
+  engagement_uuid "char(36)" [null]
+  service_id "bigint(20)" [null]
+  booked_by "bigint(20)" [null]
+  topic "varchar(150)" [not null]
+  start_at "varchar(19)" [not null]
+  end_at "varchar(19)" [not null]
+  founder_timezone "varchar(64)" [not null]
+  expert_timezone "varchar(64)" [not null]
+  status "varchar(20)" [not null]
+  duration_minutes "smallint(5)" [not null]
+  price_minor "bigint(20)" [null]
+  currency "varchar(3)" [null]
+  payment_status "varchar(20)" [not null]
+  policy_snapshot longtext [not null]
+  cancellation_reason text [null]
+  cancelled_by "bigint(20)" [null]
+  cancelled_at timestamp [null]
+  confirmed_at timestamp [null]
+  completed_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_categories {
+  id "bigint(20)" [pk, not null]
+  slug "varchar(60)" [not null, unique]
+  name "varchar(100)" [not null]
+  description "varchar(255)" [null]
+  is_active "tinyint(1)" [not null]
+  sort_order "smallint(5)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_category_profile {
+  expert_category_id "bigint(20)" [pk, not null]
+  expert_profile_id "bigint(20)" [pk, not null]
+}
+
+Table expert_complaints {
+  id "bigint(20)" [pk, not null]
+  engagement_uuid "char(36)" [null]
+  booking_uuid "char(36)" [null]
+  review_id "bigint(20)" [null]
+  raised_by "bigint(20)" [null]
+  kind "varchar(20)" [not null]
+  description text [not null]
+  status "varchar(20)" [not null]
+  resolution_note text [null]
+  handled_by "bigint(20)" [null]
+  handled_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_contracts {
+  id "bigint(20)" [pk, not null]
+  engagement_uuid "char(36)" [not null]
+  booking_uuid "char(36)" [null]
+  terms_version "varchar(40)" [not null]
+  terms_hash "varchar(64)" [not null]
+  terms_text text [not null]
+  expert_accepted_by "bigint(20)" [null]
+  expert_accepted_at timestamp [null]
+  startup_accepted_by "bigint(20)" [null]
+  startup_accepted_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (engagement_uuid, terms_version) [unique]
+  }
+}
+
+Table expert_conversations {
+  id "bigint(20)" [pk, not null]
+  engagement_uuid "char(36)" [not null, unique]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_engagements {
+  uuid "char(36)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  expert_user_id "bigint(20)" [not null]
+  type "varchar(20)" [not null]
+  source "varchar(20)" [not null]
+  requested_by "bigint(20)" [null]
+  topic "varchar(150)" [not null]
+  details text [null]
+  preferred_times "varchar(255)" [null]
+  status "varchar(20)" [not null]
+  response_note text [null]
+  decided_by "bigint(20)" [null]
+  decided_at timestamp [null]
+  completed_at timestamp [null]
+  outcome text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_messages {
+  id "bigint(20)" [pk, not null]
+  conversation_id "bigint(20)" [not null]
+  sender_id "bigint(20)" [null]
+  body text [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_profiles {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [not null, unique]
+  headline "varchar(150)" [not null]
+  bio text [not null]
+  kind "varchar(20)" [not null]
+  expertise longtext [null]
+  sectors longtext [null]
+  languages longtext [null]
+  website "varchar(255)" [null]
+  availability "varchar(500)" [null]
+  offers_free "tinyint(1)" [not null]
+  rate_note "varchar(255)" [null]
+  max_active "smallint(5)" [not null]
+  status "varchar(20)" [not null]
+  verification_note text [null]
+  verified_by "bigint(20)" [null]
+  verified_at timestamp [null]
+  is_listed "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  location "varchar(120)" [null]
+  is_remote "tinyint(1)" [not null]
+  time_zone "varchar(64)" [not null]
+}
+
+Table expert_reviews {
+  id "bigint(20)" [pk, not null]
+  engagement_uuid "char(36)" [not null, unique]
+  startup_uuid "char(36)" [not null]
+  expert_user_id "bigint(20)" [not null]
+  reviewer_id "bigint(20)" [null]
+  rating "tinyint(3)" [not null]
+  comment text [null]
+  helped "tinyint(1)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  hidden_at timestamp [null]
+  hidden_reason text [null]
+  hidden_by "bigint(20)" [null]
+}
+
+Table expert_services {
+  id "bigint(20)" [pk, not null]
+  expert_user_id "bigint(20)" [not null]
+  title "varchar(150)" [not null]
+  description text [null]
+  duration_minutes "smallint(5)" [not null]
+  price_minor "bigint(20)" [null]
+  currency "varchar(3)" [null]
+  is_pro_bono "tinyint(1)" [not null]
+  is_active "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_sessions {
+  uuid "char(36)" [pk, not null]
+  engagement_uuid "char(36)" [not null]
+  scheduled_at datetime [not null]
+  duration_minutes "smallint(5)" [not null]
+  mode "varchar(20)" [not null]
+  location "varchar(255)" [null]
+  status "varchar(20)" [not null]
+  shared_notes text [null]
+  expert_notes text [null]
+  startup_notes text [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table expert_verifications {
+  id "bigint(20)" [pk, not null]
+  expert_profile_id "bigint(20)" [not null]
+  type "varchar(20)" [not null]
+  status "varchar(20)" [not null]
+  title "varchar(150)" [not null]
+  details text [null]
+  disk "varchar(20)" [null]
+  path "varchar(255)" [null]
+  original_name "varchar(200)" [null]
+  mime_type "varchar(100)" [null]
+  size "int(10)" [null]
+  reviewed_by "bigint(20)" [null]
+  reviewed_at timestamp [null]
+  review_note text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table failed_jobs {
+  id "bigint(20)" [pk, not null]
+  uuid "varchar(255)" [not null, unique]
+  connection text [not null]
+  queue text [not null]
+  payload longtext [not null]
+  exception longtext [not null]
+  failed_at timestamp [not null]
+}
+
+Table faqs {
+  id "bigint(20)" [pk, not null]
+  question "varchar(255)" [not null]
+  answer text [not null]
+  topic "varchar(80)" [null]
+  sort_order "int(10)" [not null]
+  is_published "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table feature_flags {
+  id "bigint(20)" [pk, not null]
+  key "varchar(60)" [not null, unique]
+  enabled "tinyint(1)" [not null]
+  description "varchar(255)" [null]
+  updated_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table funding_requests {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  amount "bigint(20)" [not null]
+  currency "varchar(3)" [not null]
+  instruments longtext [not null]
+  pitch text [not null]
+  use_of_funds text [null]
+  status "varchar(20)" [not null]
+  created_by "bigint(20)" [null]
+  closed_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table growth_actions {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  assessment_uuid "char(36)" [null]
+  dimension_key "varchar(60)" [null]
+  question_key "varchar(60)" [null]
+  title "varchar(255)" [not null]
+  details text [null]
+  owner_user_id "bigint(20)" [null]
+  due_date date [null]
+  status "varchar(20)" [not null]
+  completed_at timestamp [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table growth_updates {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  growth_action_id "bigint(20)" [null]
+  user_id "bigint(20)" [null]
+  note text [not null]
+  created_at timestamp [not null]
+}
+
+Table hiring_pipeline_events {
+  id "bigint(20)" [pk, not null]
+  application_uuid "char(36)" [not null]
+  from_status "varchar(20)" [null]
+  to_status "varchar(20)" [not null]
+  actor_id "bigint(20)" [null]
+  message "varchar(500)" [null]
+  created_at timestamp [not null]
+}
+
+Table integration_inbox {
+  event_id "char(36)" [pk, not null]
+  api_client_id "bigint(20)" [null]
+  type "varchar(60)" [not null]
+  subject_uuid "char(36)" [null]
+  status "varchar(20)" [not null]
+  error "varchar(255)" [null]
+  data longtext [null]
+  occurred_at timestamp [null]
+  received_at timestamp [not null]
+}
+
+Table interviews {
+  uuid "char(36)" [pk, not null]
+  application_uuid "char(36)" [not null]
+  scheduled_at datetime [not null]
+  duration_minutes "smallint(5)" [not null]
+  mode "varchar(20)" [not null]
+  location "varchar(255)" [null]
+  status "varchar(20)" [not null]
+  candidate_note "varchar(500)" [null]
+  team_notes text [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table investment_pipeline_events {
+  id "bigint(20)" [pk, not null]
+  pipeline_item_id "bigint(20)" [not null]
+  investor_user_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  from_stage "varchar(30)" [null]
+  to_stage "varchar(30)" [not null]
+  actor_user_id "bigint(20)" [null]
+  created_at timestamp [not null]
+}
+
+Table investment_pipeline_items {
+  id "bigint(20)" [pk, not null]
+  investor_user_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  stage "varchar(30)" [not null]
+  stage_changed_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (investor_user_id, startup_uuid) [unique]
+  }
+}
+
+Table investor_interactions {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  investor_user_id "bigint(20)" [not null]
+  actor_user_id "bigint(20)" [null]
+  type "varchar(40)" [not null]
+  visible_to_startup "tinyint(1)" [not null]
+  meta longtext [null]
+  created_at timestamp [not null]
+}
+
+Table investor_introductions {
+  uuid "char(36)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  investor_user_id "bigint(20)" [not null]
+  requested_by "varchar(10)" [not null]
+  requester_user_id "bigint(20)" [null]
+  message text [null]
+  status "varchar(20)" [not null]
+  decided_by "bigint(20)" [null]
+  decided_at timestamp [null]
+  investor_stage "varchar(20)" [null]
+  investor_notes text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table investor_match_feedback {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  investor_user_id "bigint(20)" [not null]
+  side "varchar(10)" [not null]
+  given_by "bigint(20)" [null]
+  rating "varchar(20)" [not null]
+  reason "varchar(500)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (startup_uuid, investor_user_id, side) [unique]
+  }
+}
+
+Table investor_profiles {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [not null, unique]
+  organisation "varchar(255)" [null]
+  investor_type "varchar(30)" [not null]
+  bio text [null]
+  website "varchar(255)" [null]
+  thesis text [null]
+  ticket_min "bigint(20)" [null]
+  ticket_max "bigint(20)" [null]
+  currency "varchar(3)" [not null]
+  sectors longtext [null]
+  stages longtext [null]
+  countries longtext [null]
+  instruments longtext [null]
+  status "varchar(20)" [not null]
+  verification_note text [null]
+  verified_by "bigint(20)" [null]
+  verified_at timestamp [null]
+  is_listed "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table investor_watchlist {
+  id "bigint(20)" [pk, not null]
+  investor_user_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (investor_user_id, startup_uuid) [unique]
+  }
+}
+
+Table jobs {
+  id "bigint(20)" [pk, not null]
+  queue "varchar(255)" [not null]
+  payload longtext [not null]
+  attempts "tinyint(3)" [not null]
+  reserved_at "int(10)" [null]
+  available_at "int(10)" [not null]
+  created_at "int(10)" [not null]
+}
+
+Table job_applications {
+  uuid "char(36)" [pk, not null]
+  vacancy_uuid "char(36)" [not null]
+  startup_uuid "char(36)" [not null]
+  applicant_id "bigint(20)" [not null]
+  cover_note text [null]
+  cv_path "varchar(255)" [null]
+  cv_name "varchar(200)" [null]
+  cv_purged_at timestamp [null]
+  status "varchar(20)" [not null]
+  team_notes text [null]
+  invited "tinyint(1)" [not null]
+  status_changed_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (vacancy_uuid, applicant_id) [unique]
+  }
+}
+
+Table job_batches {
+  id "varchar(255)" [pk, not null]
+  name "varchar(255)" [not null]
+  total_jobs "int(11)" [not null]
+  pending_jobs "int(11)" [not null]
+  failed_jobs "int(11)" [not null]
+  failed_job_ids longtext [not null]
+  options mediumtext [null]
+  cancelled_at "int(11)" [null]
+  created_at "int(11)" [not null]
+  finished_at "int(11)" [null]
+}
+
+Table knowledge_bookmarks {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [not null]
+  knowledge_resource_id "bigint(20)" [not null]
+  created_at timestamp [null]
+  indexes {
+    (user_id, knowledge_resource_id) [unique]
+  }
+}
+
+Table knowledge_categories {
+  id "bigint(20)" [pk, not null]
+  parent_id "bigint(20)" [null]
+  name "varchar(120)" [not null]
+  slug "varchar(120)" [not null, unique]
+  description "varchar(500)" [null]
+  sort_order "int(10)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table knowledge_downloads {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [null]
+  knowledge_resource_id "bigint(20)" [not null]
+  version "int(10)" [null]
+  kind "varchar(10)" [not null]
+  ip_hash "varchar(64)" [null]
+  created_at timestamp [null]
+}
+
+Table knowledge_index_metadata {
+  id "bigint(20)" [pk, not null]
+  knowledge_resource_id "bigint(20)" [not null]
+  index_name "varchar(60)" [not null]
+  visibility "varchar(20)" [not null]
+  version "int(10)" [null]
+  checksum "varchar(64)" [not null]
+  indexed_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (knowledge_resource_id, index_name) [unique]
+  }
+}
+
+Table knowledge_recent_views {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [not null]
+  knowledge_resource_id "bigint(20)" [not null]
+  viewed_at timestamp [not null]
+  indexes {
+    (user_id, knowledge_resource_id) [unique]
+  }
+}
+
+Table knowledge_resources {
+  id "bigint(20)" [pk, not null]
+  uuid "char(36)" [not null, unique]
+  slug "varchar(140)" [not null, unique]
+  title "varchar(200)" [not null]
+  summary "varchar(1000)" [null]
+  body longtext [null]
+  resource_type "varchar(40)" [not null]
+  category_id "bigint(20)" [null]
+  author "varchar(200)" [null]
+  source "varchar(200)" [null]
+  publisher "varchar(200)" [null]
+  publication_date date [null]
+  license "varchar(60)" [not null]
+  external_url "varchar(500)" [null]
+  file_disk "varchar(20)" [null]
+  file_path "varchar(255)" [null]
+  file_name "varchar(200)" [null]
+  file_mime "varchar(120)" [null]
+  file_size "bigint(20)" [null]
+  visibility "varchar(20)" [not null]
+  audience longtext [null]
+  stages longtext [null]
+  vgi_dimension_keys longtext [null]
+  builder_step_keys longtext [null]
+  status "varchar(20)" [not null]
+  uploaded_by "bigint(20)" [null]
+  reviewed_by "bigint(20)" [null]
+  review_note text [null]
+  submitted_at timestamp [null]
+  reviewed_at timestamp [null]
+  published_at timestamp [null]
+  review_due_at timestamp [null]
+  expires_at timestamp [null]
+  seo_title "varchar(200)" [null]
+  seo_description "varchar(320)" [null]
+  download_count "int(10)" [not null]
+  current_version "int(10)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table knowledge_resource_tag {
+  knowledge_resource_id "bigint(20)" [pk, not null]
+  knowledge_tag_id "bigint(20)" [pk, not null]
+}
+
+Table knowledge_resource_versions {
+  id "bigint(20)" [pk, not null]
+  knowledge_resource_id "bigint(20)" [not null]
+  version "int(10)" [not null]
+  snapshot longtext [not null]
+  file_path "varchar(255)" [null]
+  file_name "varchar(200)" [null]
+  file_mime "varchar(120)" [null]
+  file_size "bigint(20)" [null]
+  change_note "varchar(500)" [null]
+  published_by "bigint(20)" [null]
+  created_at timestamp [null]
+  indexes {
+    (knowledge_resource_id, version) [unique]
+  }
+}
+
+Table knowledge_tags {
+  id "bigint(20)" [pk, not null]
+  name "varchar(60)" [not null]
+  slug "varchar(60)" [not null, unique]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table login_audits {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [null]
+  method "varchar(10)" [not null]
+  success "tinyint(1)" [not null]
+  reason "varchar(80)" [null]
+  identifier_hash "varchar(64)" [null]
+  ip_hash "varchar(64)" [null]
+  created_at timestamp [not null]
+}
+
+Table marketplace_inquiries {
+  uuid "char(36)" [pk, not null]
+  listing_uuid "char(36)" [not null]
+  startup_uuid "char(36)" [not null]
+  inquirer_id "bigint(20)" [not null]
+  inquirer_startup_uuid "char(36)" [null]
+  subject "varchar(150)" [not null]
+  status "varchar(20)" [not null]
+  last_message_at timestamp [null]
+  inquirer_read_at timestamp [null]
+  team_read_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table marketplace_listings {
+  uuid "char(36)" [pk, not null]
+  slug "varchar(190)" [not null, unique]
+  startup_uuid "char(36)" [not null]
+  kind "varchar(20)" [not null]
+  category "varchar(40)" [not null]
+  title "varchar(150)" [not null]
+  summary "varchar(300)" [not null]
+  description text [not null]
+  price_note "varchar(150)" [null]
+  location "varchar(120)" [null]
+  expires_on date [null]
+  status "varchar(20)" [not null]
+  moderation_note text [null]
+  published_at timestamp [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table marketplace_messages {
+  id "bigint(20)" [pk, not null]
+  inquiry_uuid "char(36)" [not null]
+  sender_id "bigint(20)" [null]
+  side "varchar(10)" [not null]
+  body text [not null]
+  created_at timestamp [not null]
+}
+
+Table marketplace_reports {
+  id "bigint(20)" [pk, not null]
+  listing_uuid "char(36)" [null]
+  inquiry_uuid "char(36)" [null]
+  reporter_id "bigint(20)" [null]
+  reason "varchar(30)" [not null]
+  details text [null]
+  status "varchar(20)" [not null]
+  resolution_note text [null]
+  resolved_by "bigint(20)" [null]
+  resolved_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table media {
+  id "bigint(20)" [pk, not null]
+  uuid "char(36)" [not null, unique]
+  disk "varchar(40)" [not null]
+  path "varchar(255)" [not null]
+  original_name "varchar(255)" [not null]
+  mime_type "varchar(120)" [not null]
+  size "bigint(20)" [not null]
+  alt_text "varchar(255)" [null]
+  uploaded_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table menus {
+  id "bigint(20)" [pk, not null]
+  name "varchar(255)" [not null]
+  location "varchar(40)" [not null, unique]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table menu_items {
+  id "bigint(20)" [pk, not null]
+  menu_id "bigint(20)" [not null]
+  parent_id "bigint(20)" [null]
+  label "varchar(255)" [not null]
+  url "varchar(255)" [null]
+  page_id "bigint(20)" [null]
+  sort_order "int(10)" [not null]
+  open_in_new_tab "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table migrations {
+  id "int(10)" [pk, not null]
+  migration "varchar(255)" [not null]
+  batch "int(11)" [not null]
+}
+
+Table model_has_permissions {
+  permission_id "bigint(20)" [pk, not null]
+  model_type "varchar(255)" [pk, not null]
+  model_id "bigint(20)" [pk, not null]
+}
+
+Table model_has_roles {
+  role_id "bigint(20)" [pk, not null]
+  model_type "varchar(255)" [pk, not null]
+  model_id "bigint(20)" [pk, not null]
+}
+
+Table notification_preferences {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [not null]
+  type "varchar(30)" [not null]
+  email "tinyint(1)" [not null]
+  in_app "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (user_id, type) [unique]
+  }
+}
+
+Table opportunities {
+  id "bigint(20)" [pk, not null]
+  uuid "char(36)" [not null, unique]
+  type "varchar(30)" [not null]
+  title "varchar(255)" [not null]
+  slug "varchar(255)" [not null, unique]
+  organisation "varchar(255)" [null]
+  summary text [not null]
+  body longtext [null]
+  location "varchar(255)" [null]
+  is_online "tinyint(1)" [not null]
+  eligibility longtext [null]
+  amount_text "varchar(120)" [null]
+  deadline_at timestamp [null]
+  starts_at timestamp [null]
+  ends_at timestamp [null]
+  apply_url "varchar(255)" [null]
+  accepts_interest "tinyint(1)" [not null]
+  capacity "int(10)" [null]
+  status "varchar(20)" [not null]
+  moderation_note text [null]
+  published_at timestamp [null]
+  submitted_by "bigint(20)" [null]
+  reviewed_by "bigint(20)" [null]
+  reviewed_at timestamp [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table opportunity_bookmarks {
+  id "bigint(20)" [pk, not null]
+  opportunity_id "bigint(20)" [not null]
+  user_id "bigint(20)" [not null]
+  reminded_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (opportunity_id, user_id) [unique]
+  }
+}
+
+Table opportunity_interests {
+  id "bigint(20)" [pk, not null]
+  opportunity_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [null]
+  user_id "bigint(20)" [not null]
+  message text [null]
+  status "varchar(20)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (opportunity_id, user_id) [unique]
+  }
+}
+
+Table organizations {
+  id "bigint(20)" [pk, not null]
+  uuid "char(36)" [not null, unique]
+  name "varchar(255)" [not null]
+  slug "varchar(120)" [not null, unique]
+  type "varchar(30)" [not null]
+  country "varchar(8)" [null]
+  website "varchar(255)" [null]
+  description text [null]
+  status "varchar(20)" [not null]
+  verified_at timestamp [null]
+  verified_by "bigint(20)" [null]
+  suspended_at timestamp [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table organization_memberships {
+  id "bigint(20)" [pk, not null]
+  organization_id "bigint(20)" [not null]
+  user_id "bigint(20)" [null]
+  role "varchar(20)" [not null]
+  status "varchar(20)" [not null]
+  invited_email "varchar(255)" [null]
+  invite_token_hash "varchar(64)" [null, unique]
+  invite_expires_at timestamp [null]
+  invited_by "bigint(20)" [null]
+  accepted_at timestamp [null]
+  revoked_at timestamp [null]
+  active_key "varchar(255)" [null, unique]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table organization_startup_relationships {
+  id "bigint(20)" [pk, not null]
+  uuid "char(36)" [not null, unique]
+  organization_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  purpose "varchar(30)" [not null]
+  scopes longtext [not null]
+  status "varchar(20)" [not null]
+  initiated_by "varchar(20)" [not null]
+  requested_by "bigint(20)" [null]
+  decided_by "bigint(20)" [null]
+  decided_at timestamp [null]
+  expires_at timestamp [null]
+  revoked_at timestamp [null]
+  revoked_by "bigint(20)" [null]
+  note text [null]
+  open_key "varchar(255)" [null, unique]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table pages {
+  id "bigint(20)" [pk, not null]
+  uuid "char(36)" [not null, unique]
+  title "varchar(255)" [not null]
+  slug "varchar(255)" [not null, unique]
+  template "varchar(40)" [not null]
+  summary text [null]
+  blocks longtext [null]
+  status "varchar(20)" [not null]
+  published_at timestamp [null]
+  seo_title "varchar(255)" [null]
+  seo_description "varchar(320)" [null]
+  og_image_id "bigint(20)" [null]
+  locale "varchar(10)" [not null]
+  author_id "bigint(20)" [null]
+  updated_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  deleted_at timestamp [null]
+}
+
+Table page_revisions {
+  id "bigint(20)" [pk, not null]
+  page_id "bigint(20)" [not null]
+  title "varchar(255)" [not null]
+  summary text [null]
+  blocks longtext [null]
+  meta longtext [null]
+  note "varchar(255)" [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [not null]
+}
+
+Table partners {
+  id "bigint(20)" [pk, not null]
+  name "varchar(255)" [not null]
+  website "varchar(255)" [null]
+  logo_media_id "bigint(20)" [null]
+  sort_order "int(10)" [not null]
+  is_published "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table password_reset_tokens {
+  email "varchar(255)" [pk, not null]
+  token "varchar(255)" [not null]
+  created_at timestamp [null]
+}
+
+Table payment_intents {
+  id "bigint(20)" [pk, not null]
+  booking_uuid "char(36)" [not null]
+  provider "varchar(30)" [not null]
+  amount_minor "bigint(20)" [not null]
+  currency "varchar(3)" [not null]
+  status "varchar(20)" [not null]
+  provider_ref "varchar(100)" [null]
+  idempotency_key "varchar(100)" [not null, unique]
+  refunded_minor "bigint(20)" [not null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (provider, provider_ref) [unique]
+  }
+}
+
+Table payment_ledger_entries {
+  id "bigint(20)" [pk, not null]
+  payment_intent_id "bigint(20)" [not null]
+  booking_uuid "char(36)" [not null]
+  entry_type "varchar(30)" [not null]
+  amount_minor "bigint(20)" [not null]
+  currency "varchar(3)" [not null]
+  source "varchar(20)" [not null]
+  webhook_receipt_id "bigint(20)" [null]
+  note "varchar(255)" [null]
+  created_at timestamp [null]
+}
+
+Table payment_webhook_receipts {
+  id "bigint(20)" [pk, not null]
+  provider "varchar(30)" [not null]
+  event_id "varchar(100)" [null]
+  claimed_event_id "varchar(100)" [null]
+  event_type "varchar(60)" [null]
+  signature_valid "tinyint(1)" [not null]
+  payload_hash "varchar(64)" [not null]
+  result "varchar(40)" [null]
+  processed_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (provider, event_id) [unique]
+  }
+}
+
+Table permissions {
+  id "bigint(20)" [pk, not null]
+  name "varchar(255)" [not null]
+  guard_name "varchar(255)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (name, guard_name) [unique]
+  }
+}
+
+Table posts {
+  id "bigint(20)" [pk, not null]
+  uuid "char(36)" [not null, unique]
+  title "varchar(255)" [not null]
+  slug "varchar(255)" [not null, unique]
+  excerpt text [null]
+  body longtext [null]
+  cover_media_id "bigint(20)" [null]
+  status "varchar(20)" [not null]
+  published_at timestamp [null]
+  seo_title "varchar(255)" [null]
+  seo_description "varchar(320)" [null]
+  author_id "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  deleted_at timestamp [null]
+}
+
+Table recommendation_feedback {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [null]
+  item_type "varchar(30)" [not null]
+  item_id "bigint(20)" [not null]
+  feedback "varchar(20)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (user_id, item_type, item_id) [unique]
+  }
+}
+
+Table registry_outbox_events {
+  event_id "char(36)" [pk, not null]
+  type "varchar(60)" [not null]
+  schema_version "smallint(5)" [not null]
+  occurred_at timestamp [not null]
+  source "varchar(20)" [not null]
+  subject_uuid "char(36)" [not null]
+  correlation_id "char(36)" [null]
+  data longtext [not null]
+  published_at timestamp [null]
+  attempts "smallint(5)" [not null]
+  last_error text [null]
+  dispatched_at timestamp [null]
+}
+
+Table roles {
+  id "bigint(20)" [pk, not null]
+  name "varchar(255)" [not null]
+  guard_name "varchar(255)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (name, guard_name) [unique]
+  }
+}
+
+Table role_has_permissions {
+  permission_id "bigint(20)" [pk, not null]
+  role_id "bigint(20)" [pk, not null]
+}
+
+Table seo_redirects {
+  id "bigint(20)" [pk, not null]
+  from_path "varchar(255)" [not null, unique]
+  to_url "varchar(255)" [not null]
+  status_code "smallint(5)" [not null]
+  hits "int(10)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table sessions {
+  id "varchar(255)" [pk, not null]
+  user_id "bigint(20)" [null]
+  ip_address "varchar(45)" [null]
+  user_agent text [null]
+  payload longtext [not null]
+  last_activity "int(11)" [not null]
+}
+
+Table session_actions {
+  id "bigint(20)" [pk, not null]
+  engagement_uuid "char(36)" [not null]
+  session_uuid "char(36)" [null]
+  title "varchar(200)" [not null]
+  owner "varchar(20)" [not null]
+  due_on date [null]
+  done_at timestamp [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table site_settings {
+  id "bigint(20)" [pk, not null]
+  key "varchar(255)" [not null, unique]
+  value text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table startups {
+  uuid "char(36)" [pk, not null]
+  legal_name "varchar(255)" [not null]
+  display_name "varchar(255)" [not null]
+  normalized_name "varchar(255)" [not null]
+  registration_number "varchar(80)" [null]
+  normalized_registration "varchar(80)" [null]
+  country "varchar(2)" [not null]
+  year_founded "smallint(5)" [null]
+  description text [null]
+  website "varchar(255)" [null]
+  website_domain "varchar(255)" [null]
+  status "varchar(20)" [not null]
+  merged_into_uuid "char(36)" [null]
+  version "int(10)" [not null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  archived_at timestamp [null]
+}
+
+Table startup_aliases {
+  id "bigint(20)" [pk, not null]
+  source_system "varchar(20)" [not null]
+  external_id "varchar(100)" [not null]
+  startup_uuid "char(36)" [not null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (source_system, external_id) [unique]
+  }
+}
+
+Table startup_duplicate_candidates {
+  id "bigint(20)" [pk, not null]
+  startup_a_uuid "char(36)" [not null]
+  startup_b_uuid "char(36)" [not null]
+  score "tinyint(3)" [not null]
+  evidence longtext [not null]
+  status "varchar(20)" [not null]
+  decided_by "bigint(20)" [null]
+  decided_at timestamp [null]
+  notes text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (startup_a_uuid, startup_b_uuid) [unique]
+  }
+}
+
+Table startup_field_changes {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  field_name "varchar(60)" [not null]
+  old_value text [null]
+  new_value text [null]
+  source_system "varchar(20)" [not null]
+  changed_by "bigint(20)" [null]
+  version "int(10)" [not null]
+  created_at timestamp [not null]
+}
+
+Table startup_founders {
+  uuid "char(36)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  user_id "bigint(20)" [null]
+  name "varchar(255)" [not null]
+  title "varchar(255)" [null]
+  visibility "varchar(20)" [not null]
+  sort_order "smallint(5)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table startup_funding_profiles {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null, unique]
+  round_stage "varchar(30)" [null]
+  instruments_sought longtext [null]
+  use_of_funds_breakdown longtext [null]
+  traction_summary text [null]
+  financial_summary text [null]
+  updated_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table startup_memberships {
+  uuid "char(36)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  user_id "bigint(20)" [null]
+  user_subject "varchar(255)" [null]
+  role "varchar(20)" [not null]
+  status "varchar(20)" [not null]
+  invited_email "varchar(255)" [null]
+  invite_token_hash "varchar(64)" [null, unique]
+  invite_expires_at timestamp [null]
+  request_message text [null]
+  invited_by "bigint(20)" [null]
+  accepted_at timestamp [null]
+  revoked_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table startup_merges {
+  id "bigint(20)" [pk, not null]
+  source_uuid "char(36)" [not null]
+  target_uuid "char(36)" [not null]
+  candidate_id "bigint(20)" [null]
+  journal longtext [not null]
+  reason text [not null]
+  merged_by "bigint(20)" [null]
+  merged_at timestamp [not null]
+  undone_by "bigint(20)" [null]
+  undone_at timestamp [null]
+}
+
+Table startup_profiles {
+  startup_uuid "char(36)" [pk, not null]
+  sector "varchar(80)" [null]
+  sub_sector "varchar(80)" [null]
+  headquarters_location "varchar(255)" [null]
+  team_size "int(10)" [null]
+  revenue_band text [null]
+  traction_summary text [null]
+  funding_raised_amount text [null]
+  funding_currency "varchar(3)" [null]
+  contact_email "varchar(255)" [null]
+  contact_phone text [null]
+  visibility longtext [null]
+  profile_completion "tinyint(3)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table startup_program_records {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  source_system "varchar(20)" [not null]
+  external_application_id "varchar(100)" [not null]
+  program_title "varchar(255)" [null]
+  cohort_name "varchar(255)" [null]
+  status "varchar(30)" [not null]
+  submitted_at timestamp [null]
+  status_changed_at timestamp [null]
+  program_start_date date [null]
+  program_end_date date [null]
+  enrolled "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (source_system, external_application_id) [unique]
+  }
+}
+
+Table talent_profiles {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [not null, unique]
+  headline "varchar(150)" [not null]
+  summary text [null]
+  skills longtext [null]
+  work_types longtext [null]
+  location "varchar(120)" [null]
+  country "varchar(10)" [null]
+  open_to_work "tinyint(1)" [not null]
+  visibility "varchar(20)" [not null]
+  consent_version "varchar(20)" [null]
+  consented_at timestamp [null]
+  cv_path "varchar(255)" [null]
+  cv_name "varchar(200)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table testimonials {
+  id "bigint(20)" [pk, not null]
+  author_name "varchar(255)" [not null]
+  author_role "varchar(255)" [null]
+  quote text [not null]
+  photo_media_id "bigint(20)" [null]
+  consent_confirmed "tinyint(1)" [not null]
+  sort_order "int(10)" [not null]
+  is_published "tinyint(1)" [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table users {
+  id "bigint(20)" [pk, not null]
+  name "varchar(255)" [not null]
+  email "varchar(255)" [not null, unique]
+  pending_email "varchar(255)" [null]
+  theme_palette "varchar(32)" [null]
+  email_verified_at timestamp [null]
+  password "varchar(255)" [null]
+  mfa_secret text [null]
+  mfa_recovery_codes text [null]
+  mfa_enabled_at timestamp [null]
+  mfa_last_step "bigint(20)" [null]
+  oidc_issuer "varchar(255)" [null]
+  oidc_subject "varchar(255)" [null]
+  is_active "tinyint(1)" [not null]
+  last_login_at timestamp [null]
+  remember_token "varchar(100)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (oidc_issuer, oidc_subject) [unique]
+  }
+}
+
+Table user_notifications {
+  id "bigint(20)" [pk, not null]
+  user_id "bigint(20)" [not null]
+  type "varchar(30)" [not null]
+  title "varchar(200)" [not null]
+  body text [null]
+  url "varchar(500)" [null]
+  read_at timestamp [null]
+  created_at timestamp [not null]
+}
+
+Table vacancies {
+  uuid "char(36)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  slug "varchar(190)" [not null, unique]
+  title "varchar(150)" [not null]
+  type "varchar(20)" [not null]
+  description text [not null]
+  requirements text [null]
+  skills longtext [null]
+  location "varchar(120)" [null]
+  remote "tinyint(1)" [not null]
+  pay_note "varchar(150)" [null]
+  closes_on date [null]
+  status "varchar(20)" [not null]
+  moderation_note text [null]
+  published_at timestamp [null]
+  closed_at timestamp [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table vacancy_invitations {
+  id "bigint(20)" [pk, not null]
+  vacancy_uuid "char(36)" [not null]
+  user_id "bigint(20)" [not null]
+  invited_by "bigint(20)" [null]
+  message "varchar(1000)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (vacancy_uuid, user_id) [unique]
+  }
+}
+
+Table venture_builder_enrollments {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  curriculum_id "bigint(20)" [not null]
+  status "varchar(20)" [not null]
+  migrated_from_id "bigint(20)" [null]
+  started_by "bigint(20)" [null]
+  started_at timestamp [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (startup_uuid, curriculum_id) [unique]
+  }
+}
+
+Table venture_step_comments {
+  id "bigint(20)" [pk, not null]
+  submission_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  user_id "bigint(20)" [null]
+  body text [not null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table venture_step_evidence {
+  id "bigint(20)" [pk, not null]
+  submission_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  kind "varchar(10)" [not null]
+  title "varchar(200)" [not null]
+  disk "varchar(20)" [null]
+  path "varchar(255)" [null]
+  original_name "varchar(200)" [null]
+  mime_type "varchar(120)" [null]
+  size "bigint(20)" [null]
+  url "varchar(2000)" [null]
+  source_note text [null]
+  uploaded_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table venture_step_reviews {
+  id "bigint(20)" [pk, not null]
+  submission_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  reviewer_id "bigint(20)" [null]
+  decision "varchar(20)" [not null]
+  feedback text [not null]
+  revision_number "int(10)" [null]
+  created_at timestamp [not null]
+}
+
+Table venture_step_revisions {
+  id "bigint(20)" [pk, not null]
+  submission_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  number "int(10)" [not null]
+  reason "varchar(20)" [not null]
+  status "varchar(20)" [not null]
+  step_key "varchar(80)" [not null]
+  step_title "varchar(255)" [not null]
+  curriculum_version "int(10)" [not null]
+  field_labels longtext [null]
+  responses longtext [null]
+  checklist_state longtext [null]
+  created_by "bigint(20)" [null]
+  created_at timestamp [not null]
+  indexes {
+    (submission_id, number) [unique]
+  }
+}
+
+Table venture_step_submissions {
+  id "bigint(20)" [pk, not null]
+  enrollment_id "bigint(20)" [not null]
+  startup_uuid "char(36)" [not null]
+  step_definition_id "bigint(20)" [not null]
+  step_key "varchar(80)" [not null]
+  status "varchar(20)" [not null]
+  responses longtext [null]
+  checklist_state longtext [null]
+  version "int(10)" [not null]
+  first_submitted_at timestamp [null]
+  started_at timestamp [null]
+  submitted_at timestamp [null]
+  submitted_by "bigint(20)" [null]
+  validated_at timestamp [null]
+  validated_by "bigint(20)" [null]
+  completed_at timestamp [null]
+  completed_by "bigint(20)" [null]
+  updated_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (enrollment_id, step_definition_id) [unique]
+  }
+}
+
+Table vgi_assessments {
+  uuid "char(36)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  framework_id "bigint(20)" [not null]
+  status "varchar(20)" [not null]
+  started_by "bigint(20)" [null]
+  submitted_by "bigint(20)" [null]
+  submitted_at timestamp [null]
+  score "decimal(5,1)" [null]
+  band_label "varchar(80)" [null]
+  result longtext [null]
+  calculation_hash "varchar(64)" [null]
+  override_score "decimal(5,1)" [null]
+  override_band_label "varchar(80)" [null]
+  override_reason text [null]
+  override_by "bigint(20)" [null]
+  override_at timestamp [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table vgi_frameworks {
+  id "bigint(20)" [pk, not null]
+  name "varchar(255)" [not null]
+  version "int(10)" [not null]
+  status "varchar(20)" [not null]
+  description text [null]
+  definition longtext [not null]
+  definition_hash "varchar(64)" [null]
+  created_by "bigint(20)" [null]
+  updated_by "bigint(20)" [null]
+  approved_by "bigint(20)" [null]
+  approved_at timestamp [null]
+  approval_note text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  methodology_status "varchar(20)" [not null]
+  owner_signoff_reference "varchar(200)" [null]
+  owner_signatory "varchar(200)" [null]
+  owner_signed_on date [null]
+  owner_signoff_note text [null]
+  owner_signoff_recorded_by "bigint(20)" [null]
+  owner_signoff_recorded_at timestamp [null]
+  indexes {
+    (name, version) [unique]
+  }
+}
+
+Table vgi_guidance_feedback {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  assessment_uuid "char(36)" [not null]
+  user_id "bigint(20)" [not null]
+  dimension_key "varchar(100)" [not null]
+  feedback "varchar(15)" [not null]
+  explanation text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (user_id, assessment_uuid, dimension_key) [unique]
+  }
+}
+
+Table vgi_override_logs {
+  id "bigint(20)" [pk, not null]
+  startup_uuid "char(36)" [not null]
+  assessment_uuid "char(36)" [not null]
+  framework_id "bigint(20)" [null]
+  original_score "decimal(5,1)" [null]
+  original_band_label "varchar(80)" [null]
+  previous_score "decimal(5,1)" [null]
+  previous_band_label "varchar(80)" [null]
+  new_score "decimal(5,1)" [null]
+  new_band_label "varchar(80)" [null]
+  reason text [not null]
+  actor_role "varchar(120)" [null]
+  actor_id "bigint(20)" [null]
+  created_at timestamp [not null]
+}
+
+Table vgi_responses {
+  id "bigint(20)" [pk, not null]
+  assessment_uuid "char(36)" [not null]
+  question_key "varchar(60)" [not null]
+  option_key "varchar(60)" [null]
+  evidence_note text [null]
+  answered_by "bigint(20)" [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (assessment_uuid, question_key) [unique]
+  }
+}
+
+Table webhook_deliveries {
+  id "bigint(20)" [pk, not null]
+  event_id "char(36)" [not null]
+  api_client_id "bigint(20)" [not null]
+  status "varchar(20)" [not null]
+  attempts "smallint(5)" [not null]
+  next_attempt_at timestamp [null]
+  delivered_at timestamp [null]
+  last_status_code "smallint(5)" [null]
+  last_error text [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+  indexes {
+    (event_id, api_client_id) [unique]
+  }
+}
+
+Ref: ai_consents.user_id > users.id
+Ref: ai_interactions.user_id > users.id
+Ref: announcements.created_by > users.id
+Ref: announcements.sent_by > users.id
+Ref: audit_logs.actor_id > users.id
+Ref: builder_curricula.copied_from_id > builder_curricula.id
+Ref: builder_curricula.created_by > users.id
+Ref: builder_curricula.published_by > users.id
+Ref: builder_curricula.updated_by > users.id
+Ref: builder_documents.startup_uuid > startups.uuid
+Ref: builder_documents.submission_id > venture_step_submissions.id
+Ref: builder_document_versions.created_by > users.id
+Ref: builder_document_versions.document_id > builder_documents.id
+Ref: builder_modules.curriculum_id > builder_curricula.id
+Ref: builder_step_definitions.curriculum_id > builder_curricula.id
+Ref: builder_step_definitions.module_id > builder_modules.id
+Ref: builder_step_events.startup_uuid > startups.uuid
+Ref: builder_step_events.submission_id > venture_step_submissions.id
+Ref: builder_step_events.user_id > users.id
+Ref: capital_document_requests.introduction_uuid > investor_introductions.uuid
+Ref: capital_document_requests.investor_user_id > users.id
+Ref: capital_document_requests.responded_by > users.id
+Ref: capital_document_requests.startup_uuid > startups.uuid
+Ref: capital_share_grants.granted_by > users.id
+Ref: capital_share_grants.investor_user_id > users.id
+Ref: capital_share_grants.revoked_by > users.id
+Ref: capital_share_grants.startup_uuid > startups.uuid
+Ref: category_post.category_id > categories.id
+Ref: category_post.post_id > posts.id
+Ref: challenges.submitted_by > users.id
+Ref: challenge_bookmarks.challenge_id > challenges.id
+Ref: challenge_bookmarks.user_id > users.id
+Ref: challenge_evidence.added_by > users.id
+Ref: challenge_evidence.challenge_id > challenges.id
+Ref: challenge_evidence.validated_by > users.id
+Ref: challenge_reviews.challenge_id > challenges.id
+Ref: challenge_reviews.challenge_version_id > challenge_versions.id
+Ref: challenge_reviews.reviewer_id > users.id
+Ref: challenge_solution_submissions.challenge_id > challenges.id
+Ref: challenge_solution_submissions.startup_uuid > startups.uuid
+Ref: challenge_solution_submissions.status_changed_by > users.id
+Ref: challenge_solution_submissions.user_id > users.id
+Ref: challenge_versions.approved_by > users.id
+Ref: challenge_versions.challenge_id > challenges.id
+Ref: challenge_versions.created_by > users.id
+Ref: challenge_versions.published_by > users.id
+Ref: connect_codes.api_client_id > api_clients.id
+Ref: connect_codes.user_id > users.id
+Ref: data_room_access_logs.user_id > users.id
+Ref: data_room_files.startup_uuid > startups.uuid
+Ref: data_room_files.uploaded_by > users.id
+Ref: data_room_grants.granted_by > users.id
+Ref: data_room_grants.investor_user_id > users.id
+Ref: data_room_grants.revoked_by > users.id
+Ref: data_room_grants.startup_uuid > startups.uuid
+Ref: data_sharing_consents.granted_by > users.id
+Ref: data_sharing_consents.revoked_by > users.id
+Ref: data_sharing_consents.startup_uuid > startups.uuid
+Ref: due_diligence_items.created_by > users.id
+Ref: due_diligence_items.introduction_uuid > investor_introductions.uuid
+Ref: due_diligence_items.investor_user_id > users.id
+Ref: due_diligence_items.startup_uuid > startups.uuid
+Ref: due_diligence_items.updated_by > users.id
+Ref: email_deliveries.user_id > users.id
+Ref: expert_availability.expert_user_id > users.id
+Ref: expert_bookings.booked_by > users.id
+Ref: expert_bookings.cancelled_by > users.id
+Ref: expert_bookings.engagement_uuid > expert_engagements.uuid
+Ref: expert_bookings.expert_user_id > users.id
+Ref: expert_bookings.service_id > expert_services.id
+Ref: expert_category_profile.expert_category_id > expert_categories.id
+Ref: expert_category_profile.expert_profile_id > expert_profiles.id
+Ref: expert_complaints.engagement_uuid > expert_engagements.uuid
+Ref: expert_complaints.handled_by > users.id
+Ref: expert_complaints.raised_by > users.id
+Ref: expert_complaints.review_id > expert_reviews.id
+Ref: expert_contracts.engagement_uuid > expert_engagements.uuid
+Ref: expert_contracts.expert_accepted_by > users.id
+Ref: expert_contracts.startup_accepted_by > users.id
+Ref: expert_conversations.engagement_uuid > expert_engagements.uuid
+Ref: expert_engagements.decided_by > users.id
+Ref: expert_engagements.expert_user_id > users.id
+Ref: expert_engagements.requested_by > users.id
+Ref: expert_messages.conversation_id > expert_conversations.id
+Ref: expert_messages.sender_id > users.id
+Ref: expert_profiles.user_id > users.id
+Ref: expert_profiles.verified_by > users.id
+Ref: expert_reviews.engagement_uuid > expert_engagements.uuid
+Ref: expert_reviews.expert_user_id > users.id
+Ref: expert_reviews.hidden_by > users.id
+Ref: expert_reviews.reviewer_id > users.id
+Ref: expert_services.expert_user_id > users.id
+Ref: expert_sessions.created_by > users.id
+Ref: expert_sessions.engagement_uuid > expert_engagements.uuid
+Ref: expert_verifications.expert_profile_id > expert_profiles.id
+Ref: expert_verifications.reviewed_by > users.id
+Ref: feature_flags.updated_by > users.id
+Ref: funding_requests.created_by > users.id
+Ref: funding_requests.startup_uuid > startups.uuid
+Ref: growth_actions.created_by > users.id
+Ref: growth_actions.owner_user_id > users.id
+Ref: growth_actions.startup_uuid > startups.uuid
+Ref: growth_updates.growth_action_id > growth_actions.id
+Ref: growth_updates.startup_uuid > startups.uuid
+Ref: growth_updates.user_id > users.id
+Ref: hiring_pipeline_events.actor_id > users.id
+Ref: hiring_pipeline_events.application_uuid > job_applications.uuid
+Ref: integration_inbox.api_client_id > api_clients.id
+Ref: interviews.application_uuid > job_applications.uuid
+Ref: interviews.created_by > users.id
+Ref: investment_pipeline_events.actor_user_id > users.id
+Ref: investment_pipeline_events.investor_user_id > users.id
+Ref: investment_pipeline_events.pipeline_item_id > investment_pipeline_items.id
+Ref: investment_pipeline_items.investor_user_id > users.id
+Ref: investment_pipeline_items.startup_uuid > startups.uuid
+Ref: investor_interactions.actor_user_id > users.id
+Ref: investor_interactions.investor_user_id > users.id
+Ref: investor_interactions.startup_uuid > startups.uuid
+Ref: investor_introductions.decided_by > users.id
+Ref: investor_introductions.investor_user_id > users.id
+Ref: investor_introductions.requester_user_id > users.id
+Ref: investor_introductions.startup_uuid > startups.uuid
+Ref: investor_match_feedback.given_by > users.id
+Ref: investor_match_feedback.investor_user_id > users.id
+Ref: investor_match_feedback.startup_uuid > startups.uuid
+Ref: investor_profiles.user_id > users.id
+Ref: investor_profiles.verified_by > users.id
+Ref: investor_watchlist.investor_user_id > users.id
+Ref: investor_watchlist.startup_uuid > startups.uuid
+Ref: job_applications.applicant_id > users.id
+Ref: job_applications.vacancy_uuid > vacancies.uuid
+Ref: knowledge_bookmarks.knowledge_resource_id > knowledge_resources.id
+Ref: knowledge_bookmarks.user_id > users.id
+Ref: knowledge_categories.parent_id > knowledge_categories.id
+Ref: knowledge_downloads.knowledge_resource_id > knowledge_resources.id
+Ref: knowledge_downloads.user_id > users.id
+Ref: knowledge_index_metadata.knowledge_resource_id > knowledge_resources.id
+Ref: knowledge_recent_views.knowledge_resource_id > knowledge_resources.id
+Ref: knowledge_recent_views.user_id > users.id
+Ref: knowledge_resources.category_id > knowledge_categories.id
+Ref: knowledge_resources.reviewed_by > users.id
+Ref: knowledge_resources.uploaded_by > users.id
+Ref: knowledge_resource_tag.knowledge_resource_id > knowledge_resources.id
+Ref: knowledge_resource_tag.knowledge_tag_id > knowledge_tags.id
+Ref: knowledge_resource_versions.knowledge_resource_id > knowledge_resources.id
+Ref: knowledge_resource_versions.published_by > users.id
+Ref: login_audits.user_id > users.id
+Ref: marketplace_inquiries.inquirer_id > users.id
+Ref: marketplace_inquiries.listing_uuid > marketplace_listings.uuid
+Ref: marketplace_listings.created_by > users.id
+Ref: marketplace_messages.inquiry_uuid > marketplace_inquiries.uuid
+Ref: marketplace_messages.sender_id > users.id
+Ref: marketplace_reports.reporter_id > users.id
+Ref: marketplace_reports.resolved_by > users.id
+Ref: media.uploaded_by > users.id
+Ref: menu_items.menu_id > menus.id
+Ref: menu_items.page_id > pages.id
+Ref: menu_items.parent_id > menu_items.id
+Ref: model_has_permissions.permission_id > permissions.id
+Ref: model_has_roles.role_id > roles.id
+Ref: notification_preferences.user_id > users.id
+Ref: opportunities.created_by > users.id
+Ref: opportunities.reviewed_by > users.id
+Ref: opportunities.submitted_by > users.id
+Ref: opportunity_bookmarks.opportunity_id > opportunities.id
+Ref: opportunity_bookmarks.user_id > users.id
+Ref: opportunity_interests.opportunity_id > opportunities.id
+Ref: opportunity_interests.startup_uuid > startups.uuid
+Ref: opportunity_interests.user_id > users.id
+Ref: organizations.created_by > users.id
+Ref: organizations.verified_by > users.id
+Ref: organization_memberships.invited_by > users.id
+Ref: organization_memberships.organization_id > organizations.id
+Ref: organization_memberships.user_id > users.id
+Ref: organization_startup_relationships.decided_by > users.id
+Ref: organization_startup_relationships.organization_id > organizations.id
+Ref: organization_startup_relationships.requested_by > users.id
+Ref: organization_startup_relationships.revoked_by > users.id
+Ref: organization_startup_relationships.startup_uuid > startups.uuid
+Ref: pages.author_id > users.id
+Ref: pages.og_image_id > media.id
+Ref: pages.updated_by > users.id
+Ref: page_revisions.created_by > users.id
+Ref: page_revisions.page_id > pages.id
+Ref: partners.logo_media_id > media.id
+Ref: payment_intents.booking_uuid > expert_bookings.uuid
+Ref: payment_intents.created_by > users.id
+Ref: payment_ledger_entries.payment_intent_id > payment_intents.id
+Ref: payment_ledger_entries.webhook_receipt_id > payment_webhook_receipts.id
+Ref: posts.author_id > users.id
+Ref: posts.cover_media_id > media.id
+Ref: recommendation_feedback.user_id > users.id
+Ref: role_has_permissions.permission_id > permissions.id
+Ref: role_has_permissions.role_id > roles.id
+Ref: session_actions.created_by > users.id
+Ref: session_actions.engagement_uuid > expert_engagements.uuid
+Ref: startups.created_by > users.id
+Ref: startup_aliases.created_by > users.id
+Ref: startup_aliases.startup_uuid > startups.uuid
+Ref: startup_duplicate_candidates.decided_by > users.id
+Ref: startup_field_changes.changed_by > users.id
+Ref: startup_founders.startup_uuid > startups.uuid
+Ref: startup_founders.user_id > users.id
+Ref: startup_funding_profiles.startup_uuid > startups.uuid
+Ref: startup_funding_profiles.updated_by > users.id
+Ref: startup_memberships.invited_by > users.id
+Ref: startup_memberships.startup_uuid > startups.uuid
+Ref: startup_memberships.user_id > users.id
+Ref: startup_merges.candidate_id > startup_duplicate_candidates.id
+Ref: startup_merges.merged_by > users.id
+Ref: startup_merges.undone_by > users.id
+Ref: startup_profiles.startup_uuid > startups.uuid
+Ref: startup_program_records.startup_uuid > startups.uuid
+Ref: talent_profiles.user_id > users.id
+Ref: testimonials.photo_media_id > media.id
+Ref: user_notifications.user_id > users.id
+Ref: vacancies.created_by > users.id
+Ref: vacancy_invitations.invited_by > users.id
+Ref: vacancy_invitations.user_id > users.id
+Ref: vacancy_invitations.vacancy_uuid > vacancies.uuid
+Ref: venture_builder_enrollments.curriculum_id > builder_curricula.id
+Ref: venture_builder_enrollments.migrated_from_id > venture_builder_enrollments.id
+Ref: venture_builder_enrollments.started_by > users.id
+Ref: venture_builder_enrollments.startup_uuid > startups.uuid
+Ref: venture_step_comments.startup_uuid > startups.uuid
+Ref: venture_step_comments.submission_id > venture_step_submissions.id
+Ref: venture_step_comments.user_id > users.id
+Ref: venture_step_evidence.startup_uuid > startups.uuid
+Ref: venture_step_evidence.submission_id > venture_step_submissions.id
+Ref: venture_step_evidence.uploaded_by > users.id
+Ref: venture_step_reviews.reviewer_id > users.id
+Ref: venture_step_reviews.startup_uuid > startups.uuid
+Ref: venture_step_reviews.submission_id > venture_step_submissions.id
+Ref: venture_step_revisions.created_by > users.id
+Ref: venture_step_revisions.startup_uuid > startups.uuid
+Ref: venture_step_revisions.submission_id > venture_step_submissions.id
+Ref: venture_step_submissions.completed_by > users.id
+Ref: venture_step_submissions.enrollment_id > venture_builder_enrollments.id
+Ref: venture_step_submissions.startup_uuid > startups.uuid
+Ref: venture_step_submissions.step_definition_id > builder_step_definitions.id
+Ref: venture_step_submissions.submitted_by > users.id
+Ref: venture_step_submissions.updated_by > users.id
+Ref: venture_step_submissions.validated_by > users.id
+Ref: vgi_assessments.framework_id > vgi_frameworks.id
+Ref: vgi_assessments.override_by > users.id
+Ref: vgi_assessments.started_by > users.id
+Ref: vgi_assessments.startup_uuid > startups.uuid
+Ref: vgi_assessments.submitted_by > users.id
+Ref: vgi_frameworks.approved_by > users.id
+Ref: vgi_frameworks.created_by > users.id
+Ref: vgi_frameworks.owner_signoff_recorded_by > users.id
+Ref: vgi_frameworks.updated_by > users.id
+Ref: vgi_guidance_feedback.assessment_uuid > vgi_assessments.uuid
+Ref: vgi_guidance_feedback.startup_uuid > startups.uuid
+Ref: vgi_guidance_feedback.user_id > users.id
+Ref: vgi_override_logs.actor_id > users.id
+Ref: vgi_override_logs.assessment_uuid > vgi_assessments.uuid
+Ref: vgi_override_logs.framework_id > vgi_frameworks.id
+Ref: vgi_override_logs.startup_uuid > startups.uuid
+Ref: vgi_responses.answered_by > users.id
+Ref: vgi_responses.assessment_uuid > vgi_assessments.uuid
+Ref: webhook_deliveries.api_client_id > api_clients.id
