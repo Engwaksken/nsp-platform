@@ -26,7 +26,7 @@
                     <p><strong>{{ $question['prompt'] }}</strong> <span class="meta">({{ $question['key'] }}, weight {{ $question['weight'] ?? 1 }}, evidence {{ $question['evidence'] ?? 'none' }})</span></p>
                     <ul>
                         @foreach ($question['options'] as $option)
-                            <li>{{ $option['label'] }} · <strong>{{ $option['score'] }}</strong>@if (!empty($option['tip']))<br><span class="meta">Tip: {{ $option['tip'] }}</span>@endif</li>
+                            <li>{{ $option['label'] }} · @if (!empty($option['insufficient']) || ! isset($option['score']))<span class="badge badge-draft">No score: not enough information</span>@else<strong>{{ $option['score'] }}</strong>@endif @if (!empty($option['tip']))<br><span class="meta">Tip: {{ $option['tip'] }}</span>@endif</li>
                         @endforeach
                     </ul>
                 @endforeach

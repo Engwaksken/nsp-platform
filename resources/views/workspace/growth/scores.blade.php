@@ -19,8 +19,12 @@
     @foreach ($result['dimensions'] as $dimension)
         <tr>
             <th scope="row">{{ $dimension['title'] }}</th>
-            <td>{{ number_format($dimension['score'], 1) }}</td>
-            <td style="width:50%"><meter min="0" max="100" low="45" high="70" optimum="100" value="{{ $dimension['score'] }}" aria-label="{{ $dimension['title'] }}: {{ $dimension['score'] }} out of 100" style="width:100%"></meter></td>
+            @if ($dimension['score'] === null)
+                <td colspan="2"><span class="meta">Insufficient information: answer more questions in this area to get a score.</span></td>
+            @else
+                <td>{{ number_format($dimension['score'], 1) }}</td>
+                <td style="width:50%"><meter min="0" max="100" low="45" high="70" optimum="100" value="{{ $dimension['score'] }}" aria-label="{{ $dimension['title'] }}: {{ $dimension['score'] }} out of 100" style="width:100%"></meter></td>
+            @endif
         </tr>
     @endforeach
     </tbody>
