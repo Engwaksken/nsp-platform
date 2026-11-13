@@ -1536,3 +1536,23 @@ a.stats-chip[aria-current="true"] { border-color: var(--brand-accent); box-shado
 .capital-no { color: var(--ink-subtle); }
 .capital-report-section h2 .fas { margin-right: .4rem; font-size: .9em; color: var(--accent-icon); }
 @media print { .capital-report-section { break-inside: avoid; } }
+
+/* FAQ page: topics as cards in two columns (one on phones), with quick links to each topic. */
+.faq-head { margin-bottom: var(--space-5); }
+.faq-head h1 { margin-bottom: .35rem; }
+.faq-topics { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: var(--space-4); }
+.faq-topics a { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .75rem; font-size: .88rem; color: var(--ink); text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; transition: border-color .15s, background-color .15s; }
+.faq-topics a:hover { border-color: var(--line-strong); background: var(--surface-alt); color: var(--ink-strong); }
+.faq-topics i { font-size: .8rem; color: var(--accent-icon, var(--brand-accent)); }
+.faq-grid { display: grid; gap: var(--space-5); grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+@media (max-width: 860px) { .faq-grid { grid-template-columns: minmax(0, 1fr); } }
+.faq-group { padding: clamp(1rem, 2.5vw, 1.5rem); background: var(--surface-alt); border: 1px solid var(--line); border-radius: var(--radius-lg); scroll-margin-top: 90px; }
+.faq-group-head { display: flex; align-items: center; gap: .7rem; margin-bottom: var(--space-4); }
+.faq-group-head h2 { margin: 0; font-size: 1.1rem; }
+.faq-group-icon { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; color: var(--tone-blue); background: var(--badge-blue-bg); border-radius: 10px; }
+.faq-count { margin-left: auto; min-width: 1.6rem; padding: 0 .5rem; font-size: .75rem; font-weight: 600; line-height: 1.6rem; text-align: center; color: var(--ink-muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; }
+.faq-group details.faq:last-child { margin-bottom: 0; }
+.faq-more { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); margin-top: var(--space-6); padding: clamp(1rem, 2.5vw, 1.5rem); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+.faq-more h2 { margin: 0 0 .2rem; font-size: 1.1rem; }
+.faq-more p { margin: 0; color: var(--ink-muted); }
+.faq-more .btn { margin-left: auto; }
