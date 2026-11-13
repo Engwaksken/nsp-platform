@@ -39,7 +39,7 @@
                                     <select id="role-{{ $member->id }}" name="role">
                                         @foreach ($roles as $key => $label)<option value="{{ $key }}" @selected($member->role === $key)>{{ $label }}</option>@endforeach
                                     </select>
-                                    <button type="submit" class="btn btn-secondary btn-sm">Save<span class="visually-hidden"> role for {{ $member->user?->name }}</span></button>
+                                    <button type="submit" class="btn btn-icon btn-icon-primary" data-tip="Save role"><i class="fas fa-floppy-disk" aria-hidden="true"></i><span class="visually-hidden">Save role for {{ $member->user?->name }}</span></button>
                                 </form>
                             @else
                                 {{ $member->roleLabel() }}
@@ -50,7 +50,8 @@
                             @if (($canManage && !$self) || ($self && $member->status === 'active'))
                                 <form method="post" action="{{ route('organizations.members.remove', [$organization, $member]) }}" data-confirm="{{ $self ? 'Leave '.$organization->name.'?' : 'Remove this person? Their access ends immediately.' }}">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-secondary btn-sm">{{ $self ? 'Leave' : ($member->status === 'invited' ? 'Cancel invitation' : 'Remove') }}</button>
+                                    @php($removeLabel = $self ? 'Leave' : ($member->status === 'invited' ? 'Cancel invitation' : 'Remove'))
+                                    <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="{{ $removeLabel }}"><i class="fas {{ $self ? 'fa-right-from-bracket' : ($member->status === 'invited' ? 'fa-envelope-circle-check' : 'fa-user-minus') }}" aria-hidden="true"></i><span class="visually-hidden">{{ $removeLabel }} {{ $member->user?->name ?? $member->invited_email }}</span></button>
                                 </form>
                             @endif
                         </td>

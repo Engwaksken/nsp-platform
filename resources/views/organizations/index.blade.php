@@ -27,7 +27,7 @@
                                 @elseif (!$m->organization->isSuspended())
                                     <form method="post" action="{{ route('organizations.switch', $m->organization) }}">
                                         @csrf
-                                        <button type="submit" class="btn btn-secondary btn-sm">Switch<span class="visually-hidden"> to {{ $m->organization->name }}</span></button>
+                                        <button type="submit" class="btn btn-icon" data-tip="Switch"><i class="fas fa-right-left" aria-hidden="true"></i><span class="visually-hidden">Switch to {{ $m->organization->name }}</span></button>
                                     </form>
                                 @endif
                             </td>

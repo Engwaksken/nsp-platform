@@ -32,10 +32,10 @@
                                 @if ($announcement->sent_at)<br><span class="meta">{{ $announcement->sent_at->format('j M Y') }} by {{ $announcement->sender?->name }}</span>@endif</td>
                             <td>@if ($announcement->status === 'sent'){{ $announcement->recipients }}@else<span class="meta">Not sent</span>@endif</td>
                             <td>@if ($announcement->status === 'draft')
-                                    <div class="inline-form">
-                                        <a class="btn btn-secondary btn-sm" href="{{ route('admin.communications.edit', $announcement) }}" data-modal><i class="fas fa-pen" aria-hidden="true"></i> Edit<span class="visually-hidden"> {{ $announcement->title }}</span></a>
-                                        <form method="post" action="{{ route('admin.communications.send', $announcement) }}" data-confirm="Send &quot;{{ $announcement->title }}&quot; to {{ $audiences[$announcement->audience] }}?">@csrf <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-paper-plane" aria-hidden="true"></i> Send<span class="visually-hidden"> {{ $announcement->title }}</span></button></form>
-                                        <form method="post" action="{{ route('admin.communications.destroy', $announcement) }}" data-confirm="Delete the draft &quot;{{ $announcement->title }}&quot;?">@csrf @method('DELETE') <button type="submit" class="btn btn-secondary btn-sm">Delete<span class="visually-hidden"> {{ $announcement->title }}</span></button></form>
+                                    <div class="icon-actions">
+                                        <a class="btn btn-icon" href="{{ route('admin.communications.edit', $announcement) }}" data-modal data-tip="Edit"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span class="visually-hidden">Edit {{ $announcement->title }}</span></a>
+                                        <form method="post" action="{{ route('admin.communications.send', $announcement) }}" data-confirm="Send &quot;{{ $announcement->title }}&quot; to {{ $audiences[$announcement->audience] }}?">@csrf <button type="submit" class="btn btn-icon btn-icon-primary" data-tip="Send"><i class="fas fa-paper-plane" aria-hidden="true"></i><span class="visually-hidden">Send {{ $announcement->title }}</span></button></form>
+                                        <form method="post" action="{{ route('admin.communications.destroy', $announcement) }}" data-confirm="Delete the draft &quot;{{ $announcement->title }}&quot;?">@csrf @method('DELETE') <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="Delete"><i class="fas fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">Delete {{ $announcement->title }}</span></button></form>
                                     </div>
                                 @endif</td>
                         </tr>

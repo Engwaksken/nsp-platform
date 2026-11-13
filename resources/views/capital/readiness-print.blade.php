@@ -7,7 +7,7 @@
     <title>Readiness report · {{ $startup->display_name }}</title>
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/fontawesome.min.css') }}?v=6.5.2">
     <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/solid.min.css') }}?v=6.5.2">
-    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=28">
+    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=30">
     <style>
         body { background: #fff; }
         .report { max-width: 820px; margin: 0 auto; padding: 24px 16px; }

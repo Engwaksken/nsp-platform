@@ -79,7 +79,7 @@
                                 <form method="post" action="{{ route('admin.organizations.members', $organization) }}" data-confirm="{{ $member->status === 'invited' ? 'Cancel this invitation?' : 'Remove this member from '.$organization->name.'?' }}">
                                     @csrf
                                     <input type="hidden" name="remove" value="{{ $member->id }}">
-                                    <button type="submit" class="btn btn-secondary btn-sm">{{ $member->status === 'invited' ? 'Cancel invite' : 'Remove' }}</button>
+                                    <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="{{ $member->status === 'invited' ? 'Cancel invite' : 'Remove' }}"><i class="fas {{ $member->status === 'invited' ? 'fa-envelope-circle-check' : 'fa-user-minus' }}" aria-hidden="true"></i><span class="visually-hidden">{{ $member->status === 'invited' ? 'Cancel invite' : 'Remove' }}</span></button>
                                 </form>
                             </td>
                         </tr>

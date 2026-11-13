@@ -34,10 +34,10 @@
                     <td><span class="badge badge-{{ $page->displayStatus() }}">{{ ucfirst($page->displayStatus()) }}</span>
                         @if ($page->displayStatus() === 'scheduled')<br><span class="meta">{{ $page->published_at->format('j M Y H:i') }}</span>@endif</td>
                     <td>{{ $page->updated_at->diffForHumans() }}</td>
-                    <td class="actions">
-                        <a class="btn btn-secondary btn-sm" href="{{ route('admin.pages.edit', $page) }}" data-modal="lg">Edit<span class="visually-hidden"> {{ $page->title }}</span></a>
-                        <a class="btn btn-secondary btn-sm" href="{{ route('admin.pages.preview', $page) }}" target="_blank" rel="noopener">Preview</a>
-                    </td>
+                    <td><div class="icon-actions">
+                        <a class="btn btn-icon" href="{{ route('admin.pages.edit', $page) }}" data-modal="lg" data-tip="Edit"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span class="visually-hidden">Edit {{ $page->title }}</span></a>
+                        <a class="btn btn-icon" href="{{ route('admin.pages.preview', $page) }}" target="_blank" rel="noopener" data-tip="Preview"><i class="fas fa-eye" aria-hidden="true"></i><span class="visually-hidden">Preview {{ $page->title }} (opens in a new tab)</span></a>
+                    </div></td>
                 </tr>
             @empty
                 <tr><td colspan="5" class="empty">No pages found.</td></tr>

@@ -58,15 +58,15 @@
                             <td><time datetime="{{ $challenge->updated_at->toIso8601String() }}">{{ $challenge->updated_at->format('j M Y') }}</time></td>
                             <td class="row-actions">
                                 @if ($challenge->publishedVersion && $challenge->isVisibleTo(auth()->user()))
-                                    <a class="btn btn-secondary btn-sm" href="{{ route('challenges.show', $challenge) }}">View</a>
+                                    <a class="btn btn-icon" href="{{ route('challenges.show', $challenge) }}" data-tip="View"><i class="fas fa-eye" aria-hidden="true"></i><span class="visually-hidden">View {{ $challenge->title }}</span></a>
                                 @endif
                                 @if ($challenge->isEditable())
-                                    <a class="btn btn-secondary btn-sm" href="{{ route('challenges.edit', $challenge) }}">{{ $challenge->published_version_id ? 'Revise' : 'Edit' }}</a>
+                                    <a class="btn btn-icon" href="{{ route('challenges.edit', $challenge) }}" data-tip="{{ $challenge->published_version_id ? 'Revise' : 'Edit' }}"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span class="visually-hidden">{{ $challenge->published_version_id ? 'Revise' : 'Edit' }} {{ $challenge->title }}</span></a>
                                 @endif
                                 @if (in_array($challenge->status, ['draft', 'changes_requested'], true))
                                     <form method="post" action="{{ route('challenges.submit', $challenge) }}" class="inline">
                                         @csrf
-                                        <button type="submit" class="btn btn-primary btn-sm">Submit for review</button>
+                                        <button type="submit" class="btn btn-icon btn-icon-primary" data-tip="Submit for review"><i class="fas fa-paper-plane" aria-hidden="true"></i><span class="visually-hidden">Submit {{ $challenge->title }} for review</span></button>
                                     </form>
                                 @endif
                             </td>

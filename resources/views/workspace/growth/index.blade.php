@@ -86,12 +86,12 @@
                                             </select>
                                             <label class="visually-hidden" for="note-{{ $action->id }}">Progress note</label>
                                             <input id="note-{{ $action->id }}" type="text" name="note" maxlength="2000" placeholder="Progress note (optional)">
-                                            <button type="submit" class="btn btn-secondary btn-sm">Save<span class="visually-hidden">: {{ $action->title }}</span></button>
+                                            <button type="submit" class="btn btn-icon btn-icon-primary" data-tip="Save"><i class="fas fa-floppy-disk" aria-hidden="true"></i><span class="visually-hidden">Save: {{ $action->title }}</span></button>
                                         </form>
                                         @if ($membership->canEdit())
                                             <form method="post" action="{{ route('workspace.growth.actions.destroy', [$startup, $action]) }}" data-confirm="Remove this action from the plan?">
                                                 @csrf @method('DELETE')
-                                                <button type="submit" class="btn-link">Remove<span class="visually-hidden"> {{ $action->title }}</span></button>
+                                                <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="Remove"><i class="fas fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">Remove {{ $action->title }}</span></button>
                                             </form>
                                         @endif
                                     </td>

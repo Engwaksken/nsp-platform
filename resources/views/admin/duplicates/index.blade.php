@@ -72,7 +72,7 @@
                                 @else
                                     <form method="post" action="{{ route('admin.merges.undo', $merge) }}" data-confirm="Undo this merge? Both startups become active again and their teams are restored.">
                                         @csrf
-                                        <button type="submit" class="btn btn-secondary btn-sm">Undo</button>
+                                        <button type="submit" class="btn btn-icon" data-tip="Undo merge"><i class="fas fa-arrow-rotate-left" aria-hidden="true"></i><span class="visually-hidden">Undo merge</span></button>
                                     </form>
                                 @endif
                             </td>

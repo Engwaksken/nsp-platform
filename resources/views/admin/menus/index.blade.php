@@ -33,13 +33,13 @@
                             </td>
                             <td>{{ $item->sort_order }}</td>
                             <td>{{ $item->open_in_new_tab ? 'New tab' : 'Same tab' }}</td>
-                            <td class="actions">
-                                <a class="btn btn-secondary btn-sm" href="#edit-item-{{ $item->id }}" data-modal-open="edit-item-{{ $item->id }}">Edit<span class="visually-hidden"> {{ $item->label }}</span></a>
+                            <td><div class="icon-actions">
+                                <a class="btn btn-icon" href="#edit-item-{{ $item->id }}" data-modal-open="edit-item-{{ $item->id }}" data-tip="Edit"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span class="visually-hidden">Edit {{ $item->label }}</span></a>
                                 <form method="post" action="{{ route('admin.menus.items.destroy', [$menu, $item]) }}" data-confirm="Remove “{{ $item->label }}” from the {{ strtolower($menu->name) }} menu?">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">Remove<span class="visually-hidden"> {{ $item->label }}</span></button>
+                                    <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="Remove"><i class="fas fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">Remove {{ $item->label }}</span></button>
                                 </form>
-                            </td>
+                            </div></td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="empty">No links in this menu yet.</td></tr>

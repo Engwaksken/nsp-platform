@@ -57,7 +57,7 @@
                                             <option value="{{ $value }}" @selected($member->role === $value)>{{ $label }}</option>
                                         @endforeach
                                     </select>
-                                    <button type="submit" class="btn btn-secondary btn-sm">Save</button>
+                                    <button type="submit" class="btn btn-icon btn-icon-primary" data-tip="Save role"><i class="fas fa-floppy-disk" aria-hidden="true"></i><span class="visually-hidden">Save role for {{ $member->user?->name }}</span></button>
                                 </form>
                             @else
                                 {{ $roles[$member->role] }}
@@ -76,22 +76,22 @@
                                             <option value="{{ $value }}" @selected($value === 'team_member')>{{ $label }}</option>
                                         @endforeach
                                     </select>
-                                    <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                                    <button type="submit" class="btn btn-icon btn-icon-success" data-tip="Approve"><i class="fas fa-check" aria-hidden="true"></i><span class="visually-hidden">Approve {{ $member->user?->name }}</span></button>
                                 </form>
                                 <form method="post" action="{{ route('workspace.startups.team.decide', [$startup, $member]) }}">
                                     @csrf
                                     <input type="hidden" name="decision" value="decline">
-                                    <button type="submit" class="btn btn-secondary btn-sm">Decline</button>
+                                    <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="Decline"><i class="fas fa-xmark" aria-hidden="true"></i><span class="visually-hidden">Decline {{ $member->user?->name }}</span></button>
                                 </form>
                             @elseif ($self && $member->status === 'active')
                                 <form method="post" action="{{ route('workspace.startups.team.remove', [$startup, $member]) }}" data-confirm="Leave {{ $startup->display_name }}? You will lose access to its profile.">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-secondary btn-sm">Leave</button>
+                                    <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="Leave"><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span class="visually-hidden">Leave {{ $startup->display_name }}</span></button>
                                 </form>
                             @elseif ($canTouch)
                                 <form method="post" action="{{ route('workspace.startups.team.remove', [$startup, $member]) }}" data-confirm="{{ $member->status === 'invited' ? 'Cancel this invitation?' : 'Remove this person from the team?' }}">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">{{ $member->status === 'invited' ? 'Cancel invite' : 'Remove' }}</button>
+                                    <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="{{ $member->status === 'invited' ? 'Cancel invite' : 'Remove' }}"><i class="fas {{ $member->status === 'invited' ? 'fa-envelope-circle-check' : 'fa-user-minus' }}" aria-hidden="true"></i><span class="visually-hidden">{{ $member->status === 'invited' ? 'Cancel invite' : 'Remove' }} {{ $member->user?->name ?? $member->invited_email }}</span></button>
                                 </form>
                             @endif
                         </td>

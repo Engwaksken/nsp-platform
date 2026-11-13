@@ -20,10 +20,10 @@
                     <td><a href="{{ route('admin.posts.edit', $post) }}" data-modal="lg">{{ $post->title }}</a></td>
                     <td><span class="badge badge-{{ $post->displayStatus() }}">{{ ucfirst($post->displayStatus()) }}</span></td>
                     <td>@if ($post->published_at){{ $post->published_at->format('j M Y H:i') }}@else<span class="meta">Not published</span>@endif</td>
-                    <td class="actions">
-                        <a class="btn btn-secondary btn-sm" href="{{ route('admin.posts.edit', $post) }}" data-modal="lg">Edit<span class="visually-hidden"> {{ $post->title }}</span></a>
-                        @if ($post->isLive())<a class="btn btn-secondary btn-sm" href="{{ route('news.show', $post->slug) }}" target="_blank" rel="noopener">View</a>@endif
-                    </td>
+                    <td><div class="icon-actions">
+                        <a class="btn btn-icon" href="{{ route('admin.posts.edit', $post) }}" data-modal="lg" data-tip="Edit"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span class="visually-hidden">Edit {{ $post->title }}</span></a>
+                        @if ($post->isLive())<a class="btn btn-icon" href="{{ route('news.show', $post->slug) }}" target="_blank" rel="noopener" data-tip="View"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i><span class="visually-hidden">View {{ $post->title }} (opens in a new tab)</span></a>@endif
+                    </div></td>
                 </tr>
             @empty
                 <tr><td colspan="4" class="empty">No posts yet.</td></tr>

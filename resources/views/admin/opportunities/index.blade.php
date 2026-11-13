@@ -23,10 +23,10 @@
                     <td>{{ \App\Models\Ecosystem\Opportunity::TYPES[$opportunity->type] }}</td>
                     <td>@if ($opportunity->deadline_at ?? $opportunity->starts_at){{ ($opportunity->deadline_at ?? $opportunity->starts_at)->format('j M Y') }}@else<span class="meta">No date</span>@endif</td>
                     <td>@if ($opportunity->accepts_interest)<a href="{{ route('admin.opportunities.interests', $opportunity) }}">{{ $opportunity->interests_count }}</a>@else<span class="meta">Not open</span>@endif</td>
-                    <td class="actions">
-                        <a class="btn btn-secondary btn-sm" href="{{ route('opportunities.show', $opportunity) }}" target="_blank" rel="noopener">View</a>
-                        @if ($opportunity->status === 'pending_review')<a class="btn btn-primary btn-sm" href="{{ route('admin.opportunities.edit', $opportunity) }}" data-modal="lg">Review</a>@endif
-                    </td>
+                    <td><div class="icon-actions">
+                        <a class="btn btn-icon" href="{{ route('opportunities.show', $opportunity) }}" target="_blank" rel="noopener" data-tip="View"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i><span class="visually-hidden">View {{ $opportunity->title }} (opens in a new tab)</span></a>
+                        @if ($opportunity->status === 'pending_review')<a class="btn btn-icon btn-icon-primary" href="{{ route('admin.opportunities.edit', $opportunity) }}" data-modal="lg" data-tip="Review"><i class="fas fa-clipboard-check" aria-hidden="true"></i><span class="visually-hidden">Review {{ $opportunity->title }}</span></a>@endif
+                    </div></td>
                 </tr>
             @empty
                 <tr><td colspan="5" class="empty">Nothing here.</td></tr>

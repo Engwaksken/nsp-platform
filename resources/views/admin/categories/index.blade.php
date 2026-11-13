@@ -32,7 +32,7 @@
                     <td>
                         <form method="post" action="{{ route('admin.categories.destroy', $category) }}" data-confirm="Delete the category “{{ $category->name }}”? Posts keep their content.">
                             @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">Delete<span class="visually-hidden"> {{ $category->name }}</span></button>
+                            <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="Delete"><i class="fas fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">Delete {{ $category->name }}</span></button>
                         </form>
                     </td>
                 </tr>
