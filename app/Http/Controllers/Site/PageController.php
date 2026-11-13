@@ -19,7 +19,7 @@ class PageController extends Controller
         // unless the editor already placed an FAQ section on it.
         $homeFaqs = collect($blocks)->contains('type', 'faqs')
             ? collect()
-            : Faq::query()->visible()->limit(6)->get();
+            : Faq::query()->visible()->limit(PageBlocks::FAQ_LIMIT)->get();
 
         return view('site.page', [
             'page' => $page,
