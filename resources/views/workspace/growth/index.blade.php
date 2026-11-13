@@ -24,6 +24,13 @@
                     @include('workspace.growth.scores', ['assessment' => $latest])
                     <p><a href="{{ route('workspace.growth.assessment', [$startup, $latest]) }}">See the full results and suggested actions</a>
                         · <a href="{{ route('workspace.growth.report', [$startup, $latest]) }}">Printable report</a></p>
+                    @include('partials.ai-panel', [
+                        'id' => 'ai-growth-latest', 'subject' => $latest->uuid,
+                        'title' => 'AI insights on your latest results',
+                        'intro' => 'A plain-language explanation of your scores and a suggested 90-day plan, or an answer to your own question.',
+                        'tasks' => ['growth_explain'], 'question' => 'growth_question',
+                        'placeholder' => 'For example: which area is holding our score back most?',
+                    ])
                 @else
                     <p>Answer {{ $framework?->questionCount() }} questions about your team, customers, traction, finances and operations. It takes about 15 minutes. You get a score for each area and suggested next steps.</p>
                 @endif

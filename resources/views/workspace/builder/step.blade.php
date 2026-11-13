@@ -33,6 +33,13 @@
             @if ($submission->status !== 'not_started')
                 <form method="post" action="{{ route('workspace.builder.step.submit', [$startup, $submission]) }}">@csrf<button class="btn" type="submit">Submit step and unlock next</button></form>
             @endif
+            @include('partials.ai-panel', [
+                'id' => 'ai-step', 'subject' => (string) $submission->id,
+                'title' => 'AI coach for this step',
+                'intro' => 'Get feedback on your saved draft before you submit it, or ask a question about this step. Save your draft first so the coach sees your latest answers.',
+                'tasks' => ['builder_feedback'], 'question' => 'builder_question',
+                'placeholder' => 'For example: how do we size our market if we have no data yet?',
+            ])
         @endif
             @if (($submission->step->evidence_requirement ?? 'none') !== 'none')
                 <section class="panel" aria-labelledby="evidence-heading">

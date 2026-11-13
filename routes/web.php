@@ -210,6 +210,7 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
     Route::middleware('feature:ai_assistant')->prefix('workspace/startups/{startup}/assistant')->name('workspace.assistant')->group(function () {
         Route::get('/', [Workspace\AssistantController::class, 'show'])->name('');
         Route::post('/', [Workspace\AssistantController::class, 'run'])->middleware('throttle:6,1')->name('.run');
+        Route::post('/ask', [Workspace\AssistantController::class, 'ask'])->middleware('throttle:6,1')->name('.ask');
         Route::post('/consent', [Workspace\AssistantController::class, 'consent'])->name('.consent');
     });
     Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
@@ -365,7 +366,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->gr
         Route::delete('ai/legal', [Admin\AiSettingsController::class, 'withdrawLegal'])->name('ai.legal.withdraw');
     });
 
-    Route::get('audit', [Admin\AuditLogController::class, 'index'])->middleware('can:view-audit-log')->name('audit.index');
+    Route::middleware('can:view-audit-log')->group(function () {
+        Route::get('audit', [Admin\AuditLogController::class, 'index'])->name('audit.index');
+        Route::get('audit/changes/{log}', [Admin\AuditLogController::class, 'show'])->whereNumber('log')->name('audit.show');
+        Route::get('audit/sign-ins/{login}', [Admin\AuditLogController::class, 'showLogin'])->whereNumber('login')->name('audit.login');
+    });
 
     Route::middleware('can:manage-startups')->group(function () {
         Route::get('startups', [Admin\StartupController::class, 'index'])->name('startups.index');

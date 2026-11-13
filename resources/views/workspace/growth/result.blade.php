@@ -14,6 +14,14 @@
 
         @include('workspace.growth.scores')
 
+        @include('partials.ai-panel', [
+            'id' => 'ai-growth', 'subject' => $assessment->uuid,
+            'title' => 'AI insights on these results',
+            'intro' => 'Get a plain-language explanation of your scores and a suggested 90-day plan, or ask your own question.',
+            'tasks' => ['growth_explain'], 'question' => 'growth_question',
+            'placeholder' => 'For example: what should we fix first before applying for funding?',
+        ])
+
         <section class="panel" aria-labelledby="gaps-heading">
             <h2 id="gaps-heading">Where to focus next</h2>
             @if (empty($assessment->result['gaps']))
@@ -70,6 +78,10 @@
                                 </form>
                             </div>
                         @endif
+                        @include('partials.ai-panel', [
+                            'id' => 'ai-gap-'.$loop->index, 'subject' => $assessment->uuid, 'gap' => $gap['question_key'],
+                            'tasks' => ['growth_gap'], 'compact' => true, 'labels' => ['growth_gap' => 'Ask AI how to improve this'],
+                        ])
                         @if (! $inPlan && $membership->canEdit())
                             <form method="post" action="{{ route('workspace.growth.actions.store', $startup) }}">
                                 @csrf

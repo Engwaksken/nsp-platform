@@ -16,7 +16,8 @@
                 <h2 id="consent-heading" class="h3">Before you start</h2>
                 <ul>
                     <li>The assistant suggests wording and next steps. <strong>You decide what to use</strong>; nothing is saved to your profile automatically.</li>
-                    <li>When you ask for help we send <strong>only</strong> the text you type in the box, plus your startup’s name, sector and growth stage, to Anthropic, the AI provider, to produce the suggestion.</li>
+                    <li>When you ask for help we send <strong>only</strong> the text you type in the box, plus your startup’s name, sector and growth stage, to {{ \App\Ai\Assistant::providerLabel() }}, the AI provider, to produce the suggestion.</li>
+                    <li>The same switch turns on AI help on other pages, such as your growth results and Venture Builder steps. There we also send that page’s facts: your scores and the answers you chose, or your saved draft for the step.</li>
                     <li>We never send your documents, data room, notes, messages, contact details, financial figures or other people’s data.</li>
                     <li>NSP does not keep the text you type or the suggestion. We keep a count of requests to apply daily limits.</li>
                     <li>AI can be wrong. Check every suggestion before you use it. Do not type passwords, bank details or other people’s personal information.</li>
