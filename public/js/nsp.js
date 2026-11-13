@@ -897,6 +897,83 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* AI help in context (partials/ai-panel): ask without leaving the     */
+  /* page. Answers are shown as plain text (textContent), never as HTML. */
+  /* Without JavaScript the form posts and the page reloads with it.     */
+  /* ------------------------------------------------------------------ */
+  document.addEventListener('submit', function (event) {
+    var form = event.target;
+    if (!(form instanceof HTMLFormElement) || !form.hasAttribute('data-ai-form') || !hasFetch) return;
+    event.preventDefault();
+    if (form.__nspAiBusy) return;
+    var panel = form.closest('.ai-panel');
+    var output = panel && panel.querySelector('[data-ai-output]');
+    if (!output) { form.submit(); return; }
+    var submitter = event.submitter || form.querySelector('button[name="task"]');
+    var data = new FormData(form);
+    if (submitter && submitter.name) data.set(submitter.name, submitter.value);
+
+    var buttons = qsa(form, 'button');
+    form.__nspAiBusy = true;
+    form.setAttribute('aria-busy', 'true');
+    buttons.forEach(function (button) { button.disabled = true; });
+    output.hidden = false;
+    output.innerHTML = '';
+    var loading = el('p', { 'class': 'ai-loading', role: 'status' });
+    loading.appendChild(el('span', { 'class': 'spinner', 'aria-hidden': 'true' }));
+    loading.appendChild(document.createTextNode(' Thinking… this can take up to a minute.'));
+    output.appendChild(loading);
+
+    function done() {
+      form.__nspAiBusy = false;
+      form.setAttribute('aria-busy', 'false');
+      buttons.forEach(function (button) { button.disabled = false; });
+    }
+    function showError(message) {
+      output.innerHTML = '';
+      var p = el('p', { 'class': 'ai-error' });
+      p.appendChild(el('i', { 'class': 'fas fa-circle-exclamation', 'aria-hidden': 'true' }));
+      p.appendChild(document.createTextNode(' ' + message));
+      output.appendChild(p);
+    }
+
+    fetch(form.action, {
+      method: 'POST', body: data, credentials: 'same-origin',
+      headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(function (response) {
+      return response.json().catch(function () { return {}; }).then(function (body) { return { status: response.status, body: body }; });
+    }).then(function (res) {
+      done();
+      var body = res.body || {};
+      if (res.status === 422) {
+        var first = body.errors ? Object.keys(body.errors).map(function (key) { return body.errors[key][0]; })[0] : null;
+        return showError(body.message && !first ? body.message : (first || body.message || 'Check your request and try again.'));
+      }
+      if (res.status === 429) return showError('You have asked several times in a row. Wait a minute and try again.');
+      if (res.status === 419) return showError('Your session has expired. Reload the page and try again.');
+      if (res.status < 200 || res.status >= 300) return showError('The assistant could not answer just now (error ' + res.status + '). Try again later.');
+      if (!body.text) return showError(body.message || 'The assistant could not answer just now. Try again later.');
+
+      output.innerHTML = '';
+      output.appendChild(el('div', { 'class': 'ai-text' }, body.text));
+      var meta = el('div', { 'class': 'ai-meta' });
+      meta.appendChild(el('i', { 'class': 'fas fa-robot', 'aria-hidden': 'true' }));
+      meta.appendChild(document.createTextNode(' AI-generated' + (body.model ? ' by ' + body.model : '') + ' on ' + body.generated_at + '. Check the facts before you use it. '));
+      var copy = el('button', { type: 'button', 'class': 'btn-link ai-copy' }, 'Copy');
+      copy.addEventListener('click', function () {
+        if (navigator.clipboard) navigator.clipboard.writeText(body.text).then(function () { copy.textContent = 'Copied'; window.setTimeout(function () { copy.textContent = 'Copy'; }, 1800); });
+      });
+      meta.appendChild(copy);
+      output.appendChild(meta);
+      var question = form.querySelector('textarea[name="text"]');
+      if (question && submitter && submitter.closest('.ai-question')) question.value = '';
+    }).catch(function () {
+      done();
+      showError('Could not reach the server. Check your connection and try again.');
+    });
+  });
+
+  /* ------------------------------------------------------------------ */
   /* Card grids (components/card-grid + components/collapsible-card)     */
   /* ------------------------------------------------------------------ */
   // Collapsible cards are native <details>, so they open and close without this code. With it:

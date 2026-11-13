@@ -210,6 +210,7 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
     Route::middleware('feature:ai_assistant')->prefix('workspace/startups/{startup}/assistant')->name('workspace.assistant')->group(function () {
         Route::get('/', [Workspace\AssistantController::class, 'show'])->name('');
         Route::post('/', [Workspace\AssistantController::class, 'run'])->middleware('throttle:6,1')->name('.run');
+        Route::post('/ask', [Workspace\AssistantController::class, 'ask'])->middleware('throttle:6,1')->name('.ask');
         Route::post('/consent', [Workspace\AssistantController::class, 'consent'])->name('.consent');
     });
     Route::get('/workspace/startups/{startup}/programs', [Workspace\ProgramController::class, 'index'])->middleware('feature:ims_integration')->name('workspace.startups.programs');
