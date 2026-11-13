@@ -68,6 +68,6 @@
     @endif
 
     @if ($isHome && ($homeFaqs ?? collect())->isNotEmpty())
-        @include('site.faq-cta', ['faqs' => $homeFaqs])
+        @include('site.faq-cta', ['faqs' => $homeFaqs, 'index' => 'home', 'bg' => null])
     @endif
 @endsection

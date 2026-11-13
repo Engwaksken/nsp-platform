@@ -653,6 +653,39 @@ input[type="checkbox"], input[type="radio"] { width: 18px; height: 18px; margin:
 .cta h2, .cta h3 { color: var(--on-secondary); }
 .cta a.btn-primary { background: var(--brand-primary); color: var(--on-primary); }
 
+/* Page sections with a background chosen in the page builder: colour, image or video.
+   Images and videos get a dark overlay; "on-dark" / "on-light" set the text colour; cards inside keep their own colours. */
+section.has-bg { position: relative; isolation: isolate; overflow: hidden; border-bottom: 0; }
+section.has-bg-color { background: var(--section-bg); }
+section.has-bg-image { background: #0b1220 var(--section-bg-image) center / cover no-repeat; }
+section.has-bg-video { background: #0b1220; }
+section.has-bg-image::before, section.has-bg-video::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(8, 12, 20, .5), rgba(8, 12, 20, .68)); }
+.section-bg-video { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.on-dark { color: rgba(255, 255, 255, .9); }
+.on-dark :is(h1, h2, h3, h4, strong, .lead) { color: #fff; }
+.on-dark a:not(.btn) { color: #fff; }
+.on-dark .prose blockquote { color: rgba(255, 255, 255, .82); }
+.on-light { color: #1f2937; }
+.on-light :is(h1, h2, h3, h4, strong) { color: #0b1220; }
+.on-light .lead { color: #1f2937; }
+.on-light a:not(.btn) { color: #0b1220; }
+.hero.on-light a.btn-primary { background: var(--brand-primary); color: var(--on-primary); }
+.hero.on-light .btn-secondary { color: #0b1220; border-color: rgba(11, 18, 32, .4); }
+/* Cards, numbers, testimonials and FAQ answers keep normal text colours on any background. */
+:is(.on-dark, .on-light) :is(.card, .stats > *, details.faq) { color: var(--ink); }
+:is(.on-dark, .on-light) :is(.card, .stats > *, details.faq) :is(h2, h3, h4, strong) { color: var(--ink-strong); }
+:is(.on-dark, .on-light) :is(.card, details.faq) a:not(.btn) { color: var(--link, var(--brand-accent)); }
+:is(.on-dark, .on-light) .cta, :is(.on-dark, .on-light) .cta :is(h2, h3) { color: var(--on-secondary); }
+.on-dark .partners img { background: rgba(255, 255, 255, .92); }
+@media print { .section-bg-video { display: none; } section.has-bg { background: none; color: inherit; } section.has-bg::before { display: none; } }
+
+/* Page builder: background settings for a section. */
+.block-bg { margin: var(--space-3) 0 0; padding: var(--space-3) var(--space-4) 0; border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); }
+.block-bg legend { padding: 0 .4rem; font-size: .85rem; font-weight: 600; color: var(--ink-muted); }
+.block-bg input[type="color"] { width: 64px; min-height: 42px; padding: 4px; cursor: pointer; }
+.block-bg.is-enhanced:not([data-bg-mode="color"]) [data-bg-field="color"],
+.block-bg.is-enhanced:not([data-bg-mode="image"]):not([data-bg-mode="video"]) [data-bg-field="media"] { display: none; }
+
 /* Home page FAQ band: intro and button on the left, the questions on the right (stacked on phones). */
 .faq-cta { display: grid; gap: var(--space-5) clamp(1.5rem, 4vw, 3rem); grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; }
 @media (max-width: 860px) { .faq-cta { grid-template-columns: minmax(0, 1fr); } }

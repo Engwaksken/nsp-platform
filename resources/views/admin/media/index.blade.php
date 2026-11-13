@@ -8,8 +8,8 @@
         <h2>Upload a file</h2>
         <form method="post" action="{{ route('admin.media.store') }}" enctype="multipart/form-data">
             @csrf
-            @include('partials.field', ['name' => 'file', 'label' => 'File', 'type' => 'file', 'required' => true, 'attrs' => 'accept=".jpg,.jpeg,.png,.webp,.gif,.ico,.pdf"',
-                'hint' => 'JPG, PNG, WebP, GIF, ICO or PDF, up to 5 MB. Compress large photos first.'])
+            @include('partials.field', ['name' => 'file', 'label' => 'File', 'type' => 'file', 'required' => true, 'attrs' => 'accept=".jpg,.jpeg,.png,.webp,.gif,.ico,.pdf,.mp4,.webm"',
+                'hint' => 'JPG, PNG, WebP, GIF, ICO or PDF up to 5 MB; MP4 or WebM video up to 20 MB (for section backgrounds). Compress large files first.'])
             @include('partials.field', ['name' => 'alt_text', 'label' => 'Description for screen readers', 'maxlength' => 255, 'hint' => 'Describe what the image shows. Leave empty for decorative images.'])
             <div class="actions">
                 <button type="submit" class="btn btn-primary">Upload</button>
@@ -20,6 +20,7 @@
     <nav class="filters" aria-label="Filter media">
         <a class="tag" href="{{ route('admin.media.index') }}" @if (!request('type')) aria-current="true" @endif>All</a>
         <a class="tag" href="{{ route('admin.media.index', ['type' => 'images']) }}" @if (request('type') === 'images') aria-current="true" @endif>Images</a>
+        <a class="tag" href="{{ route('admin.media.index', ['type' => 'videos']) }}" @if (request('type') === 'videos') aria-current="true" @endif>Videos</a>
         <a class="tag" href="{{ route('admin.media.index', ['type' => 'documents']) }}" @if (request('type') === 'documents') aria-current="true" @endif>Documents</a>
     </nav>
 
@@ -32,6 +33,8 @@
                     <div class="media-thumb">
                         @if ($file->isImage())
                             <img src="{{ $file->url() }}" alt="" loading="lazy">
+                        @elseif ($file->isVideo())
+                            <video src="{{ $file->url() }}" muted playsinline preload="metadata" aria-hidden="true"></video>
                         @else
                             <span>PDF</span>
                         @endif

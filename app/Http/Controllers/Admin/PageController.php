@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class PageController extends Controller
@@ -31,7 +32,7 @@ class PageController extends Controller
 
     public function create(): View
     {
-        return view('admin.pages.form', ['page' => new Page(['status' => 'draft', 'template' => 'default', 'blocks' => []]), 'media' => $this->images()]);
+        return view('admin.pages.form', ['page' => new Page(['status' => 'draft', 'template' => 'default', 'blocks' => []]), 'media' => $this->images(), 'backgrounds' => $this->backgrounds()]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -53,7 +54,7 @@ class PageController extends Controller
 
     public function edit(Page $page): View
     {
-        return view('admin.pages.form', ['page' => $page, 'media' => $this->images()]);
+        return view('admin.pages.form', ['page' => $page, 'media' => $this->images(), 'backgrounds' => $this->backgrounds()]);
     }
 
     public function update(Request $request, Page $page): RedirectResponse
@@ -135,8 +136,27 @@ class PageController extends Controller
             'og_image_id' => ['nullable', 'integer', 'exists:media,id'],
             'blocks' => ['nullable', 'array', 'max:30'],
             'blocks.*.type' => ['required', Rule::in(array_keys(Page::BLOCK_TYPES))],
+            'blocks.*.background' => ['nullable', Rule::in(array_keys(PageBlocks::BACKGROUNDS))],
+            'blocks.*.bg_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'blocks.*.bg_media_id' => ['nullable', 'integer', 'exists:media,id'],
             'revision_note' => ['nullable', 'string', 'max:200'],
-        ], ['slug.regex' => 'Use lower-case letters, numbers and single hyphens only.']);
+        ], [
+            'slug.regex' => 'Use lower-case letters, numbers and single hyphens only.',
+            'blocks.*.bg_color.regex' => 'Pick a background colour like #1f6feb.',
+            'blocks.*.bg_media_id.exists' => 'The background file no longer exists. Choose another one.',
+        ]);
+        foreach (array_values($request->input('blocks', [])) as $n => $block) {
+            $mode = is_array($block) ? ($block['background'] ?? '') : '';
+            if ($mode === 'color' && blank($block['bg_color'] ?? null)) {
+                throw ValidationException::withMessages(["blocks.$n.bg_color" => 'Section '.($n + 1).': pick a background colour.']);
+            }
+            if (in_array($mode, ['image', 'video'], true)) {
+                $file = Media::query()->find($block['bg_media_id'] ?? 0);
+                if (! $file || ($mode === 'image' ? ! $file->isImage() : ! $file->isVideo())) {
+                    throw ValidationException::withMessages(["blocks.$n.bg_media_id" => 'Section '.($n + 1).': choose '.($mode === 'image' ? 'an image' : 'a video').' from the media library for the background.']);
+                }
+            }
+        }
 
         // Changing live content, publishing or unpublishing all need publishing rights.
         if (($data['status'] === 'published' || $page?->status === 'published') && ! Gate::allows('publish-content')) {
@@ -149,6 +169,15 @@ class PageController extends Controller
         unset($data['revision_note']);
 
         return $data;
+    }
+
+    /** Images and videos that can be used as section backgrounds (not icons). */
+    private function backgrounds()
+    {
+        return Media::query()
+            ->where(fn ($query) => $query->where('mime_type', 'like', 'image/%')->orWhere('mime_type', 'like', 'video/%'))
+            ->whereNotIn('mime_type', ['image/x-icon', 'image/vnd.microsoft.icon'])
+            ->latest('id')->limit(200)->get();
     }
 
     private function images()

@@ -692,8 +692,17 @@
         });
         var title = block.querySelector('[data-block-number]');
         if (title) title.textContent = 'Section ' + (index + 1);
+        // Background: show only the colour or the file picker that fits the chosen type.
+        var bg = block.querySelector('.block-bg');
+        var bgSwitch = bg && bg.querySelector('[data-bg-switch]');
+        if (bgSwitch) { bg.classList.add('is-enhanced'); bg.setAttribute('data-bg-mode', bgSwitch.value); }
       });
     };
+    editor.addEventListener('change', function (event) {
+      var bgSwitch = event.target.closest && event.target.closest('[data-bg-switch]');
+      if (bgSwitch) bgSwitch.closest('.block-bg').setAttribute('data-bg-mode', bgSwitch.value);
+    });
+    renumber();
     var announce = function (text) {
       var live = root.querySelector('#blocks-status');
       if (live) live.textContent = text;
@@ -1065,6 +1074,15 @@
     });
   });
 
+  /* Background videos on page sections are decorative: stop them for people who prefer reduced motion. */
+  function initBgVideos(root) {
+    if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    qsa(root, 'video[data-bg-video]').forEach(function (video) {
+      video.removeAttribute('autoplay');
+      video.pause();
+    });
+  }
+
   NSP.enhance = function (root) {
     root = root || document;
     initCardGrids(root);
@@ -1076,6 +1094,7 @@
     initInlineModals(root);
     initAlerts(root);
     initBuilder(root);
+    initBgVideos(root);
     initSlug(root);
     initOtp(root);
   };

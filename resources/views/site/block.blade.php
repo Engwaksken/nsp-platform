@@ -1,8 +1,14 @@
 {{-- One page-builder section. $block['html'] is Markdown rendered with raw HTML escaped (App\Support\Markdown). --}}
-@php($headingTag = ($first ?? false) && $block['type'] === 'hero' ? 'h1' : 'h2')
+@php
+    $headingTag = ($first ?? false) && $block['type'] === 'hero' ? 'h1' : 'h2';
+    // Optional background chosen by the editor: colour, image or video (App\Support\PageBlocks::background).
+    $bg = $block['bg'] ?? null;
+    $bgStyle = ! empty($bg['style']) ? ' style="'.e($bg['style']).'"' : '';
+@endphp
 @switch($block['type'])
     @case('hero')
-        <section class="hero">
+        <section class="hero {{ $bg['class'] ?? '' }}"{!! $bgStyle !!}>
+            @include('site.section-bg')
             <div class="container">
                 <{{ $headingTag }}>{{ $block['heading'] ?: $pageTitle }}</{{ $headingTag }}>
                 @if ($block['html'])<div class="lead">{!! $block['html'] !!}</div>@endif
@@ -14,7 +20,8 @@
         @break
 
     @case('text')
-        <section class="section">
+        <section class="section {{ $bg['class'] ?? '' }}"{!! $bgStyle !!}>
+            @include('site.section-bg')
             <div class="container">
                 <div class="prose">
                     @if ($block['heading'])<h2>{{ $block['heading'] }}</h2>@endif
@@ -28,7 +35,8 @@
         @break
 
     @case('stats')
-        <section class="section section-alt">
+        <section class="section {{ $bg['class'] ?? 'section-alt' }}"{!! $bgStyle !!}>
+            @include('site.section-bg')
             <div class="container">
                 @if ($block['heading'])<h2>{{ $block['heading'] }}</h2>@endif
                 {!! $block['html'] !!}
@@ -42,7 +50,8 @@
         @break
 
     @case('cta')
-        <section class="section">
+        <section class="section {{ $bg['class'] ?? '' }}"{!! $bgStyle !!}>
+            @include('site.section-bg')
             <div class="container">
                 <div class="cta">
                     @if ($block['heading'])<h2>{{ $block['heading'] }}</h2>@endif
@@ -57,7 +66,8 @@
 
     @case('testimonials')
         @if ($block['data']->isNotEmpty())
-            <section class="section section-alt">
+            <section class="section {{ $bg['class'] ?? 'section-alt' }}"{!! $bgStyle !!}>
+                @include('site.section-bg')
                 <div class="container">
                     <h2>{{ $block['heading'] ?: 'What founders say' }}</h2>
                     <div class="grid">
@@ -75,7 +85,8 @@
 
     @case('partners')
         @if ($block['data']->isNotEmpty())
-            <section class="section">
+            <section class="section {{ $bg['class'] ?? '' }}"{!! $bgStyle !!}>
+                @include('site.section-bg')
                 <div class="container">
                     <h2>{{ $block['heading'] ?: 'Partners' }}</h2>
                     <ul class="partners" role="list">
@@ -98,13 +109,14 @@
     @case('faqs')
         @if ($block['data']->isNotEmpty())
             @include('site.faq-cta', ['faqs' => $block['data'], 'heading' => $block['heading'], 'html' => $block['html'],
-                'linkLabel' => $block['link_label'], 'linkUrl' => $block['link_url']])
+                'linkLabel' => $block['link_label'], 'linkUrl' => $block['link_url'], 'bg' => $bg])
         @endif
         @break
 
     @case('latest_posts')
         @if ($block['data']->isNotEmpty())
-            <section class="section section-alt">
+            <section class="section {{ $bg['class'] ?? 'section-alt' }}"{!! $bgStyle !!}>
+                @include('site.section-bg')
                 <div class="container">
                     <h2>{{ $block['heading'] ?: 'Latest news' }}</h2>
                     <div class="card-grid">

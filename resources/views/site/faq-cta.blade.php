@@ -1,7 +1,9 @@
 {{-- Common questions in a call-to-action band: intro and FAQs button on the left, the questions (expandable) on the right.
-     Params: $faqs, optional $heading, $html (rendered intro), $linkLabel, $linkUrl. --}}
+     Params: $faqs, optional $heading, $html (rendered intro), $linkLabel, $linkUrl, $bg (section background). --}}
 @php($ctaId = 'faq-cta-'.($index ?? 'home'))
-<section class="section" aria-labelledby="{{ $ctaId }}">
+@php($bg ??= null)
+<section class="section {{ $bg['class'] ?? '' }}" aria-labelledby="{{ $ctaId }}" @if (! empty($bg['style'])) style="{{ $bg['style'] }}" @endif>
+    @include('site.section-bg')
     <div class="container">
         <div class="cta faq-cta">
             <div class="faq-cta-intro">
