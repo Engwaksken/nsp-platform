@@ -66,4 +66,8 @@
             @include('site.block', ['block' => $block, 'first' => $index === 0, 'pageTitle' => $page->title])
         @endforeach
     @endif
+
+    @if ($isHome && ($homeFaqs ?? collect())->isNotEmpty())
+        @include('site.faq-cta', ['faqs' => $homeFaqs])
+    @endif
 @endsection

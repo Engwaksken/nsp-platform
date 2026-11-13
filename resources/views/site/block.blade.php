@@ -15,12 +15,14 @@
 
     @case('text')
         <section class="section">
-            <div class="container prose">
-                @if ($block['heading'])<h2>{{ $block['heading'] }}</h2>@endif
-                {!! $block['html'] !!}
-                @if ($block['link_url'] && $block['link_label'])
-                    <p><a href="{{ $block['link_url'] }}">{{ $block['link_label'] }}</a></p>
-                @endif
+            <div class="container">
+                <div class="prose">
+                    @if ($block['heading'])<h2>{{ $block['heading'] }}</h2>@endif
+                    {!! $block['html'] !!}
+                    @if ($block['link_url'] && $block['link_label'])
+                        <p><a href="{{ $block['link_url'] }}">{{ $block['link_label'] }}</a></p>
+                    @endif
+                </div>
             </div>
         </section>
         @break
@@ -95,15 +97,8 @@
 
     @case('faqs')
         @if ($block['data']->isNotEmpty())
-            <section class="section">
-                <div class="container narrow">
-                    <h2>{{ $block['heading'] ?: 'Frequently asked questions' }}</h2>
-                    @foreach ($block['data'] as $faq)
-                        <details class="faq"><summary>{{ $faq->question }}</summary>{!! \App\Support\Markdown::render($faq->answer) !!}</details>
-                    @endforeach
-                    @if ($block['link_url'] && $block['link_label'])<p><a href="{{ $block['link_url'] }}">{{ $block['link_label'] }}</a></p>@endif
-                </div>
-            </section>
+            @include('site.faq-cta', ['faqs' => $block['data'], 'heading' => $block['heading'], 'html' => $block['html'],
+                'linkLabel' => $block['link_label'], 'linkUrl' => $block['link_url']])
         @endif
         @break
 
