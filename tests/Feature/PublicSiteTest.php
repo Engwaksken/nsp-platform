@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Faq;
 use App\Models\Menu;
 use App\Models\Page;
 use App\Models\Post;
@@ -21,6 +22,21 @@ class PublicSiteTest extends TestCase
     public function test_home_page_renders_without_any_content(): void
     {
         $this->get('/')->assertOk()->assertSee('Hive NSP');
+    }
+
+    public function test_home_page_shows_common_questions_with_a_button_to_the_faqs_page(): void
+    {
+        Faq::query()->create(['question' => 'How do I register my startup?', 'answer' => 'Sign in and add it.', 'is_published' => true]);
+        Faq::query()->create(['question' => 'Hidden draft question?', 'answer' => 'No.', 'is_published' => false]);
+
+        $this->get('/')->assertOk()->assertSee('faq-cta', false)->assertSee('How do I register my startup?')
+            ->assertDontSee('Hidden draft question?')->assertSee('View all FAQs')->assertSee('href="'.route('faqs').'"', false);
+
+        // An editor-built home page gets the band too; an FAQ section placed by the editor is not repeated.
+        $home = $this->page(['title' => 'Home', 'slug' => 'home']);
+        $this->get('/')->assertOk()->assertSee('Who we are')->assertSee('View all FAQs');
+        $home->update(['blocks' => [['type' => 'faqs', 'heading' => 'Questions', 'body' => '', 'items' => '', 'link_label' => '', 'link_url' => '']]]);
+        $this->assertSame(1, substr_count($this->get('/')->assertOk()->getContent(), 'How do I register my startup?'));
     }
 
     public function test_header_hides_links_to_draft_pages(): void
