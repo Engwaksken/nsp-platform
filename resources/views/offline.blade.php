@@ -8,7 +8,7 @@
     <title>You are offline | {{ $brand['site_name'] }}</title>
     <script src="{{ asset('js/theme.js') }}?v=1"></script>
     <link rel="stylesheet" href="{{ asset('css/palette-hive.css') }}?v=1">
-    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=28">
+    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=30">
 </head>
 <body>
 <main class="container section narrow" style="text-align:center;padding-top:20vh">

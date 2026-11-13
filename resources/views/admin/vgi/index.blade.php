@@ -33,7 +33,7 @@
                         <td>{{ $framework->questionCount() }}</td>
                         <td>{{ $framework->editor?->name ?? 'Seeded starter draft' }}</td>
                         <td>@if ($framework->approved_at){{ $framework->approved_at->format('j M Y') }}@else<span class="meta">Not approved</span>@endif @if ($framework->approval_note)<br><span class="meta">{{ $framework->approval_note }}</span>@endif</td>
-                        <td><a class="btn btn-secondary btn-sm" href="{{ route('admin.vgi.edit', $framework) }}" data-modal="lg">{{ $framework->status === 'draft' ? 'Review and edit' : 'View' }}</a></td>
+                        <td><a class="btn btn-icon" href="{{ route('admin.vgi.edit', $framework) }}" data-modal="lg" data-tip="{{ $framework->status === 'draft' ? 'Review and edit' : 'View' }}"><i class="fas {{ $framework->status === 'draft' ? 'fa-pen-to-square' : 'fa-eye' }}" aria-hidden="true"></i><span class="visually-hidden">{{ $framework->status === 'draft' ? 'Review and edit' : 'View' }}</span></a></td>
                     </tr>
                 @endforeach
                 </tbody>

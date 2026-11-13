@@ -24,9 +24,9 @@
                 <tr><td><a href="{{ route('admin.challenges.show', $challenge) }}">{{ $challenge->title }}</a></td>
                     <td>{{ \Illuminate\Support\Str::headline($challenge->status) }}</td><td>{{ $challenge->submitter?->name ?? 'Hive staff' }}</td>
                     <td>@if ($challenge->publishedVersion?->version)v{{ $challenge->publishedVersion->version }}@else<span class="meta">Not published</span>@endif</td>
-                    <td class="actions"><a class="btn btn-secondary btn-sm" href="{{ route('admin.challenges.show', $challenge) }}">Review</a>
-                        @can('manage-challenges')<a class="btn btn-secondary btn-sm" href="{{ route('admin.challenges.edit', $challenge) }}" data-modal="lg">Edit</a>@endcan
-                    </td></tr>
+                    <td><div class="icon-actions"><a class="btn btn-icon" href="{{ route('admin.challenges.show', $challenge) }}" data-tip="Review"><i class="fas fa-eye" aria-hidden="true"></i><span class="visually-hidden">Review {{ $challenge->title }}</span></a>
+                        @can('manage-challenges')<a class="btn btn-icon" href="{{ route('admin.challenges.edit', $challenge) }}" data-modal="lg" data-tip="Edit"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span class="visually-hidden">Edit {{ $challenge->title }}</span></a>@endcan
+                    </div></td></tr>
             @empty<tr><td colspan="5" class="empty">No challenges in this queue.</td></tr>@endforelse
         </tbody></table>
     </div>

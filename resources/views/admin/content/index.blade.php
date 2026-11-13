@@ -16,13 +16,13 @@
                         @if ($definition['key'] === 'testimonials' && !$item->consent_confirmed)<br><span class="badge badge-draft">No consent recorded: hidden</span>@endif</td>
                     <td>{{ $item->sort_order }}</td>
                     <td><span class="badge badge-{{ $item->is_published ? 'on' : 'off' }}">{{ $item->is_published ? 'Yes' : 'No' }}</span></td>
-                    <td class="actions">
-                        <a class="btn btn-secondary btn-sm" href="{{ route('admin.content.edit', [$definition['key'], $item->id]) }}" data-modal>Edit<span class="visually-hidden"> {{ $item->{$definition['title']} }}</span></a>
+                    <td><div class="icon-actions">
+                        <a class="btn btn-icon" href="{{ route('admin.content.edit', [$definition['key'], $item->id]) }}" data-modal data-tip="Edit"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span class="visually-hidden">Edit {{ $item->{$definition['title']} }}</span></a>
                         <form method="post" action="{{ route('admin.content.destroy', [$definition['key'], $item->id]) }}" data-confirm="Delete this {{ $definition['singular'] }}? This cannot be undone.">
                             @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="Delete"><i class="fas fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">Delete {{ $item->{$definition['title']} }}</span></button>
                         </form>
-                    </td>
+                    </div></td>
                 </tr>
             @empty
                 <tr><td colspan="4" class="empty">Nothing added yet.</td></tr>

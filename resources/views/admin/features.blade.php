@@ -35,7 +35,7 @@
                             <form method="post" action="{{ route('admin.features.update', $flag['key']) }}">
                                 @csrf @method('PUT')
                                 <input type="hidden" name="enabled" value="{{ $flag['enabled'] ? 0 : 1 }}">
-                                <button type="submit" class="btn btn-secondary btn-sm">{{ $flag['enabled'] ? 'Turn off' : 'Turn on' }}<span class="visually-hidden"> {{ $flag['label'] }}</span></button>
+                                <button type="submit" class="btn btn-icon {{ $flag['enabled'] ? 'btn-icon-success' : '' }}" data-tip="{{ $flag['enabled'] ? 'Turn off' : 'Turn on' }}"><i class="fas {{ $flag['enabled'] ? 'fa-toggle-on' : 'fa-toggle-off' }}" aria-hidden="true"></i><span class="visually-hidden">{{ $flag['enabled'] ? 'Turn off' : 'Turn on' }} {{ $flag['label'] }}</span></button>
                             </form>
                         @endif
                     </td>

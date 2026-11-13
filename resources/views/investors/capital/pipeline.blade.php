@@ -84,12 +84,12 @@
                                 @if (! $trackedItem && ($visible[$entry->startup_uuid] ?? false))
                                     <form method="post" action="{{ route('investor.capital.transition', $entry->startup) }}" class="inline-form">
                                         @csrf <input type="hidden" name="stage" value="{{ array_key_first($stages) }}">
-                                        <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-plus" aria-hidden="true"></i> Add to pipeline<span class="visually-hidden"> {{ $entry->startup->display_name }}</span></button>
+                                        <button type="submit" class="btn btn-icon btn-icon-primary" data-tip="Add to pipeline"><i class="fas fa-plus" aria-hidden="true"></i><span class="visually-hidden">Add {{ $entry->startup->display_name }} to pipeline</span></button>
                                     </form>
                                 @endif
                                 <form method="post" action="{{ route('investor.capital.unwatch', $entry->startup) }}" class="inline-form">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-secondary btn-sm"><i class="fas fa-eye-slash" aria-hidden="true"></i> Remove<span class="visually-hidden"> {{ $entry->startup->display_name }}</span></button>
+                                    <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="Remove from watchlist"><i class="fas fa-eye-slash" aria-hidden="true"></i><span class="visually-hidden">Remove {{ $entry->startup->display_name }}</span></button>
                                 </form>
                             </td>
                         </tr>

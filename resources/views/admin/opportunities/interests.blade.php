@@ -30,7 +30,7 @@
                             <select id="st-{{ $interest->id }}" name="status">
                                 @foreach (\App\Models\Ecosystem\OpportunityInterest::STATUSES as $value => $label)<option value="{{ $value }}" @selected($interest->status === $value)>{{ $label }}</option>@endforeach
                             </select>
-                            <button type="submit" class="btn btn-secondary btn-sm">Save</button>
+                            <button type="submit" class="btn btn-icon btn-icon-primary" data-tip="Save"><i class="fas fa-floppy-disk" aria-hidden="true"></i><span class="visually-hidden">Save status for {{ $interest->user?->name }}</span></button>
                         </form>
                     </td>
                 </tr>

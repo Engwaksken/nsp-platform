@@ -240,8 +240,8 @@
                                             <input type="hidden" name="investor_user_id" value="{{ $connection->investor_user_id }}">
                                             <label class="visually-hidden" for="reason-{{ $connection->investor_user_id }}">Reason for {{ $connection->investor?->name }}</label>
                                             <input id="reason-{{ $connection->investor_user_id }}" type="text" name="reason" maxlength="500" placeholder="Reason (optional)" value="{{ $given?->reason }}">
-                                            <button type="submit" name="rating" value="useful" class="btn btn-secondary btn-sm"><i class="fas fa-thumbs-up" aria-hidden="true"></i> Useful</button>
-                                            <button type="submit" name="rating" value="not_useful" class="btn btn-secondary btn-sm"><i class="fas fa-thumbs-down" aria-hidden="true"></i> Not useful</button>
+                                            <button type="submit" name="rating" value="useful" class="btn btn-icon btn-icon-success" data-tip="Useful"><i class="fas fa-thumbs-up" aria-hidden="true"></i><span class="visually-hidden">Useful</span></button>
+                                            <button type="submit" name="rating" value="not_useful" class="btn btn-icon btn-icon-danger" data-tip="Not useful"><i class="fas fa-thumbs-down" aria-hidden="true"></i><span class="visually-hidden">Not useful</span></button>
                                         </form>
                                     </td>
                                 @endif

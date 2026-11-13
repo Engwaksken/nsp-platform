@@ -58,7 +58,7 @@
                         <td>
                             <form method="post" action="{{ route('admin.integrations.replay', $delivery) }}">
                                 @csrf
-                                <button type="submit" class="btn btn-secondary btn-sm">Send again</button>
+                                <button type="submit" class="btn btn-icon" data-tip="Send again"><i class="fas fa-rotate-right" aria-hidden="true"></i><span class="visually-hidden">Send again</span></button>
                             </form>
                         </td>
                     </tr>

@@ -25,7 +25,7 @@
                     <td>
                         <form method="post" action="{{ route('admin.pages.restore', [$page, $revision]) }}" data-confirm="Restore this revision as a draft?">
                             @csrf
-                            <button type="submit" class="btn btn-secondary btn-sm">Restore</button>
+                            <button type="submit" class="btn btn-icon" data-tip="Restore"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i><span class="visually-hidden">Restore this revision</span></button>
                         </form>
                     </td>
                 </tr>

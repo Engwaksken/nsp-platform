@@ -31,7 +31,8 @@
     if (!node) return '';
     var clone = node.cloneNode(true);
     qsa(clone, '.visually-hidden').forEach(function (hidden) { hidden.remove(); });
-    return clone.textContent.replace(/\s+/g, ' ').trim();
+    // Icon-only buttons (.btn-icon) have no visible text: use their tooltip label instead.
+    return clone.textContent.replace(/\s+/g, ' ').trim() || node.getAttribute('data-tip') || '';
   }
   function focusFirst(container) {
     var target = container.querySelector('[autofocus]') ||
@@ -199,9 +200,9 @@
 
   function isDanger(form, submitter) {
     var method = form.querySelector('input[name="_method"]');
-    return !!((submitter && submitter.classList.contains('btn-danger')) ||
+    return !!((submitter && submitter.matches('.btn-danger, .btn-icon-danger')) ||
       (method && method.value.toUpperCase() === 'DELETE') ||
-      form.querySelector('.btn-danger'));
+      form.querySelector('.btn-danger, .btn-icon-danger'));
   }
 
   /* ------------------------------------------------------------------ */
@@ -444,7 +445,13 @@
       button.disabled = busy;
     });
     if (submitter) {
-      if (busy) { submitter.__label = submitter.innerHTML; submitter.classList.add('is-loading'); submitter.innerHTML = '<span class="spinner" aria-hidden="true"></span> ' + (visibleText(submitter).match(/^(delete|remove)/i) ? 'Working…' : 'Saving…'); }
+      if (busy) {
+        var busyText = visibleText(submitter).match(/^(delete|remove)/i) ? 'Working…' : 'Saving…';
+        submitter.__label = submitter.innerHTML; submitter.classList.add('is-loading');
+        submitter.innerHTML = submitter.classList.contains('btn-icon')
+          ? '<span class="spinner" aria-hidden="true"></span><span class="visually-hidden">' + busyText + '</span>'
+          : '<span class="spinner" aria-hidden="true"></span> ' + busyText;
+      }
       else if (submitter.__label != null) { submitter.innerHTML = submitter.__label; submitter.classList.remove('is-loading'); }
     }
   }
@@ -875,7 +882,7 @@
           var cell = row.cells[actionIndex];
           if (!cell) return;
           qsa(cell, 'a, button').forEach(function (control) {
-            if (control.__nspActionIcon) return;
+            if (control.__nspActionIcon || control.classList.contains('btn-icon')) return;
             control.__nspActionIcon = true;
             var label = visibleText(control);
             if (!control.hasAttribute('title') && label) control.title = label;

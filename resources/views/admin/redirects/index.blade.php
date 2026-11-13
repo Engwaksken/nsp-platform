@@ -24,7 +24,7 @@
                     <td>
                         <form method="post" action="{{ route('admin.redirects.destroy', $redirect) }}" data-confirm="Remove this redirect?">
                             @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                            <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="Remove"><i class="fas fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">Remove redirect from {{ $redirect->from_path }}</span></button>
                         </form>
                     </td>
                 </tr>

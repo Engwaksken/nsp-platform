@@ -36,7 +36,7 @@
                                         @if ($membership->may('request_access'))
                                             <form method="post" action="{{ route('organizations.relationships.withdraw', [$organization, $rel]) }}" data-confirm="Give up access to {{ $rel->startup->display_name }}?">
                                                 @csrf
-                                                <button type="submit" class="btn btn-secondary btn-sm">End access<span class="visually-hidden"> to {{ $rel->startup->display_name }}</span></button>
+                                                <button type="submit" class="btn btn-icon btn-icon-danger" data-tip="End access"><i class="fas fa-link-slash" aria-hidden="true"></i><span class="visually-hidden">End access to {{ $rel->startup->display_name }}</span></button>
                                             </form>
                                         @endif
                                     </td>
