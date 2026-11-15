@@ -106,7 +106,8 @@ class PublicSiteTest extends TestCase
         $manifest = $this->get('/manifest.webmanifest')->assertOk()->assertHeader('Content-Type', 'application/manifest+json');
         $this->assertSame('standalone', $manifest->json('display'));
         $this->assertSame('Hive NSP', $manifest->json('name'));
-        $this->assertContains('maskable', array_column($manifest->json('icons'), 'purpose'));
+        $this->assertSame(asset('favicon.ico'), $manifest->json('icons.0.src'));
+        $this->assertSame('image/x-icon', $manifest->json('icons.0.type'));
         foreach ($manifest->json('icons') as $icon) {
             $this->assertFileExists(public_path(parse_url($icon['src'], PHP_URL_PATH)));
         }
@@ -138,7 +139,8 @@ class PublicSiteTest extends TestCase
         $this->assertStringNotContainsString('full-time jobs', $html);
 
         $admin = $this->userWithRole('platform_admin');
-        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('class="stat-cards"', false)->assertSee('data-tab="Modules"', false);
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('class="stat-cards"', false)
+            ->assertSee('Content overview')->assertSee('Needs attention')->assertSee('See more', false);
         $this->actingAs($admin)->get('/admin/users')->assertOk()->assertSee('Two-step sign-in on');
         $this->assertFileExists(public_path('vendor/fontawesome/webfonts/fa-solid-900.woff2'));
     }

@@ -6,10 +6,15 @@
     icon: a Font Awesome solid icon name (fas). tone: orange (default), blue, green, purple, amber, red, grey.
     url and note are optional; numbers are formatted, other values are shown as given.
 --}}
-@php($stats = array_values(array_filter($stats ?? [])))
+@php
+    $stats = array_values(array_filter($stats ?? []));
+    $mobileLimit = $mobileLimit ?? null;
+    $visibleStats = $mobileLimit ? array_slice($stats, 0, $mobileLimit) : $stats;
+    $moreStats = $mobileLimit ? array_slice($stats, $mobileLimit) : [];
+@endphp
 @if ($stats)
     <section class="stat-cards" aria-label="{{ $label ?? 'Key figures' }}">
-        @foreach ($stats as $stat)
+        @foreach ($visibleStats as $stat)
             @php($tag = ! empty($stat['url']) ? 'a' : 'div')
             <{{ $tag }} class="stat-card stat-{{ $stat['tone'] ?? 'orange' }}" @if (! empty($stat['url'])) href="{{ $stat['url'] }}" @endif>
                 <span class="stat-icon" aria-hidden="true"><i class="fas {{ $stat['icon'] }}"></i></span>
@@ -21,4 +26,22 @@
             </{{ $tag }}>
         @endforeach
     </section>
+    @if ($moreStats)
+        <details class="stat-cards-more">
+            <summary>See more ({{ count($moreStats) }})</summary>
+            <section class="stat-cards" aria-label="More {{ strtolower($label ?? 'key figures') }}">
+                @foreach ($moreStats as $stat)
+                    @php($tag = ! empty($stat['url']) ? 'a' : 'div')
+                    <{{ $tag }} class="stat-card stat-{{ $stat['tone'] ?? 'orange' }}" @if (! empty($stat['url'])) href="{{ $stat['url'] }}" @endif>
+                        <span class="stat-icon" aria-hidden="true"><i class="fas {{ $stat['icon'] }}"></i></span>
+                        <span class="stat-body">
+                            <span class="stat-value">{{ is_int($stat['value']) || is_float($stat['value']) ? number_format($stat['value']) : $stat['value'] }}</span>
+                            <span class="stat-label">{{ $stat['label'] }}</span>
+                            @if (! empty($stat['note']))<span class="stat-note">{{ $stat['note'] }}</span>@endif
+                        </span>
+                    </{{ $tag }}>
+                @endforeach
+            </section>
+        </details>
+    @endif
 @endif
