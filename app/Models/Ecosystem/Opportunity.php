@@ -25,7 +25,7 @@ class Opportunity extends Model
     public const STATUSES = ['pending_review', 'draft', 'published', 'rejected', 'archived'];
 
     protected $fillable = ['type', 'title', 'slug', 'organisation', 'summary', 'body', 'location', 'is_online', 'eligibility',
-        'amount_text', 'deadline_at', 'starts_at', 'ends_at', 'apply_url', 'accepts_interest', 'capacity', 'status'];
+        'amount_text', 'deadline_at', 'starts_at', 'ends_at', 'apply_url', 'ims_embed_url', 'accepts_interest', 'capacity', 'status'];
 
     protected function casts(): array
     {

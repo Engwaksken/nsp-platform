@@ -12,6 +12,7 @@ use App\Models\Registry\StartupMembership;
 use App\Models\Registry\StartupProfile;
 use App\Registry\ActiveStartup;
 use App\Support\Audit;
+use App\Support\ImsOpportunityEmbed;
 use App\Support\Markdown;
 use App\Support\PageBlocks;
 use Illuminate\Http\RedirectResponse;
@@ -150,6 +151,11 @@ class OpportunityController extends Controller
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
             'apply_url' => ['nullable', 'url:https,http', 'max:500'],
+            'ims_embed_url' => $staff ? ['nullable', 'string', 'max:1000', function ($attribute, $value, $fail) {
+                if (filled($value) && ! ImsOpportunityEmbed::isValid($value)) {
+                    $fail('Use the public opportunity-embed URL from the configured IMS site.');
+                }
+            }] : ['prohibited'],
             'sectors' => ['nullable', 'array'], 'sectors.*' => [Rule::in(StartupProfile::SECTORS)],
             'countries' => ['nullable', 'array'], 'countries.*' => [Rule::in(array_keys(Startup::COUNTRIES))],
             'stages' => ['nullable', 'array'], 'stages.*' => ['string', 'max:80'],
@@ -166,7 +172,7 @@ class OpportunityController extends Controller
             'registered_only' => $request->boolean('registered_only') ?: null,
             'max_age_years' => $data['max_age_years'] ?? null,
         ]);
-        $clean = array_intersect_key($data, array_flip(['type', 'title', 'organisation', 'summary', 'body', 'location', 'amount_text', 'deadline_at', 'starts_at', 'ends_at', 'apply_url']));
+        $clean = array_intersect_key($data, array_flip(['type', 'title', 'organisation', 'summary', 'body', 'location', 'amount_text', 'deadline_at', 'starts_at', 'ends_at', 'apply_url', 'ims_embed_url']));
         $clean['apply_url'] = PageBlocks::safeUrl((string) ($clean['apply_url'] ?? '')) ?: null;
         $clean['is_online'] = $request->boolean('is_online');
         $clean['eligibility'] = $eligibility ?: null;

@@ -17,6 +17,11 @@
         </dl>
         <p class="lead">{{ $opportunity->summary }}</p>
         <div class="prose">{!! $bodyHtml !!}</div>
+        @if ($opportunity->ims_embed_url && \App\Support\ImsOpportunityEmbed::isValid($opportunity->ims_embed_url))
+            <section class="ims-opportunity-embed" aria-label="Opportunity details from Hive IMS">
+                <iframe src="{{ $opportunity->ims_embed_url }}" title="{{ $opportunity->title }} — Hive IMS opportunity details" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-forms allow-same-origin"></iframe>
+            </section>
+        @endif
 
         @if ($checks !== null && $checks !== [])
             <section class="panel" aria-labelledby="fit-heading">

@@ -173,6 +173,36 @@ class OpportunitiesTest extends TestCase
         }
     }
 
+    public function test_staff_can_embed_only_a_public_opportunity_from_configured_ims(): void
+    {
+        config(['nsp.ims_url' => 'https://ims.example.test']);
+        $manager = User::factory()->withRole('ecosystem_manager')->create();
+        $embedUrl = 'https://ims.example.test/opportunity-embed.php?id=42';
+
+        $this->actingAs($manager)->post('/admin/opportunities', [
+            'type' => 'grant', 'title' => 'IMS grant', 'summary' => 'Apply through IMS.',
+            'ims_embed_url' => $embedUrl, 'publish' => 1,
+        ])->assertRedirect();
+
+        $opportunity = Opportunity::query()->where('title', 'IMS grant')->sole();
+        $this->assertSame($embedUrl, $opportunity->ims_embed_url);
+        $response = $this->get(route('opportunities.show', $opportunity))->assertOk()
+            ->assertSee('class="ims-opportunity-embed"', false)
+            ->assertSee('src="'.$embedUrl.'"', false);
+        $this->assertStringContainsString('frame-src \'self\' https://ims.example.test', $response->headers->get('Content-Security-Policy'));
+    }
+
+    public function test_staff_cannot_embed_an_untrusted_or_non_opportunity_ims_url(): void
+    {
+        config(['nsp.ims_url' => 'https://ims.example.test']);
+        $manager = User::factory()->withRole('ecosystem_manager')->create();
+
+        $this->actingAs($manager)->post('/admin/opportunities', [
+            'type' => 'grant', 'title' => 'Unsafe embed', 'summary' => 'Not allowed.',
+            'ims_embed_url' => 'https://evil.example.test/opportunity-embed.php?id=42',
+        ])->assertSessionHasErrors('ims_embed_url');
+    }
+
     public function test_everything_is_hidden_when_the_feature_is_off(): void
     {
         $this->opportunity();

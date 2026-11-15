@@ -21,6 +21,9 @@
         @csrf
         @if ($opportunity->exists) @method('PUT') @endif
         @include('site.opportunities.fields', ['staff' => true])
+        @if (config('nsp.ims_url'))
+            @include('partials.field', ['name' => 'ims_embed_url', 'label' => 'IMS opportunity embed URL (optional)', 'type' => 'url', 'value' => old('ims_embed_url', $opportunity->ims_embed_url), 'hint' => 'Paste the public opportunity-embed URL from the configured IMS site. It will appear inside this opportunity page.'])
+        @endif
         <div class="actions">
             <button type="submit" class="btn btn-secondary">Save</button>
             @unless ($opportunity->exists)<button type="submit" name="publish" value="1" class="btn btn-primary">Save and publish</button>@endunless

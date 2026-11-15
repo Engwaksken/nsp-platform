@@ -1233,6 +1233,10 @@ a.stat-card:focus-visible { outline: none; box-shadow: var(--ring); }
 .chart-bars strong { min-width: 2.5rem; text-align: right; font-variant-numeric: tabular-nums; }
 @media (max-width: 700px) { .dashboard-charts { grid-template-columns: 1fr; } }
 
+.ims-opportunity-embed { margin: var(--space-6) 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.ims-opportunity-embed iframe { display: block; width: 100%; min-height: 720px; border: 0; }
+@media (max-width: 640px) { .ims-opportunity-embed iframe { min-height: 900px; } }
+
 .tab-count { padding: 0 .45rem; font-size: .72rem; line-height: 1.6; color: var(--ink-muted); background: var(--surface-sunken); border-radius: 999px; }
 .tab.has-error::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--danger); }
 [data-tabs].is-tabbed > [role="tabpanel"]:focus-visible { outline: none; box-shadow: var(--ring); border-radius: var(--radius); }
