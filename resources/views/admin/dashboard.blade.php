@@ -18,29 +18,37 @@
             'url' => isset($look[$label][2]) && \Illuminate\Support\Facades\Route::has($look[$label][2]) ? route($look[$label][2]) : null,
         ])->values()->all();
     @endphp
-    @include('partials.stats', ['label' => 'Key figures', 'stats' => $dashStats])
+    @include('partials.stats', ['label' => 'Key figures', 'stats' => $dashStats, 'mobileLimit' => 6])
 
-    <div data-tabs="Dashboard sections" data-tabs-key="admin-dashboard">
-        <section class="panel" aria-labelledby="features-heading" data-tab="Modules" data-tab-icon="fa-puzzle-piece" data-tab-count="{{ $features->where('enabled', true)->count() }}/{{ $features->count() }}">
-            <h2 id="features-heading">Modules</h2>
-            <p class="hint">Modules for later phases stay off until they are built and approved.</p>
-            <ul>
-                @foreach ($features as $feature)
-                    <li>{{ $feature['label'] }}: <span class="badge badge-{{ $feature['enabled'] ? 'on' : 'off' }}">{{ $feature['enabled'] ? 'On' : 'Off' }}</span></li>
+    @php
+        $contentChart = collect(['Published pages', 'Draft pages', 'Published news'])
+            ->map(fn ($label) => ['label' => $label, 'value' => $counts[$label] ?? 0]);
+        $attentionChart = collect($dashStats)->filter(fn ($stat) => in_array($stat['label'], [
+            'New messages', 'Opportunities to review', 'Investors to verify', 'Experts to verify',
+            'Open marketplace reports', 'Failed emails (7 days)',
+        ], true))->map(fn ($stat) => ['label' => $stat['label'], 'value' => $stat['value']]);
+        $chartMax = max(1, (int) $contentChart->max('value'), (int) $attentionChart->max('value'));
+    @endphp
+    <div class="dashboard-charts">
+        <section class="panel dashboard-chart" aria-labelledby="content-chart-heading">
+            <h2 id="content-chart-heading">Content overview</h2>
+            <ul class="chart-bars" role="img" aria-label="Content counts: {{ $contentChart->map(fn ($row) => $row['label'].', '.$row['value'])->implode('; ') }}">
+                @foreach ($contentChart as $row)
+                    <li><span>{{ $row['label'] }}</span><span class="chart-track"><span class="chart-bar" style="width: {{ min(100, (int) round($row['value'] / $chartMax * 100)) }}%"></span></span><strong>{{ number_format($row['value']) }}</strong></li>
                 @endforeach
             </ul>
         </section>
-
-        @if ($recentActivity->isNotEmpty())
-            <section class="panel" aria-labelledby="activity-heading" data-tab="Recent activity" data-tab-icon="fa-clock-rotate-left">
-                <h2 id="activity-heading">Recent activity</h2>
-                <ul>
-                    @foreach ($recentActivity as $log)
-                        <li><span class="meta">{{ $log->created_at->diffForHumans() }}</span> · {{ $log->actor?->name ?? 'System' }} · {{ $log->action }}</li>
+        <section class="panel dashboard-chart" aria-labelledby="attention-chart-heading">
+            <h2 id="attention-chart-heading">Needs attention</h2>
+            @if ($attentionChart->isNotEmpty())
+                <ul class="chart-bars" role="img" aria-label="Items needing attention: {{ $attentionChart->map(fn ($row) => $row['label'].', '.$row['value'])->implode('; ') }}">
+                    @foreach ($attentionChart as $row)
+                        <li><span>{{ $row['label'] }}</span><span class="chart-track"><span class="chart-bar chart-bar-warm" style="width: {{ min(100, (int) round($row['value'] / $chartMax * 100)) }}%"></span></span><strong>{{ number_format($row['value']) }}</strong></li>
                     @endforeach
                 </ul>
-                <a href="{{ route('admin.audit.index') }}">Full audit log</a>
-            </section>
-        @endif
+            @else
+                <p class="hint">No attention metrics are available for your account.</p>
+            @endif
+        </section>
     </div>
 @endsection

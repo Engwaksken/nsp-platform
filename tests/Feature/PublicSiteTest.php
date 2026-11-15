@@ -139,7 +139,8 @@ class PublicSiteTest extends TestCase
         $this->assertStringNotContainsString('full-time jobs', $html);
 
         $admin = $this->userWithRole('platform_admin');
-        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('class="stat-cards"', false)->assertSee('data-tab="Modules"', false);
+        $this->actingAs($admin)->get('/admin')->assertOk()->assertSee('class="stat-cards"', false)
+            ->assertSee('Content overview')->assertSee('Needs attention')->assertSee('See more', false);
         $this->actingAs($admin)->get('/admin/users')->assertOk()->assertSee('Two-step sign-in on');
         $this->assertFileExists(public_path('vendor/fontawesome/webfonts/fa-solid-900.woff2'));
     }
