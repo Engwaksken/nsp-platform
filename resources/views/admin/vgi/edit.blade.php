@@ -45,9 +45,10 @@
                 <p class="hint">Edit questions and answer options directly below. Use a unique lower-case key for every question and option. Scores are from 0–100; mark a “not enough information” option as unscored. Founders’ scores are recalculated only from the approved version they used.</p>
                 @include('partials.field', ['name' => 'description', 'label' => 'Description', 'type' => 'textarea', 'rows' => 2, 'value' => $framework->description])
                 @error('questions')<div class="alert alert-danger" role="alert">{{ is_array($message) ? implode(' ', $message) : $message }}</div>@enderror
+                <div data-tabs="Assessment areas" data-tabs-key="vgi-dimensions-{{ $framework->id }}">
                 @foreach ($definition['dimensions'] ?? [] as $dimension)
                     @php($dimensionKey = $dimension['key'])
-                    <section class="panel vgi-question-dimension" data-vgi-dimension="{{ $dimensionKey }}" aria-labelledby="dimension-{{ $dimensionKey }}">
+                    <section class="panel vgi-question-dimension" data-tab="{{ $dimension['title'] }}" data-tab-icon="fa-seedling" data-tab-count="{{ count($dimension['questions']) }}" data-vgi-dimension="{{ $dimensionKey }}" aria-labelledby="dimension-{{ $dimensionKey }}">
                         <h3 id="dimension-{{ $dimensionKey }}">{{ $dimension['title'] }} <span class="meta">(weight {{ $dimension['weight'] }})</span></h3>
                         <div class="vgi-question-list">
                             @foreach ($questionsByDimension[$dimensionKey] ?? [] as $questionIndex => $question)
@@ -110,6 +111,7 @@
                         <button type="button" class="btn btn-secondary" data-vgi-add-question>Add question to {{ $dimension['title'] }}</button>
                     </section>
                 @endforeach
+                </div>
                 <div class="actions"><button type="submit" class="btn btn-primary">Save draft</button></div>
             </form>
         @endcan

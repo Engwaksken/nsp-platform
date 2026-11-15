@@ -11,7 +11,7 @@
     @endif
     <form method="post" action="{{ route('admin.builder.update', $curriculum) }}" class="panel" id="curriculum-editor">
         @csrf @method('PUT')
-        <div class="curriculum-module-list" data-curriculum-module-list>
+        <div class="curriculum-module-list" data-tabs="Curriculum modules" data-tabs-key="builder-curriculum-{{ $curriculum->id }}" data-curriculum-module-list>
             @foreach ($definition['modules'] ?? [] as $moduleIndex => $module)
                 @include('admin.builder.partials.module-editor', ['moduleIndex' => $moduleIndex, 'module' => $module])
             @endforeach

@@ -610,6 +610,22 @@
     }
   }
 
+  function refreshTabs(box, activePanel) {
+    if (!box) return;
+    var generatedList = box.querySelector(':scope > .tabs-list');
+    if (generatedList) generatedList.remove();
+    qsa(box, ':scope > [data-tab]').forEach(function (panel) {
+      panel.hidden = false;
+      panel.removeAttribute('role');
+      panel.removeAttribute('aria-labelledby');
+      panel.removeAttribute('tabindex');
+    });
+    box.classList.remove('is-tabbed');
+    box.__nspTabs = false;
+    initTabs(box.parentElement || document);
+    if (activePanel && box.__nspSelect) box.__nspSelect(activePanel);
+  }
+
   NSP.showTabFor = function (node) {
     var panel = node && node.closest ? node.closest('[role="tabpanel"]') : null;
     while (panel) {
@@ -811,6 +827,9 @@
       replaceTokens(moduleNode, { '__MODULE__': String(moduleIndex) });
       moduleNode.setAttribute('data-module-index', String(moduleIndex));
       moduleList.appendChild(moduleNode);
+      var moduleTitle = moduleNode.querySelector('input[name$="[title]"]');
+      if (moduleTitle && moduleTitle.value) moduleNode.setAttribute('data-tab', moduleTitle.value);
+      refreshTabs(moduleList, moduleNode);
       var moduleKey = moduleNode.querySelector('input[name$="[key]"]');
       if (moduleKey) moduleKey.focus();
       return;
@@ -877,6 +896,16 @@
     if (removeField) { removeField.closest('[data-curriculum-field]').remove(); return; }
     var removeCheck = event.target.closest('[data-curriculum-remove-check]');
     if (removeCheck) { removeCheck.closest('[data-curriculum-check]').remove(); }
+  });
+
+  document.addEventListener('input', function (event) {
+    var title = event.target;
+    if (!title.matches || !title.matches('[data-curriculum-module] input[name$="[title]"]')) return;
+    var module = title.closest('[data-curriculum-module]');
+    module.setAttribute('data-tab', title.value.trim() || 'New module');
+    var tab = module.id && document.getElementById(module.id + '-tab');
+    var label = tab && tab.querySelector('span');
+    if (label) label.textContent = title.value.trim() || 'New module';
   });
 
   /* ------------------------------------------------------------------ */

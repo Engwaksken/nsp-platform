@@ -1,4 +1,4 @@
-<fieldset class="panel curriculum-module" data-curriculum-module data-module-index="{{ $moduleIndex }}">
+<fieldset class="panel curriculum-module" data-curriculum-module data-module-index="{{ $moduleIndex }}" data-tab="{{ $module['title'] ?: 'New module' }}" data-tab-icon="fa-layer-group" data-tab-count="{{ count($module['steps'] ?? []) }}">
     <legend>Module</legend>
     <div class="form-row">
         @include('partials.field', ['name' => "definition[modules][$moduleIndex][key]", 'label' => 'Module key', 'value' => $module['key'] ?? '', 'required' => true])

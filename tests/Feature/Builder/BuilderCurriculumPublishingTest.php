@@ -52,6 +52,7 @@ class BuilderCurriculumPublishingTest extends TestCase
         $draft = app(CurriculumService::class)->createDraft($admin);
         $this->actingAs($admin)->get(route('admin.builder.edit', $draft))->assertOk()
             ->assertSee('Add module')->assertSee('Add step')->assertSee('Add response field')
+            ->assertSee('data-tabs="Curriculum modules"', false)
             ->assertDontSee('Curriculum definition (JSON)')->assertDontSee('name="definition"', false);
 
         $definition = CurriculumDefinition::fromCurriculum($draft);
