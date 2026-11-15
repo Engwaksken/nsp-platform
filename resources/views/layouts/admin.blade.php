@@ -30,7 +30,14 @@
 <div class="admin-shell">
     <aside class="admin-sidebar" id="admin-sidebar" data-offcanvas>
         <div class="app-sidebar-head">
-            <a class="brand" href="{{ route('admin.dashboard') }}">{{ $brand['site_name'] }} Admin</a>
+            <a class="brand" href="{{ route('admin.dashboard') }}">
+                @if ($brandLogo)
+                    <img src="{{ $brandLogo->url() }}" alt="{{ $brandLogo->alt_text ?: $brand['site_name'] }}" width="140" height="36">
+                @else
+                    {{ $brand['site_name'] }}
+                @endif
+                <span>Admin</span>
+            </a>
             {{-- Without JavaScript on small screens the menu opens in place via #admin-sidebar (see "no-js" in nsp.css). --}}
             <a class="app-sidebar-close nojs-only" href="#main" aria-label="Close menu"><i class="fas fa-xmark" aria-hidden="true"></i></a>
         </div>
