@@ -14,7 +14,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="{{ \Illuminate\Support\Str::limit($brand['site_name'], 12, '') }}">
-<link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}?v=1">
+<link rel="apple-touch-icon" href="{{ $brandFavicon?->url() ?? asset('favicon.ico') }}">
 <meta name="nsp-sw" content="{{ asset('sw.js') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {{-- Blocking on purpose: sets the "js" class and the saved colour theme before the first paint. --}}
@@ -31,9 +31,7 @@
 @isset($ogImage)
     <meta property="og:image" content="{{ $ogImage }}">
 @endisset
-@if ($brandFavicon)
-    <link rel="icon" href="{{ $brandFavicon->url() }}">
-@endif
+<link rel="icon" href="{{ $brandFavicon?->url() ?? asset('favicon.ico') }}">
 @if (in_array($brand['font_family'], ['Poppins', 'Outfit'], true))
     {{-- Brand fonts are self-hosted (public/fonts) so pages make no third-party requests. --}}
     <link rel="preload" href="{{ asset('fonts/'.strtolower($brand['font_family']).'/'.strtolower($brand['font_family']).($brand['font_family'] === 'Outfit' ? '' : '-400').'-latin.woff2') }}" as="font" type="font/woff2" crossorigin>

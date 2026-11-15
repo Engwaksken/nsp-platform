@@ -106,7 +106,8 @@ class PublicSiteTest extends TestCase
         $manifest = $this->get('/manifest.webmanifest')->assertOk()->assertHeader('Content-Type', 'application/manifest+json');
         $this->assertSame('standalone', $manifest->json('display'));
         $this->assertSame('Hive NSP', $manifest->json('name'));
-        $this->assertContains('maskable', array_column($manifest->json('icons'), 'purpose'));
+        $this->assertSame(asset('favicon.ico'), $manifest->json('icons.0.src'));
+        $this->assertSame('image/x-icon', $manifest->json('icons.0.type'));
         foreach ($manifest->json('icons') as $icon) {
             $this->assertFileExists(public_path(parse_url($icon['src'], PHP_URL_PATH)));
         }

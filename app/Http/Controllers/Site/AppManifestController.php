@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Models\Media;
 use App\Support\Settings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -17,10 +18,13 @@ class AppManifestController extends Controller
     public function manifest(): JsonResponse
     {
         $brand = Settings::all();
+        $favicon = $brand['favicon_media_id'] ? Media::query()->find($brand['favicon_media_id']) : null;
         $name = (string) $brand['site_name'];
         $color = preg_match('/^#[0-9a-fA-F]{3,8}$/', (string) $brand['primary_color']) ? $brand['primary_color'] : '#3a3a3c';
-        $icon = fn (string $file, string $size, string $purpose) => [
-            'src' => asset('icons/'.$file).'?v=1', 'sizes' => $size, 'type' => 'image/png', 'purpose' => $purpose,
+        $icon = [
+            'src' => $favicon?->url() ?? asset('favicon.ico'),
+            'sizes' => 'any',
+            'type' => $favicon?->mime_type ?? 'image/x-icon',
         ];
 
         return response()->json([
@@ -34,11 +38,7 @@ class AppManifestController extends Controller
             'orientation' => 'portrait',
             'background_color' => '#f1f3f6',
             'theme_color' => $color,
-            'icons' => [
-                $icon('icon-192.png', '192x192', 'any'),
-                $icon('icon-512.png', '512x512', 'any'),
-                $icon('icon-maskable-512.png', '512x512', 'maskable'),
-            ],
+            'icons' => [$icon],
         ], 200, ['Content-Type' => 'application/manifest+json', 'Cache-Control' => 'public, max-age=3600'],
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
