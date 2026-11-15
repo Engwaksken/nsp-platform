@@ -167,7 +167,7 @@ class AiSettingsController extends Controller
         Features::set('ai_assistant', $enable, $request->user()->id);
         Audit::log('feature_flag.changed', 'feature_flags', ['key' => 'ai_assistant', 'enabled' => $enable]);
 
-        return redirect()->route('admin.ai.edit')->with('status', $enable ? 'The AI assistant is on for founders who opt in.' : 'The AI assistant is off.');
+        return redirect()->route('admin.ai.edit')->with('status', $enable ? 'AI help is available to founders who opt in and to admins on supported pages.' : 'AI help is off.');
     }
 
     /** @return array{requests: int, failed: int, input_tokens: int, output_tokens: int, cost: float} */

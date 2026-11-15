@@ -1233,6 +1233,27 @@ a.stat-card:focus-visible { outline: none; box-shadow: var(--ring); }
 .chart-bars strong { min-width: 2.5rem; text-align: right; font-variant-numeric: tabular-nums; }
 @media (max-width: 700px) { .dashboard-charts { grid-template-columns: 1fr; } }
 
+.vgi-question-dimension { margin: var(--space-5) 0; }
+.vgi-question-dimension > h3 { margin-top: 0; }
+.vgi-question-list { display: grid; gap: var(--space-4); margin: var(--space-4) 0; }
+.vgi-question { min-width: 0; margin: 0; }
+.vgi-question > legend { padding: 0 .4rem; font-weight: 700; }
+.vgi-option-list { display: grid; gap: var(--space-3); margin: var(--space-3) 0; }
+.vgi-option { min-width: 0; padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); }
+.vgi-option > legend { padding: 0 .35rem; font-weight: 600; }
+.vgi-option .form-group { margin-bottom: var(--space-2); }
+.vgi-option-template { display: block; }
+
+.curriculum-module-list { display: grid; gap: var(--space-5); }
+.curriculum-module { min-width: 0; }
+.curriculum-module > legend, .curriculum-step > legend { padding: 0 .45rem; font-weight: 700; }
+.curriculum-step-list { display: grid; gap: var(--space-4); margin: var(--space-4) 0; }
+.curriculum-step { min-width: 0; margin: 0; background: var(--surface-alt); }
+.curriculum-field-list { display: grid; gap: var(--space-3); margin: var(--space-3) 0; }
+.curriculum-response-field { min-width: 0; padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.curriculum-response-field > legend { padding: 0 .35rem; font-weight: 600; }
+.curriculum-check { align-items: end; }
+
 .ims-opportunity-embed { margin: var(--space-6) 0; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .ims-opportunity-embed iframe { display: block; width: 100%; min-height: 720px; border: 0; }
 @media (max-width: 640px) { .ims-opportunity-embed iframe { min-height: 900px; } }

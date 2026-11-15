@@ -29,7 +29,7 @@ class CurriculumService
                 'name' => $name,
                 'version' => (int) BuilderCurriculum::query()->where('name', $name)->max('version') + 1,
                 'status' => 'draft', 'methodology_status' => 'provisional',
-                'description' => $base?->description ?? 'Provisional curriculum draft awaiting owner approval.',
+                'description' => $base?->description ?? 'Curriculum draft awaiting owner approval.',
                 'copied_from_id' => $base?->id, 'created_by' => $creator->id, 'updated_by' => $creator->id,
             ]);
             $this->replaceDefinition($curriculum, $definition);
@@ -51,7 +51,7 @@ class CurriculumService
             $curriculum = BuilderCurriculum::query()->create([
                 'name' => 'Hive Venture Builder', 'version' => 1, 'status' => 'draft',
                 'methodology_status' => 'provisional',
-                'description' => 'Provisional implementation scaffold awaiting owner approval of official module and step names.',
+                'description' => 'Starter curriculum awaiting owner approval of official module and step names.',
                 'note' => 'Not owner-approved. Do not present this curriculum as official methodology.',
             ]);
             $this->replaceDefinition($curriculum, $definition);

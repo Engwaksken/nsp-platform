@@ -55,6 +55,20 @@ class GrowthTest extends TestCase
         return array_map(fn ($q) => $q['options'][min($position, count($q['options']) - 1)]['key'], FrameworkDefinition::questions($framework->definition));
     }
 
+    private function questionsPayload(array $definition): array
+    {
+        $questions = [];
+        foreach ($definition['dimensions'] as $dimension) {
+            $questions[$dimension['key']] = array_values(array_map(function ($question) {
+                $question['options'] = array_values($question['options']);
+
+                return $question;
+            }, $dimension['questions']));
+        }
+
+        return ['questions' => $questions];
+    }
+
     /** Evidence fixtures for required prompts whose selected answer expects evidence. */
     private function requiredEvidence(VgiFramework $framework, array $answers): array
     {
@@ -80,7 +94,7 @@ class GrowthTest extends TestCase
 
     public function test_nothing_is_offered_until_a_rubric_is_approved(): void
     {
-        $this->actingAs($this->owner)->get("/workspace/startups/{$this->startup->uuid}/growth")->assertOk()->assertSee('Coming soon');
+        $this->actingAs($this->owner)->get("/workspace/startups/{$this->startup->uuid}/growth")->assertOk()->assertSee('Growth assessment unavailable');
         $this->actingAs($this->owner)->post("/workspace/startups/{$this->startup->uuid}/growth/assessments")->assertSessionHasErrors('growth');
         $this->assertSame(0, VgiAssessment::query()->count());
     }
@@ -89,9 +103,21 @@ class GrowthTest extends TestCase
     {
         $framework = VgiFramework::query()->firstOrFail();
         $editor = User::factory()->withRole('platform_admin')->create();
-        $json = json_encode($framework->definition);
+        $form = $this->questionsPayload($framework->definition);
+        $firstDimensionKey = $framework->definition['dimensions'][0]['key'];
+        $form['questions'][$firstDimensionKey][0]['prompt'] = 'How committed is the founding team?';
+        $form['questions'][$firstDimensionKey][] = [
+            'key' => 'team_new_question', 'prompt' => 'Does the team have a hiring plan?', 'weight' => 1,
+            'evidence' => 'optional', 'options' => [
+                ['key' => 'no', 'label' => 'Not yet', 'score' => 0],
+                ['key' => 'some', 'label' => 'In progress', 'score' => 50],
+                ['key' => 'yes', 'label' => 'Ready', 'score' => 100],
+            ],
+        ];
 
-        $this->actingAs($editor)->put("/admin/vgi/frameworks/{$framework->id}", ['definition' => $json, 'description' => 'Edited'])->assertSessionHasNoErrors();
+        $this->actingAs($editor)->put("/admin/vgi/frameworks/{$framework->id}", $form + ['description' => 'Edited'])->assertSessionHasNoErrors();
+        $this->assertSame('How committed is the founding team?', $framework->fresh()->definition['dimensions'][0]['questions'][0]['prompt']);
+        $this->assertSame('team_new_question', $framework->fresh()->definition['dimensions'][0]['questions'][count($framework->definition['dimensions'][0]['questions'])]['key']);
         $this->actingAs($editor)->post("/admin/vgi/frameworks/{$framework->id}/approve", ['note' => 'I reviewed my own work.'])->assertSessionHasErrors('approve');
         $this->assertSame('draft', $framework->fresh()->status);
 
@@ -101,20 +127,20 @@ class GrowthTest extends TestCase
         $this->actingAs($approver)->post("/admin/vgi/frameworks/{$framework->id}/approve", ['note' => 'Reviewed with the programs team.'])->assertSessionHasNoErrors();
         $this->assertSame('approved', $framework->fresh()->status);
 
-        $this->actingAs($editor)->put("/admin/vgi/frameworks/{$framework->id}", ['definition' => $json])->assertSessionHasErrors('definition');
-        $this->actingAs($editor)->put("/admin/vgi/frameworks/{$framework->id}", ['definition' => '{not json'])->assertSessionHasErrors('definition');
+        $this->actingAs($editor)->put("/admin/vgi/frameworks/{$framework->id}", $form)->assertSessionHasErrors('questions');
         $this->assertDatabaseHas('audit_logs', ['action' => 'vgi.framework_approved']);
     }
 
     public function test_invalid_rubrics_cannot_be_saved(): void
     {
         $framework = VgiFramework::query()->firstOrFail();
-        $definition = $framework->definition;
-        $definition['bands'][0]['max'] = 10;
+        $form = $this->questionsPayload($framework->definition);
+        $firstDimensionKey = $framework->definition['dimensions'][0]['key'];
+        $form['questions'][$firstDimensionKey][0]['options'][0]['score'] = -1;
 
         $this->actingAs(User::factory()->withRole('ecosystem_manager')->create())
-            ->put("/admin/vgi/frameworks/{$framework->id}", ['definition' => json_encode($definition)])->assertSessionHasErrors('definition');
-        $this->assertSame(24.9, (float) $framework->fresh()->definition['bands'][0]['max']);
+            ->put("/admin/vgi/frameworks/{$framework->id}", $form)->assertSessionHasErrors();
+        $this->assertSame(0.0, (float) $framework->fresh()->definition['dimensions'][0]['questions'][0]['options'][0]['score']);
     }
 
     public function test_founder_completes_an_assessment_with_reproducible_results(): void

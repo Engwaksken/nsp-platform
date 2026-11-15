@@ -15,6 +15,7 @@
         @endforeach
     </nav>
     <p class="hint">From {{ $from->format('j M Y') }} to today. Counts only: no names or contact details. Definitions are in <code>docs/kpi-definitions.md</code>. Downloads are recorded in the audit log.</p>
+    @include('partials.admin-ai-panel', ['context' => 'kpis', 'days' => $days])
 
     <div data-tabs="KPI groups" data-tabs-key="insights">
     @foreach ($kpis as $group => $items)

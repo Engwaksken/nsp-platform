@@ -4,7 +4,7 @@
 @section('content')
     <div class="page-head"><h1>Venture Builder curricula</h1></div>
     @include('partials.flash')
-    <p>Publishing checks the six-module/24-step structure. Curriculum content remains marked provisional until owner methodology approval.</p>
+    <p>Publishing checks the six-module/24-step structure. Owner methodology approval is pending; published content is guidance and may change.</p>
     @include('partials.stats', ['label' => 'Curriculum statistics', 'stats' => [
         ['icon' => 'fa-layer-group', 'label' => 'Versions', 'value' => $curriculumStats['total'], 'tone' => 'blue'],
         ['icon' => 'fa-file-pen', 'label' => 'Drafts', 'value' => $curriculumStats['drafts'], 'tone' => 'amber'],
@@ -22,9 +22,9 @@
                 <tr><td>{{ $curriculum->name }} v{{ $curriculum->version }}</td><td>{{ ucfirst($curriculum->status) }}</td><td>{{ \App\Models\Builder\BuilderCurriculum::METHODOLOGY[$curriculum->methodology_status] ?? $curriculum->methodology_status }}</td>
                     <td>{{ $curriculum->modules->count() }} / {{ $curriculum->steps->count() }}</td>
                     <td>@if ($curriculum->isDraft())<a class="btn btn-icon" href="{{ route('admin.builder.edit', $curriculum) }}" data-tip="Edit draft"><i class="fas fa-pen-to-square" aria-hidden="true"></i><span class="visually-hidden">Edit draft</span></a>
-                        @can('publish-builder-curricula')<form method="post" action="{{ route('admin.builder.publish', $curriculum) }}">@csrf<label for="publish-note-{{ $curriculum->id }}">Publication review note</label><input id="publish-note-{{ $curriculum->id }}" name="note" required minlength="10" maxlength="5000" placeholder="At least 10 characters on what you reviewed"><button class="btn btn-primary" type="submit">Publish provisional curriculum</button></form>@endcan
+                        @can('publish-builder-curricula')<form method="post" action="{{ route('admin.builder.publish', $curriculum) }}">@csrf<label for="publish-note-{{ $curriculum->id }}">Publication review note</label><input id="publish-note-{{ $curriculum->id }}" name="note" required minlength="10" maxlength="5000" placeholder="At least 10 characters on what you reviewed"><button class="btn btn-primary" type="submit">Publish curriculum</button></form>@endcan
                     @else<span>Frozen</span>@endif</td></tr>
-            @empty<tr><td colspan="5">No curriculum draft yet. Run the database seeders to add the provisional scaffold.</td></tr>@endforelse
+            @empty<tr><td colspan="5">No curriculum versions are available. Create a draft version to get started.</td></tr>@endforelse
         </tbody></table>
     </div>
     {{ $curricula->links() }}

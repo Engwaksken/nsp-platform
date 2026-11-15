@@ -8,7 +8,7 @@
         @include('partials.flash')
 
         @if (!$framework && !$latest)
-            <div class="card"><h2>Coming soon</h2><p>Hive has not published the growth assessment yet. You will be able to assess your startup and build a growth plan here.</p></div>
+            <div class="card"><h2>Growth assessment unavailable</h2><p>There is no active Growth Assessment for this startup. Contact your Hive program team if you need access.</p></div>
         @else
             @include('partials.stats', ['label' => 'Growth at a glance', 'stats' => [
                 ['icon' => 'fa-gauge-high', 'tone' => 'green', 'label' => 'Growth score', 'value' => $latest ? number_format($latest->displayScore(), 1) : 'None', 'note' => $latest ? 'out of 100' : 'Not assessed yet'],

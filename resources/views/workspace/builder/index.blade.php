@@ -11,7 +11,7 @@
             <section class="panel"><h2>Curriculum not published</h2><p>The Venture Builder will be available when a curriculum is published.</p></section>
         @elseif (!$enrollment)
             <section class="panel">
-                @if ($curriculum->isProvisional())<p class="notice">Provisional curriculum: awaiting owner approval. Labels and content are a configurable proposal.</p>@endif
+                @if ($curriculum->isProvisional())<p class="notice">Owner methodology approval is pending. Treat this curriculum as guidance; labels and activities may change.</p>@endif
                 <h2>{{ $curriculum->name }} · version {{ $curriculum->version }}</h2>
                 <p>{{ $curriculum->description }}</p>
                 @if ($membership->canEdit())
@@ -24,7 +24,7 @@
                 @endforeach
             </section>
         @else
-            @if ($curriculum->isProvisional())<p class="notice">Provisional curriculum: awaiting owner approval.</p>@endif
+            @if ($curriculum->isProvisional())<p class="notice">Owner methodology approval is pending.</p>@endif
             @include('partials.stats', ['label' => 'Venture Builder progress', 'stats' => [
                 ['icon' => 'fa-chart-pie', 'tone' => 'green', 'label' => 'Complete', 'value' => $progress['percent'].'%'],
                 ['icon' => 'fa-circle-check', 'tone' => 'blue', 'label' => 'Steps done', 'value' => $progress['done'], 'note' => 'of '.$progress['total']],

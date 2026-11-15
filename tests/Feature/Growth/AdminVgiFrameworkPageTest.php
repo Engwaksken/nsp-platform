@@ -15,7 +15,9 @@ class AdminVgiFrameworkPageTest extends TestCase
         $admin = $this->userWithRole('platform_admin');
         $framework = VgiFramework::query()->firstOrFail();
 
-        $this->actingAs($admin)->get(route('admin.vgi.edit', $framework))->assertOk();
+        $this->actingAs($admin)->get(route('admin.vgi.edit', $framework))->assertOk()
+            ->assertSee('Add question to Team')->assertSee('data-vgi-add-option', false)
+            ->assertDontSee('name="definition"', false)->assertDontSee('Rubric (JSON)');
 
         $this->actingAs($admin)->post(route('admin.vgi.create'))->assertRedirect();
         $draft = VgiFramework::query()->latest('id')->firstOrFail();

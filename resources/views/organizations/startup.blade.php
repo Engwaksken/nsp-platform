@@ -24,7 +24,7 @@
                             @endforeach
                         </dl>
                         @if ($scope === 'vgi_summary')
-                            <p class="hint">Growth scores use Hive’s current rubric, which is provisional until the official methodology is approved.</p>
+                            <p class="hint">Growth scores use Hive’s current rubric; owner approval of the official methodology is pending. Treat these scores as guidance.</p>
                         @endif
                     @endif
                 </x-collapsible-card>
@@ -32,7 +32,7 @@
         </x-card-grid>
                     </dl>
                     @if ($scope === 'vgi_summary')
-                        <p class="hint">Growth scores use Hive’s current rubric, which is provisional until the official methodology is approved.</p>
+                        <p class="hint">Growth scores use Hive’s current rubric; owner approval of the official methodology is pending. Treat these scores as guidance.</p>
                     @endif
                 @endif
             </section>

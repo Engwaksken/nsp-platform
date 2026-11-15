@@ -15,7 +15,7 @@ class BuilderCurriculum extends Model
 
     public const STATUSES = ['draft' => 'Draft', 'published' => 'Published', 'retired' => 'Retired'];
 
-    public const METHODOLOGY = ['provisional' => 'Provisional (awaiting owner approval)', 'owner_approved' => 'Owner approved'];
+    public const METHODOLOGY = ['provisional' => 'Awaiting owner approval', 'owner_approved' => 'Owner approved'];
 
     protected $fillable = ['name', 'version', 'status', 'methodology_status', 'description', 'note', 'copied_from_id'];
 

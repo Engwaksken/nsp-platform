@@ -46,6 +46,35 @@ class BuilderCurriculumPublishingTest extends TestCase
         $this->assertDatabaseCount('builder_curricula', 1);
     }
 
+    public function test_admin_can_edit_curriculum_fields_without_json(): void
+    {
+        $admin = User::factory()->withRole('platform_admin')->create();
+        $draft = app(CurriculumService::class)->createDraft($admin);
+        $this->actingAs($admin)->get(route('admin.builder.edit', $draft))->assertOk()
+            ->assertSee('Add module')->assertSee('Add step')->assertSee('Add response field')
+            ->assertDontSee('Curriculum definition (JSON)')->assertDontSee('name="definition"', false);
+
+        $definition = CurriculumDefinition::fromCurriculum($draft);
+        foreach ($definition['modules'] as &$module) {
+            $module['outputs_text'] = implode("\n", $module['outputs'] ?? []);
+            foreach ($module['steps'] as &$step) {
+                $step['prerequisites_text'] = implode(', ', $step['prerequisites'] ?? []);
+                $step['task_suggestions_text'] = implode("\n", $step['task_suggestions'] ?? []);
+                $step['vgi_dimension_keys'] = implode(', ', $step['vgi_dimension_keys'] ?? []);
+                foreach ($step['fields'] as &$field) {
+                    $field['options_text'] = collect($field['options'] ?? [])->map(fn ($label, $key) => $key.' | '.$label)->implode("\n");
+                }
+                unset($field);
+            }
+            unset($step);
+        }
+        unset($module);
+        $definition['modules'][0]['title'] = 'Updated module title';
+        $payload = ['definition' => $definition];
+        $this->put(route('admin.builder.update', $draft), $payload)->assertSessionHasNoErrors();
+        $this->assertSame('Updated module title', $draft->fresh()->modules->first()->title);
+    }
+
     public function test_publish_rejects_wrong_counts_then_all_24_steps_can_be_completed(): void
     {
         $this->seed(BuilderCurriculumSeeder::class);
@@ -66,7 +95,7 @@ class BuilderCurriculumPublishingTest extends TestCase
         $definition = require database_path('data/builder_provisional_curriculum.php');
         $curricula->updateDraft($draft->fresh(), $admin, $definition);
         $reviewer = User::factory()->withRole('builder_reviewer')->create();
-        $this->actingAs($admin)->get('/admin/builder')->assertOk()->assertSee('Venture Builder curricula')->assertSee('Provisional');
+        $this->actingAs($admin)->get('/admin/builder')->assertOk()->assertSee('Venture Builder curricula')->assertSee('Awaiting owner approval');
         $this->actingAs($admin)->post('/admin/builder/'.$draft->id.'/publish', [
             'note' => 'Reviewed the provisional six-module, 24-step structure.',
         ])->assertRedirect('/admin/builder');

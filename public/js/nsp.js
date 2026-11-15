@@ -739,6 +739,146 @@
     renumber();
   }
 
+  /* Growth assessment rubric editor: add/remove questions and answer options. */
+  function replaceTokens(root, tokens) {
+    [root].concat(qsa(root, '*')).forEach(function (node) {
+      ['name', 'id', 'for', 'data-vgi-question-index', 'data-vgi-option-index', 'data-module-index', 'data-step-index', 'data-field-index', 'data-check-index'].forEach(function (attribute) {
+        if (!node.hasAttribute || !node.hasAttribute(attribute)) return;
+        var value = node.getAttribute(attribute);
+        Object.keys(tokens).forEach(function (token) { value = value.split(token).join(tokens[token]); });
+        node.setAttribute(attribute, value);
+      });
+    });
+  }
+  document.addEventListener('click', function (event) {
+    var addQuestion = event.target.closest('[data-vgi-add-question]');
+    if (addQuestion) {
+      var dimension = addQuestion.closest('[data-vgi-dimension]');
+      var list = dimension && dimension.querySelector('.vgi-question-list');
+      var template = dimension && dimension.querySelector('template[data-vgi-question-template]');
+      if (!list || !template) return;
+      var indices = qsa(list, '[data-vgi-question-index]').map(function (node) { return Number(node.getAttribute('data-vgi-question-index')); });
+      var index = indices.length ? Math.max.apply(Math, indices) + 1 : 0;
+      var question = template.content.firstElementChild.cloneNode(true);
+      replaceTokens(question, { '__QUESTION__': String(index) });
+      question.setAttribute('data-vgi-question-index', String(index));
+      list.appendChild(question);
+      var first = question.querySelector('input:not([type=checkbox]), textarea');
+      if (first) first.focus();
+      return;
+    }
+    var addOption = event.target.closest('[data-vgi-add-option]');
+    if (addOption) {
+      var questionBox = addOption.closest('[data-vgi-question]');
+      var options = questionBox && questionBox.querySelector('.vgi-option-list');
+      var optionTemplate = questionBox && questionBox.querySelector('template[data-vgi-option-template]');
+      if (!options || !optionTemplate || options.querySelectorAll('[data-vgi-option]').length >= 7) return;
+      var optionIndices = qsa(options, '[data-vgi-option-index]').map(function (node) { return Number(node.getAttribute('data-vgi-option-index')); });
+      var optionIndex = optionIndices.length ? Math.max.apply(Math, optionIndices) + 1 : 0;
+      var questionIndex = questionBox.getAttribute('data-vgi-question-index');
+      var option = optionTemplate.content.firstElementChild.cloneNode(true);
+      replaceTokens(option, { '__QUESTION__': questionIndex, '__OPTION__': String(optionIndex) });
+      option.setAttribute('data-vgi-option-index', String(optionIndex));
+      options.appendChild(option);
+      var optionField = option.querySelector('input');
+      if (optionField) optionField.focus();
+      return;
+    }
+    var removeQuestion = event.target.closest('[data-vgi-remove-question]');
+    if (removeQuestion) {
+      var questionToRemove = removeQuestion.closest('[data-vgi-question]');
+      if (questionToRemove) questionToRemove.remove();
+      return;
+    }
+    var removeOption = event.target.closest('[data-vgi-remove-option]');
+    if (removeOption) {
+      var optionToRemove = removeOption.closest('[data-vgi-option]');
+      if (optionToRemove) optionToRemove.remove();
+    }
+  });
+
+  /* Structured Venture Builder curriculum editor. */
+  document.addEventListener('click', function (event) {
+    var addModule = event.target.closest('[data-curriculum-add-module]');
+    if (addModule) {
+      var editor = addModule.closest('#curriculum-editor');
+      var moduleList = editor && editor.querySelector('[data-curriculum-module-list]');
+      var moduleTemplate = editor && editor.querySelector('template[data-curriculum-module-template]');
+      if (!moduleList || !moduleTemplate) return;
+      var moduleIndices = qsa(moduleList, '[data-module-index]').map(function (node) { return Number(node.getAttribute('data-module-index')); });
+      var moduleIndex = moduleIndices.length ? Math.max.apply(Math, moduleIndices) + 1 : 0;
+      var moduleNode = moduleTemplate.content.firstElementChild.cloneNode(true);
+      replaceTokens(moduleNode, { '__MODULE__': String(moduleIndex) });
+      moduleNode.setAttribute('data-module-index', String(moduleIndex));
+      moduleList.appendChild(moduleNode);
+      var moduleKey = moduleNode.querySelector('input[name$="[key]"]');
+      if (moduleKey) moduleKey.focus();
+      return;
+    }
+    var addStep = event.target.closest('[data-curriculum-add-step]');
+    if (addStep) {
+      var moduleBox = addStep.closest('[data-curriculum-module]');
+      var stepList = moduleBox && moduleBox.querySelector('[data-curriculum-step-list]');
+      var stepTemplate = moduleBox && moduleBox.querySelector('template[data-curriculum-step-template]');
+      if (!stepList || !stepTemplate) return;
+      var stepIndices = qsa(stepList, '[data-step-index]').map(function (node) { return Number(node.getAttribute('data-step-index')); });
+      var stepIndex = stepIndices.length ? Math.max.apply(Math, stepIndices) + 1 : 0;
+      var moduleIndexValue = moduleBox.getAttribute('data-module-index');
+      var stepNode = stepTemplate.content.firstElementChild.cloneNode(true);
+      replaceTokens(stepNode, { '__MODULE__': moduleIndexValue, '__STEP__': String(stepIndex) });
+      stepNode.setAttribute('data-step-index', String(stepIndex));
+      stepList.appendChild(stepNode);
+      var stepKey = stepNode.querySelector('input[name$="[key]"]');
+      if (stepKey) stepKey.focus();
+      return;
+    }
+    var addField = event.target.closest('[data-curriculum-add-field]');
+    if (addField) {
+      var stepBox = addField.closest('[data-curriculum-step]');
+      var fieldList = stepBox && stepBox.querySelector('[data-curriculum-field-list]');
+      var fieldTemplate = stepBox && stepBox.querySelector('template[data-curriculum-field-template]');
+      if (!fieldList || !fieldTemplate) return;
+      var fieldIndices = qsa(fieldList, '[data-field-index]').map(function (node) { return Number(node.getAttribute('data-field-index')); });
+      var fieldIndex = fieldIndices.length ? Math.max.apply(Math, fieldIndices) + 1 : 0;
+      var moduleIndexValue = stepBox.closest('[data-curriculum-module]').getAttribute('data-module-index');
+      var stepIndexValue = stepBox.getAttribute('data-step-index');
+      var fieldNode = fieldTemplate.content.firstElementChild.cloneNode(true);
+      replaceTokens(fieldNode, { '__MODULE__': moduleIndexValue, '__STEP__': stepIndexValue, '__FIELD__': String(fieldIndex) });
+      fieldNode.setAttribute('data-field-index', String(fieldIndex));
+      fieldList.appendChild(fieldNode);
+      var fieldKey = fieldNode.querySelector('input[name$="[key]"]');
+      if (fieldKey) fieldKey.focus();
+      return;
+    }
+    var addCheck = event.target.closest('[data-curriculum-add-check]');
+    if (addCheck) {
+      var checkStep = addCheck.closest('[data-curriculum-step]');
+      var checkList = checkStep && checkStep.querySelector('[data-curriculum-checklist]');
+      var checkTemplate = checkStep && checkStep.querySelector('template[data-curriculum-check-template]');
+      if (!checkList || !checkTemplate) return;
+      var checkIndices = qsa(checkList, '[data-check-index]').map(function (node) { return Number(node.getAttribute('data-check-index')); });
+      var checkIndex = checkIndices.length ? Math.max.apply(Math, checkIndices) + 1 : 0;
+      var checkNode = checkTemplate.content.firstElementChild.cloneNode(true);
+      replaceTokens(checkNode, {
+        '__MODULE__': checkStep.closest('[data-curriculum-module]').getAttribute('data-module-index'),
+        '__STEP__': checkStep.getAttribute('data-step-index'), '__CHECK__': String(checkIndex)
+      });
+      checkNode.setAttribute('data-check-index', String(checkIndex));
+      checkList.appendChild(checkNode);
+      var checkKey = checkNode.querySelector('input[name$="[key]"]');
+      if (checkKey) checkKey.focus();
+      return;
+    }
+    var removeModule = event.target.closest('[data-curriculum-remove-module]');
+    if (removeModule) { removeModule.closest('[data-curriculum-module]').remove(); return; }
+    var removeStep = event.target.closest('[data-curriculum-remove-step]');
+    if (removeStep) { removeStep.closest('[data-curriculum-step]').remove(); return; }
+    var removeField = event.target.closest('[data-curriculum-remove-field]');
+    if (removeField) { removeField.closest('[data-curriculum-field]').remove(); return; }
+    var removeCheck = event.target.closest('[data-curriculum-remove-check]');
+    if (removeCheck) { removeCheck.closest('[data-curriculum-check]').remove(); }
+  });
+
   /* ------------------------------------------------------------------ */
   /* Suggest a slug from the title while the slug is still untouched    */
   /* ------------------------------------------------------------------ */

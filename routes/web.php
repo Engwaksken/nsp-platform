@@ -294,6 +294,7 @@ Route::get('/health', [HealthController::class, 'endpoint'])->middleware('thrott
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'mfa'])->group(function () {
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::post('ai/help', [Admin\AdminAiHelpController::class, 'ask'])->middleware('throttle:10,1')->name('ai.help');
 
     Route::middleware('can:manage-pages')->group(function () {
         Route::get('pages/{page}/preview', [Admin\PageController::class, 'preview'])->name('pages.preview');

@@ -35,7 +35,7 @@
         <dl class="detail-grid">
             <div><dt>Stage</dt><dd>{{ $vgi['stage'] ?? 'Not set' }}</dd></div>
             <div><dt>Overall score</dt><dd>{{ $vgi['score'] !== null ? number_format($vgi['score'], 1) : 'Not set' }}</dd></div>
-            <div><dt>Rubric version</dt><dd>{{ $vgi['version'] ?? 'Not set' }} @if ($vgi['provisional'])<span class="badge badge-draft">Provisional</span>@endif</dd></div>
+            <div><dt>Rubric version</dt><dd>{{ $vgi['version'] ?? 'Not set' }} @if ($vgi['provisional'])<span class="badge badge-draft">Approval pending</span>@endif</dd></div>
             <div><dt>Assessed</dt><dd>{{ $vgi['assessed_at'] ?? 'Not set' }}</dd></div>
         </dl>
         @if ($vgi['dimensions'])

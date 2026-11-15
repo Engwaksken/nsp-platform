@@ -134,7 +134,7 @@ class FundingService
 
         // Only signals the founders authorised: the VGI summary appears with its rubric version and provisional label.
         if ($vgi && ($vgi['version'] ?? null)) {
-            $reasons[] = 'Shared VGI v'.$vgi['version'].($vgi['stage'] ? ': '.$vgi['stage'] : '').(($vgi['provisional'] ?? true) ? ' (provisional)' : '');
+            $reasons[] = 'Shared VGI v'.$vgi['version'].($vgi['stage'] ? ': '.$vgi['stage'] : '').(($vgi['provisional'] ?? true) ? ' (methodology approval pending)' : '');
         }
 
         return ['fits' => $misses === [], 'reasons' => $reasons, 'misses' => $misses];

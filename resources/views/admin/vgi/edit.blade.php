@@ -11,6 +11,7 @@
     <div class="page-head">
         <h1>{{ $framework->name }} v{{ $framework->version }} <span class="badge badge-{{ ['approved' => 'on', 'draft' => 'draft'][$framework->status] ?? 'off' }}">{{ ucfirst($framework->status) }}</span></h1>
     </div>
+    @include('partials.admin-ai-panel', ['context' => 'growth', 'subjectId' => $framework->id])
     @if ($problems)
         <div class="alert alert-warning"><strong>Fix before approving:</strong><ul>@foreach ($problems as $problem)<li>{{ $problem }}</li>@endforeach</ul></div>
     @endif
@@ -41,13 +42,74 @@
             <form method="post" action="{{ route('admin.vgi.update', $framework) }}" class="panel" data-tab="Edit">
                 @csrf @method('PUT')
                 <h2>Edit</h2>
-                <p class="hint">The rubric is JSON. Each dimension has a weight (relative), questions (key, prompt, weight, evidence: none/optional/required) and 2–7 options (key, label, score 0–100, optional tip). Bands must cover 0–100 in steps of 0.1 (for example 0–24.9, 25–44.9 …). Founders’ scores are recalculated only from the approved version they used.</p>
+                <p class="hint">Edit questions and answer options directly below. Use a unique lower-case key for every question and option. Scores are from 0–100; mark a “not enough information” option as unscored. Founders’ scores are recalculated only from the approved version they used.</p>
                 @include('partials.field', ['name' => 'description', 'label' => 'Description', 'type' => 'textarea', 'rows' => 2, 'value' => $framework->description])
-                <div class="form-group">
-                    <label for="definition">Rubric (JSON)</label>
-                    <textarea id="definition" name="definition" rows="28" spellcheck="false" class="code-input" @error('definition') aria-invalid="true" @enderror>{{ $json }}</textarea>
-                    @error('definition')<p class="error">{{ $message }}</p>@enderror
-                </div>
+                @error('questions')<div class="alert alert-danger" role="alert">{{ is_array($message) ? implode(' ', $message) : $message }}</div>@enderror
+                @foreach ($definition['dimensions'] ?? [] as $dimension)
+                    @php($dimensionKey = $dimension['key'])
+                    <section class="panel vgi-question-dimension" data-vgi-dimension="{{ $dimensionKey }}" aria-labelledby="dimension-{{ $dimensionKey }}">
+                        <h3 id="dimension-{{ $dimensionKey }}">{{ $dimension['title'] }} <span class="meta">(weight {{ $dimension['weight'] }})</span></h3>
+                        <div class="vgi-question-list">
+                            @foreach ($questionsByDimension[$dimensionKey] ?? [] as $questionIndex => $question)
+                                <fieldset class="panel vgi-question" data-vgi-question-index="{{ $questionIndex }}">
+                                    <legend>Question {{ $loop->iteration }}</legend>
+                                    <div class="form-row">
+                                        @include('partials.field', ['name' => "questions[$dimensionKey][$questionIndex][key]", 'label' => 'Question key', 'value' => $question['key'] ?? '', 'required' => true])
+                                        @include('partials.field', ['name' => "questions[$dimensionKey][$questionIndex][weight]", 'label' => 'Weight', 'type' => 'number', 'value' => $question['weight'] ?? 1, 'required' => true, 'attrs' => 'min="0.1" step="0.1"'])
+                                    </div>
+                                    @include('partials.field', ['name' => "questions[$dimensionKey][$questionIndex][prompt]", 'label' => 'Question', 'type' => 'textarea', 'rows' => 2, 'value' => $question['prompt'] ?? '', 'required' => true])
+                                    @include('partials.field', ['name' => "questions[$dimensionKey][$questionIndex][help]", 'label' => 'Help text (optional)', 'type' => 'textarea', 'rows' => 2, 'value' => $question['help'] ?? ''])
+                                    <div class="form-row">
+                                        @include('partials.field', ['name' => "questions[$dimensionKey][$questionIndex][evidence]", 'label' => 'Evidence', 'type' => 'select', 'options' => ['none' => 'Not collected', 'optional' => 'Optional', 'required' => 'Required'], 'value' => $question['evidence'] ?? 'none'])
+                                        @include('partials.field', ['name' => "questions[$dimensionKey][$questionIndex][evidence_hint]", 'label' => 'Evidence guidance (optional)', 'value' => $question['evidence_hint'] ?? ''])
+                                    </div>
+                                    <h4>Answer options (2–7)</h4>
+                                    <div class="vgi-option-list">
+                                        @foreach ($question['options'] ?? [] as $optionIndex => $option)
+                                            @include('admin.vgi.partials.option-fields', ['dimensionKey' => $dimensionKey, 'questionIndex' => $questionIndex, 'optionIndex' => $optionIndex, 'option' => $option])
+                                        @endforeach
+                                    </div>
+                                    <template data-vgi-option-template>
+                                        @include('admin.vgi.partials.option-fields', ['dimensionKey' => $dimensionKey, 'questionIndex' => $questionIndex, 'optionIndex' => '__OPTION__', 'option' => ['key' => '', 'label' => '', 'score' => '', 'tip' => '', 'insufficient' => false], 'isTemplate' => true])
+                                    </template>
+                                    <div class="actions">
+                                        <button type="button" class="btn btn-secondary btn-sm" data-vgi-add-option>Add option</button>
+                                        <button type="button" class="btn btn-danger btn-sm" data-vgi-remove-question>Remove question</button>
+                                    </div>
+                                </fieldset>
+                            @endforeach
+                        </div>
+                        <template data-vgi-question-template>
+                            <fieldset class="panel vgi-question">
+                                <legend>New question</legend>
+                                <div class="form-row">
+                                    @include('partials.field', ['name' => "questions[$dimensionKey][__QUESTION__][key]", 'label' => 'Question key', 'value' => '', 'required' => true])
+                                    @include('partials.field', ['name' => "questions[$dimensionKey][__QUESTION__][weight]", 'label' => 'Weight', 'type' => 'number', 'value' => 1, 'required' => true, 'attrs' => 'min="0.1" step="0.1"'])
+                                </div>
+                                @include('partials.field', ['name' => "questions[$dimensionKey][__QUESTION__][prompt]", 'label' => 'Question', 'type' => 'textarea', 'rows' => 2, 'value' => '', 'required' => true])
+                                @include('partials.field', ['name' => "questions[$dimensionKey][__QUESTION__][help]", 'label' => 'Help text (optional)', 'type' => 'textarea', 'rows' => 2, 'value' => ''])
+                                <div class="form-row">
+                                    @include('partials.field', ['name' => "questions[$dimensionKey][__QUESTION__][evidence]", 'label' => 'Evidence', 'type' => 'select', 'options' => ['none' => 'Not collected', 'optional' => 'Optional', 'required' => 'Required'], 'value' => 'none'])
+                                    @include('partials.field', ['name' => "questions[$dimensionKey][__QUESTION__][evidence_hint]", 'label' => 'Evidence guidance (optional)', 'value' => ''])
+                                </div>
+                                <h4>Answer options (2–7)</h4>
+                                <div class="vgi-option-list">
+                                    @foreach ([['key' => 'a', 'label' => 'Option 1', 'score' => 0], ['key' => 'b', 'label' => 'Option 2', 'score' => 100]] as $optionIndex => $option)
+                                        @include('admin.vgi.partials.option-fields', ['dimensionKey' => $dimensionKey, 'questionIndex' => '__QUESTION__', 'optionIndex' => $optionIndex, 'option' => $option, 'isTemplate' => true])
+                                    @endforeach
+                                </div>
+                                <template data-vgi-option-template>
+                                    @include('admin.vgi.partials.option-fields', ['dimensionKey' => $dimensionKey, 'questionIndex' => '__QUESTION__', 'optionIndex' => '__OPTION__', 'option' => ['key' => '', 'label' => '', 'score' => '', 'tip' => '', 'insufficient' => false], 'isTemplate' => true])
+                                </template>
+                                <div class="actions">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-vgi-add-option>Add option</button>
+                                    <button type="button" class="btn btn-danger btn-sm" data-vgi-remove-question>Remove question</button>
+                                </div>
+                            </fieldset>
+                        </template>
+                        <button type="button" class="btn btn-secondary" data-vgi-add-question>Add question to {{ $dimension['title'] }}</button>
+                    </section>
+                @endforeach
                 <div class="actions"><button type="submit" class="btn btn-primary">Save draft</button></div>
             </form>
         @endcan

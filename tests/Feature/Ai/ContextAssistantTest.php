@@ -202,4 +202,22 @@ class ContextAssistantTest extends TestCase
             ->assertOk()->assertSee('<strong>OpenAI</strong>', false);
         $this->actingAs($this->owner)->get("/workspace/startups/{$this->startup->uuid}/assistant")->assertOk()->assertSee('to OpenAI, the AI provider');
     }
+
+    public function test_admin_can_get_ai_help_on_kpis_without_sending_private_records(): void
+    {
+        $admin = User::factory()->withRole('platform_admin')->create();
+        $this->fake->next = new AiResult('ok', 'Review account growth against startup activation.', 'gpt-4.1', 80, 20);
+
+        $this->actingAs($admin)->get('/admin/insights')->assertOk()->assertSee('AI help');
+        $this->from('/admin/insights')->post('/admin/ai/help', [
+            'context' => 'kpis', 'days' => 30, 'question' => 'What does the current trend suggest?', 'acknowledge' => 1,
+        ])->assertRedirect('/admin/insights');
+        $this->get('/admin/insights')->assertOk()->assertSee('Review account growth against startup activation.');
+
+        $interaction = \App\Models\Ai\AiInteraction::query()->latest('id')->firstOrFail();
+        $this->assertSame('admin_kpi_help', $interaction->task);
+        $this->assertNull($interaction->startup_uuid);
+        $this->assertStringContainsString('Aggregate KPIs:', $this->fake->calls[0][1]);
+        $this->assertStringNotContainsString('private@greenfields.test', $this->fake->calls[0][1]);
+    }
 }

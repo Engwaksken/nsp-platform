@@ -85,7 +85,7 @@ Modules that are not built yet show "Not built yet" and can't be switched on. Si
 
 ## Growth assessments (rubric editors, approvers and reviewers)
 - **Admin › Growth assessments** lists rubric versions. The starter rubric is a **draft proposal**: founders see nothing until a version is approved.
-- **Editing:** open the draft, read the preview, and edit the JSON. Saving checks it and explains any problem, for example "bands must follow each other without gaps".
+- **Editing:** open the draft and read the preview. Update question text, help, evidence guidance, weights and answer options in the form. Add or remove questions and options as needed; each question needs 2–7 options with unique keys and scores from 0–100 (or one unscored “not enough information” option). Saving validates the rubric and reports any issues before it can be approved.
 - **Approving:**
   - Someone other than the last editor must approve, with a note on what was reviewed.
   - Approving freezes the version and makes it the one used for new assessments.

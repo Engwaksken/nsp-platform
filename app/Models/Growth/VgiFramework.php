@@ -16,7 +16,7 @@ class VgiFramework extends Model
             'owner_signed_on' => 'date', 'owner_signoff_recorded_at' => 'datetime'];
     }
 
-    public const METHODOLOGY = ['provisional' => 'Provisional methodology', 'owner_approved' => 'Owner-approved methodology'];
+    public const METHODOLOGY = ['provisional' => 'Methodology approval pending', 'owner_approved' => 'Owner-approved methodology'];
 
     /**
      * Hive approval makes a version usable; only a recorded owner sign-off makes

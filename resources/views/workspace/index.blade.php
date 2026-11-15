@@ -85,7 +85,7 @@
                     @foreach ($sections as $section)
                         <x-collapsible-card id="ws-{{ \Illuminate\Support\Str::slug($section['title']) }}" icon="{{ $section['icon'] }}"
                             class="tone-{{ $section['tone'] }} {{ $section['available'] ? '' : 'is-soon' }}"
-                            :title="$section['title']" :badge="$section['available'] ? null : 'Not available yet'" badge-tone="soon"
+                            :title="$section['title']" :badge="$section['available'] ? null : 'Unavailable'" badge-tone="soon"
                             :summary="$section['text']" :open="true">
                             @if ($section['available'] && $section['actions'])
                                 <div class="actions">
@@ -96,7 +96,7 @@
                             @elseif ($section['available'])
                                 <p class="meta">Register or join a startup to use this.</p>
                             @else
-                                <p class="meta">This service is coming soon.</p>
+                                <p class="meta">This service is currently unavailable.</p>
                             @endif
                         </x-collapsible-card>
                     @endforeach

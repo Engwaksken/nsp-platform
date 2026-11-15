@@ -88,7 +88,7 @@ Not yet: the Registry API for IMS (Phase 3), the IMS-first journey, importing ex
 
 | Area | What exists | Evidence |
 |---|---|---|
-| Configurable rubric | Dimensions with relative weights, weighted questions, 2–7 options scored 0–100 with improvement tips, evidence none/optional/required, stage bands covering 0–100. Edited as JSON with plain-language validation and a readable preview. | `ScorerTest`, `GrowthTest` |
+| Configurable rubric | Dimensions with relative weights, weighted questions, 2–7 options scored 0–100 with improvement tips, evidence none/optional/required, stage bands covering 0–100. Questions and options are edited with structured admin controls, validated before saving, with a readable preview. | `ScorerTest`, `GrowthTest` |
 | Versions and approval | Draft → approved → retired. Four-eyes: the last editor cannot approve (super admins excepted), and an approval note is required. Approved versions are frozen; a new approval retires the old one for new assessments only. | `GrowthTest` |
 | Starter rubric | 6 areas, 18 questions, 5 stages (`database/data/vgi_starter_draft.php`): a **proposal** seeded as an unapproved draft | `ScorerTest::test_the_seeded_starter_rubric_is_valid` |
 | Deterministic scoring | Weighted averages with fixed rounding; a calculation hash over the rubric and answers. Staff can re-verify any result against its stored version. | `ScorerTest`, `GrowthTest` |

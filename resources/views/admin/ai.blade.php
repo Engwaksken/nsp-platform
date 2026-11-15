@@ -5,7 +5,7 @@
     <div class="page-head">
         <div>
             <h1>AI assistant</h1>
-            <p>Optional writing help for founders, powered by an administrator-selected AI provider. Founders opt in one by one; only the text they type and their startup's name, sector and stage are sent.</p>
+            <p>Optional AI help for founders and administrators. Founders opt in one by one. On KPI, Growth Assessment and Venture Builder pages, admins can ask about the aggregate data or content shown there; each request explains what is sent.</p>
         </div>
     </div>
 
@@ -93,7 +93,7 @@
                 </form>
             @endif
         @else
-            <p class="hint">Hive's legal team must approve the assistant (including the selected provider and founder consent wording) before it is switched on.</p>
+            <p class="hint">Hive's legal team must approve the assistant, selected provider and data-use notices before it is switched on.</p>
             <form method="post" action="{{ route('admin.ai.legal.approve') }}">
                 @csrf
                 @include('partials.field', ['name' => 'legal_reference', 'label' => 'Where is the approval recorded?', 'value' => '', 'required' => true, 'maxlength' => 255,
