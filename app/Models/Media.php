@@ -20,6 +20,12 @@ class Media extends Model
 
     public function url(): string
     {
+        // Public local media should follow the current request host (important behind proxies
+        // and when APP_URL is not the externally visible hostname).
+        if ($this->disk === 'public') {
+            return asset('storage/'.$this->path);
+        }
+
         return Storage::disk($this->disk)->url($this->path);
     }
 

@@ -1206,16 +1206,19 @@ a.stat-card:focus-visible { outline: none; box-shadow: var(--ring); }
 .stat-note { font-size: .78rem; color: var(--ink-subtle); }
 .stat-blue { --tone: var(--tone-blue); } .stat-green { --tone: var(--tone-green); } .stat-purple { --tone: var(--tone-purple); }
 .stat-amber { --tone: var(--tone-amber-icon); } .stat-red { --tone: var(--tone-red); } .stat-grey { --tone: var(--tone-grey); }
-.stat-cards-more { display: none; }
-@media (max-width: 480px) {
+.stats-more-toggle, .stats-more-label { display: none; }
+@media (max-width: 640px) {
   .stat-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
   .stat-card { flex-direction: row; align-items: center; gap: .55rem; padding: var(--space-3); }
   .stat-icon { width: 34px; height: 34px; font-size: .95rem; border-radius: 9px; }
   .stat-body { grid-template-columns: minmax(0, 1fr); }
   .stat-value { font-size: 1.2rem; }
-  .stat-cards-more { display: block; margin: calc(var(--space-5) * -1) 0 var(--space-6); }
-  .stat-cards-more > summary { width: fit-content; padding: .45rem .75rem; color: var(--brand-accent); font-weight: 700; cursor: pointer; }
-  .stat-cards-more[open] .stat-cards { margin-top: var(--space-2); }
+  .stats-more-toggle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .stats-more-label { display: block; width: fit-content; padding: .45rem .75rem; margin: calc(var(--space-5) * -1) 0 var(--space-6); color: var(--brand-accent); font-weight: 700; cursor: pointer; }
+  .stats-more-toggle:focus-visible + .stats-more-label { outline: 2px solid var(--brand-accent); outline-offset: 2px; }
+  .stats-more-close, .stats-more-toggle:checked + .stats-more-label .stats-more-open { display: none; }
+  .stats-more-toggle:checked + .stats-more-label .stats-more-close { display: inline; }
+  .stats-more-toggle:not(:checked) ~ .stat-cards [data-mobile-extra] { display: none; }
 }
 
 .dashboard-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-5); }
