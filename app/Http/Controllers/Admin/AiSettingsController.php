@@ -69,13 +69,14 @@ class AiSettingsController extends Controller
             'api_key' => ['nullable', 'string', 'min:20', 'max:300', 'regex:/^\S+$/'],
             'remove_key' => ['nullable', 'boolean'],
             'model' => $modelRule,
-            'custom_model' => [Rule::requiredIf($provider === 'custom'), 'nullable', 'string', 'regex:/^[a-zA-Z0-9._:-]{1,100}$/'],
+            'custom_model' => [Rule::requiredIf($provider === 'custom'), 'nullable', 'string', 'regex:'.AiSettings::CUSTOM_MODEL_PATTERN],
             'base_url' => [Rule::requiredIf($provider === 'custom'), 'nullable', 'url:https', 'max:255'],
             'effort' => ['required', Rule::in(array_keys(AiSettings::EFFORTS))],
             'limit_user' => ['required', 'integer', 'min:1', 'max:1000'],
             'limit_startup' => ['required', 'integer', 'min:1', 'max:10000'],
             'limit_platform' => ['required', 'integer', 'min:1', 'max:100000'],
-        ], ['api_key.regex' => 'The API key cannot contain spaces.', 'api_key.min' => 'That does not look like a full API key.']);
+        ], ['api_key.regex' => 'The API key cannot contain spaces.', 'api_key.min' => 'That does not look like a full API key.',
+            'custom_model.regex' => 'Use the model ID exactly as your provider lists it, for example "openai/gpt-oss-120b" (letters, numbers and . _ : / - only, up to 100 characters).']);
         if ($provider === 'custom') {
             $data['model'] = $data['custom_model'];
             if (! $this->isSafeCustomEndpoint($data['base_url'])) {

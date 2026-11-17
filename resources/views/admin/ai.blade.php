@@ -60,7 +60,7 @@
         @endif
         <div data-custom-provider-field @if ($selectedProvider !== 'custom') hidden @endif>
             @include('partials.field', ['name' => 'base_url', 'label' => 'OpenAI-compatible API base URL', 'type' => 'url', 'value' => $config['base_url'], 'placeholder' => 'https://api.example.com/v1', 'hint' => 'HTTPS endpoint implementing /chat/completions.'])
-            @include('partials.field', ['name' => 'custom_model', 'label' => 'Custom model ID', 'value' => old('custom_model', $selectedProvider === 'custom' ? $config['model'] : ''), 'placeholder' => 'e.g. provider-model-v1'])
+            @include('partials.field', ['name' => 'custom_model', 'label' => 'Custom model ID', 'value' => old('custom_model', $selectedProvider === 'custom' ? $config['model'] : ''), 'placeholder' => 'e.g. openai/gpt-oss-120b'])
         </div>
         <div class="form-row">
             <div data-curated-model-field @if ($selectedProvider === 'custom') hidden @endif>

@@ -141,6 +141,27 @@ class AiSettingsTest extends TestCase
         ])->assertSessionHasErrors('base_url');
     }
 
+    public function test_custom_model_ids_may_contain_a_namespace_slash(): void
+    {
+        foreach (['openai/gpt-oss-120b', 'meta-llama/Llama-3.3-70B-Instruct', '@cf/meta/llama-3-8b', 'local-model'] as $id) {
+            $this->assertTrue(AiSettings::supportsModel('custom', $id), $id);
+        }
+        foreach (['', '/leading-slash', 'has space', str_repeat('a', 101)] as $id) {
+            $this->assertFalse(AiSettings::supportsModel('custom', $id), $id);
+        }
+
+        // Validation passes for the model ID; only the (private) endpoint is rejected.
+        $this->save([
+            'provider' => 'custom', 'model' => '', 'custom_model' => 'openai/gpt-oss-120b',
+            'base_url' => 'https://127.0.0.1/v1',
+        ])->assertSessionDoesntHaveErrors('custom_model')->assertSessionHasErrors('base_url');
+
+        $this->save([
+            'provider' => 'custom', 'model' => '', 'custom_model' => 'bad model id',
+            'base_url' => 'https://127.0.0.1/v1',
+        ])->assertSessionHasErrors('custom_model');
+    }
+
     public function test_only_admins_who_manage_features_can_open_it(): void
     {
         $this->actingAs($this->userWithRole('startup_user'))->get('/admin/ai')->assertForbidden();

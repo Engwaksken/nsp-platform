@@ -19,6 +19,12 @@ class AiSettings
 
     public const PREFIX = 'ai.';
 
+    /**
+     * Model IDs accepted for a custom OpenAI-compatible provider, e.g. "local-model",
+     * "openai/gpt-oss-120b", "meta-llama/Llama-3.3-70B-Instruct" or "@cf/meta/llama-3-8b".
+     */
+    public const CUSTOM_MODEL_PATTERN = '/^@?[A-Za-z0-9][A-Za-z0-9._:\/-]{0,99}$/';
+
     /** Models offered to admins, with prices in US$ per million input / output tokens. */
     public const MODELS = [
         'claude-opus-5-5' => ['label' => 'Claude Opus 5.5 (recommended)', 'input' => 4.00, 'output' => 20.00, 'fallbacks' => true],
@@ -124,7 +130,7 @@ class AiSettings
 
     public static function supportsModel(string $provider, mixed $model): bool
     {
-        return $provider === 'custom' ? is_string($model) && (bool) preg_match('/^[a-zA-Z0-9._:-]{1,100}$/', $model)
+        return $provider === 'custom' ? is_string($model) && (bool) preg_match(self::CUSTOM_MODEL_PATTERN, $model)
             : isset(self::PROVIDERS[$provider]['models'][$model]);
     }
 
