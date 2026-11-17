@@ -41,7 +41,9 @@
 {{-- Font Awesome Free 6.5.2, solid icons only, self-hosted (public/vendor/fontawesome; the CSP allows no CDNs). --}}
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/fontawesome.min.css') }}?v=6.5.2">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/solid.min.css') }}?v=6.5.2">
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=37">
+<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=38">
+{{-- Big monitors, TVs, ultra-wide, very small and short screens (scales the rem-based layout in nsp.css). --}}
+<link rel="stylesheet" href="{{ asset('css/responsive.css') }}?v=1">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};
@@ -55,6 +57,6 @@
         @endforeach
     }
 </style>
-<link rel="stylesheet" href="{{ asset('css/widgets.css') }}?v=2">
+<link rel="stylesheet" href="{{ asset('css/widgets.css') }}?v=3">
 <script src="{{ asset('js/nsp.js') }}?v=17" defer></script>
 <script src="{{ asset('js/widgets.js') }}?v=2" defer></script>

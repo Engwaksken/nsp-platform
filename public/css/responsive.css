@@ -1,0 +1,78 @@
+/* Hive NSP: displays beyond the usual laptop and phone: big desktop monitors (24" to 32", QHD, 4K and 5K),
+   ultra-wide screens and TVs, plus very small and very short screens. Loaded after nsp.css.
+
+   How it works: every layout size in nsp.css (containers, sidebar, grids, controls, dialogs) is in rem, so
+   raising the root font size scales the whole interface evenly: text, spacing, columns and buttons together,
+   with no gaps or tiny controls. The accessibility panel's text size (--a11y-scale, css/widgets.css)
+   multiplies on top of it. Media-query breakpoints stay in CSS pixels on purpose. */
+
+/* ------------------------------------------------------------------ */
+/* 1. Interface scale by screen width                                  */
+/* ------------------------------------------------------------------ */
+:root { --screen-scale: 1; --tv-scale: 1; }
+@media (min-width: 1920px) { :root { --screen-scale: 1.0625; } }  /* 17px: full-HD monitors at 100% */
+@media (min-width: 2400px) { :root { --screen-scale: 1.1875; } }  /* 19px: 27" QHD (2560) and ultra-wide 3440 */
+@media (min-width: 3200px) { :root { --screen-scale: 1.5; } }     /* 24px: 4K/5K monitors at 100% */
+@media (min-width: 3800px) { :root { --screen-scale: 1.75; } }    /* 28px: 4K TVs and monitors at 100% */
+
+/* TVs (seen from across a room, driven by a remote): no hover and a coarse or missing pointer on a wide
+   screen. Tablets never reach this width, so they are not affected. */
+@media (min-width: 1600px) and (hover: none) and (pointer: coarse), (min-width: 1600px) and (pointer: none) {
+  :root { --tv-scale: 1.25; }
+  /* Remote controls move focus with arrow keys: make it impossible to lose. */
+  :focus-visible { outline: .25rem solid var(--brand-accent) !important; outline-offset: .2rem !important; }
+  a, button, input, select, textarea, summary, [tabindex] { scroll-margin-block: 20vh; }
+}
+
+html { font-size: calc(100% * var(--screen-scale) * var(--tv-scale) * var(--a11y-scale, 1)); }
+
+@media print { html { font-size: 100%; } }
+
+/* ------------------------------------------------------------------ */
+/* 2. Wider layouts on big screens                                     */
+/* ------------------------------------------------------------------ */
+@media (min-width: 1600px) {
+  :root { --gutter: 2rem; }
+  .container { max-width: 82rem; }
+  .container.narrow { max-width: 48.75rem; }
+  .site-header .container { max-width: 110rem; }
+  .admin-shell { grid-template-columns: 17.5rem minmax(0, 1fr); }
+  .app-content { max-width: 96rem; }
+  /* Admin pages were left-aligned with an empty band on the right on wide screens: centre the column. */
+  .admin-content { max-width: 100rem; margin-inline: auto; }
+  .admin-topbar { padding-inline: var(--space-6); }
+}
+@media (min-width: 2400px) {
+  :root { --gutter: 2.5rem; }
+  .container { max-width: 88rem; }
+  .app-content { max-width: 104rem; }
+  .admin-content { max-width: 108rem; }
+}
+
+/* Ultra-wide screens (21:9 and 32:9): text stays at a readable line length while the page breathes. */
+@media (min-aspect-ratio: 21/9) and (min-width: 2400px) {
+  .hero .container, .section > .container { max-width: 96rem; }
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Small and short screens                                          */
+/* ------------------------------------------------------------------ */
+/* Long words, links and codes never push the page sideways. */
+body { overflow-wrap: break-word; }
+:where(table) { max-width: 100%; }
+
+/* Very small phones (older and compact models, 320–360px wide). */
+@media (max-width: 360px) {
+  :root { --gutter: 12px; }
+  .btn { padding-inline: .8rem; }
+  .page-head { gap: var(--space-3); }
+  .page-head .actions, .page-head .actions .btn { width: 100%; }
+  .page-head .actions .btn { justify-content: center; }
+}
+
+/* Short screens (phones held sideways, small laptop windows): sticky bars take less height. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .site-header, .admin-topbar { position: static; }
+  .admin-sidebar { height: 100dvh; }
+  .modal-lg { height: 96dvh; }
+}
