@@ -43,4 +43,37 @@
   window.addEventListener('storage', function (event) { if (event.key === KEY) apply(saved()); });
 
   apply(saved());
+
+  // Accessibility settings (the universal-access panel, js/widgets.js): saved per device, applied here before
+  // the first paint as data-a11y-* attributes on <html> that css/widgets.css responds to.
+  var A11Y_KEY = 'nsp-a11y';
+  var A11Y_ATTRS = ['text', 'line', 'spacing', 'font', 'color', 'links', 'headings', 'cursor', 'motion', 'images', 'focus', 'align'];
+
+  function a11ySaved() {
+    try {
+      var value = JSON.parse(window.localStorage.getItem(A11Y_KEY) || '{}');
+      return value && typeof value === 'object' ? value : {};
+    } catch (e) { return {}; }
+  }
+
+  function a11yApply(prefs) {
+    for (var i = 0; i < A11Y_ATTRS.length; i++) {
+      var name = A11Y_ATTRS[i];
+      var value = prefs[name];
+      if (value === undefined || value === null || value === false || value === '' || value === 0) root.removeAttribute('data-a11y-' + name);
+      else root.setAttribute('data-a11y-' + name, value === true ? 'on' : String(value).replace(/[^a-z0-9-]/gi, ''));
+    }
+  }
+
+  NSP.a11y = a11ySaved;
+  NSP.setA11y = function (prefs) {
+    try {
+      if (prefs && Object.keys(prefs).length) window.localStorage.setItem(A11Y_KEY, JSON.stringify(prefs));
+      else window.localStorage.removeItem(A11Y_KEY);
+    } catch (e) { /* storage blocked: settings last for this page only */ }
+    a11yApply(prefs || {});
+  };
+  window.addEventListener('storage', function (event) { if (event.key === A11Y_KEY) a11yApply(a11ySaved()); });
+
+  a11yApply(a11ySaved());
 })();

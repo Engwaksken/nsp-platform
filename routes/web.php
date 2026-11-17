@@ -126,6 +126,14 @@ Route::middleware('auth')->prefix('account/security')->name('mfa.')->group(funct
 });
 
 /*
+| Site-wide AI chat helper (partials/site-widgets), using the AI provider an admin made active
+*/
+Route::middleware(['auth', 'feature:ai_assistant'])->prefix('assistant/chat')->name('chatbot.')->group(function () {
+    Route::post('/', [\App\Http\Controllers\ChatbotController::class, 'message'])->middleware('throttle:10,1')->name('message');
+    Route::post('/consent', [\App\Http\Controllers\ChatbotController::class, 'consent'])->middleware('throttle:10,1')->name('consent');
+});
+
+/*
 | Founder / member workspace
 */
 Route::get('/workspace', [WorkspaceController::class, 'index'])->middleware('auth')->name('workspace');

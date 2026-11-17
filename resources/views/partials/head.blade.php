@@ -18,7 +18,7 @@
 <meta name="nsp-sw" content="{{ asset('sw.js') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {{-- Blocking on purpose: sets the "js" class and the saved colour theme before the first paint. --}}
-<script src="{{ asset('js/theme.js') }}?v=1"></script>
+<script src="{{ asset('js/theme.js') }}?v=2"></script>
 <title>{{ trim(($pageTitle ?? '') !== '' ? $pageTitle . ' | ' . $brand['site_name'] : $brand['site_name']) }}</title>
 @if (!empty($metaDescription ?? $brand['meta_description']))
     <meta name="description" content="{{ $metaDescription ?? $brand['meta_description'] }}">
@@ -55,4 +55,6 @@
         @endforeach
     }
 </style>
+<link rel="stylesheet" href="{{ asset('css/widgets.css') }}?v=1">
 <script src="{{ asset('js/nsp.js') }}?v=17" defer></script>
+<script src="{{ asset('js/widgets.js') }}?v=1" defer></script>

@@ -127,5 +127,6 @@
         </main>
     </div>
 </div>
+@include('partials.site-widgets')
 </body>
 </html>

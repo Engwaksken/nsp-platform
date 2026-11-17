@@ -214,5 +214,6 @@
         </div>
     </div>
 </footer>
+@include('partials.site-widgets')
 </body>
 </html>
