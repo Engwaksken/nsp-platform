@@ -26,6 +26,40 @@ class ProviderAiClientTest extends TestCase
         Http::assertSent(fn ($request) => $request->url() === 'https://api.openai.com/v1/chat/completions' && $request->hasHeader('Authorization', 'Bearer test-key'));
     }
 
+    public function test_custom_endpoint_url_is_normalized_and_chat_probe_is_used_without_model_list(): void
+    {
+        Http::fake([
+            'https://api.example.com/v1/models' => Http::response(['error' => ['message' => 'Not found']], 404),
+            'https://api.example.com/v1/chat/completions' => Http::response(['choices' => [['message' => ['content' => 'p']]]]),
+        ]);
+        $client = new ProviderAiClient(['provider' => 'custom', 'api_key' => 'test-key', 'base_url' => 'https://api.example.com/v1/chat/completions/', 'model' => 'openai/gpt-oss-120b']);
+
+        $this->assertNull($client->check());
+        Http::assertSent(fn ($request) => $request->url() === 'https://api.example.com/v1/chat/completions' && $request['model'] === 'openai/gpt-oss-120b' && $request['max_tokens'] === 1);
+    }
+
+    public function test_custom_endpoint_404_names_the_url_and_provider_message(): void
+    {
+        Http::fake(['*' => Http::response(['error' => ['message' => 'Unknown route']], 404)]);
+        $client = new ProviderAiClient(['provider' => 'custom', 'api_key' => 'test-key', 'base_url' => 'https://api.example.com', 'model' => 'openai/gpt-oss-120b']);
+
+        $error = $client->check();
+        $this->assertStringContainsString('https://api.example.com/chat/completions', $error);
+        $this->assertStringContainsString('/v1', $error);
+        $this->assertStringContainsString('Unknown route', $error);
+    }
+
+    public function test_listed_provider_reports_unknown_model_clearly(): void
+    {
+        Http::fake([
+            'https://api.example.com/v1/models' => Http::response(['data' => [['id' => 'other-model']]]),
+            'https://api.example.com/v1/chat/completions' => Http::response(['error' => ['message' => 'model not found']], 404),
+        ]);
+        $client = new ProviderAiClient(['provider' => 'custom', 'api_key' => 'test-key', 'base_url' => 'https://api.example.com/v1', 'model' => 'openai/gpt-oss-120b']);
+
+        $this->assertStringContainsString('model "openai/gpt-oss-120b" is not available', $client->check());
+    }
+
     public function test_gemini_uses_api_key_header_and_extracts_text_and_usage(): void
     {
         Http::fake([

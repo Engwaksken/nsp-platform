@@ -89,7 +89,7 @@ class AiSettingsController extends Controller
             'limit_user' => (string) $data['limit_user'], 'limit_startup' => (string) $data['limit_startup'], 'limit_platform' => (string) $data['limit_platform'],
         ];
         if ($provider === 'custom') {
-            $values['base_url'] = rtrim($data['base_url'] ?? '', '/');
+            $values['base_url'] = \App\Ai\ProviderAiClient::normalizeBaseUrl($data['base_url'] ?? '');
         }
         $keyChange = null;
         if (filled($data['api_key'] ?? null)) {
