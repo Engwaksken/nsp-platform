@@ -55,6 +55,6 @@
         @endforeach
     }
 </style>
-<link rel="stylesheet" href="{{ asset('css/widgets.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/widgets.css') }}?v=2">
 <script src="{{ asset('js/nsp.js') }}?v=17" defer></script>
-<script src="{{ asset('js/widgets.js') }}?v=1" defer></script>
+<script src="{{ asset('js/widgets.js') }}?v=2" defer></script>

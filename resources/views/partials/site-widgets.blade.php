@@ -13,6 +13,10 @@
     $swChatOn = \Illuminate\Support\Facades\Route::has('chatbot.message') && \App\Ai\Assistant::unavailableReason() === null;
     $swConsented = $swChatOn && $swUser ? app(\App\Ai\Assistant::class)->hasConsent($swUser) : false;
     $swProvider = $swChatOn ? \App\Ai\Assistant::providerLabel() : '';
+    // The chat wears the site's own favicon (Admin → Settings → branding), like the browser tab does.
+    $swFavicon = ($brandFavicon ?? null)?->url() ?? asset('favicon.ico');
+    $swName = $brand['site_name'] ?? 'Hive';
+    $swAccept = collect(array_keys(\App\Ai\ChatAttachment::TYPES))->map(fn ($ext) => '.'.$ext)->implode(',');
     $swToggles = [
         'links' => ['Highlight links', 'fa-link'],
         'headings' => ['Highlight headings', 'fa-heading'],
@@ -33,7 +37,7 @@
 <div class="sw-launchers" data-site-widgets hidden>
     @if ($swChatOn)
         <button type="button" class="sw-launcher sw-launcher-chat" data-sw-open="sw-chat" aria-controls="sw-chat" aria-expanded="false" aria-keyshortcuts="Alt+Shift+C">
-            <i class="fas fa-comments" aria-hidden="true"></i><span class="visually-hidden">Open the AI help chat</span>
+            <img src="{{ $swFavicon }}" alt="" width="32" height="32" class="sw-brand-icon"><span class="visually-hidden">Open the {{ $swName }} AI help chat</span>
         </button>
     @endif
     <button type="button" class="sw-launcher sw-launcher-a11y" data-sw-open="sw-a11y" aria-controls="sw-a11y" aria-expanded="false" aria-keyshortcuts="Alt+Shift+A">
@@ -77,14 +81,14 @@
         <h3 class="sw-section" id="sw-colour-heading">Colour and contrast</h3>
         <div class="sw-grid" role="group" aria-labelledby="sw-colour-heading">
             @foreach ($swColours as $swValue => [$swLabel, $swIcon])
-                <button type="button" class="sw-tile" data-a11y-choice="color" data-value="{{ $swValue }}" aria-pressed="{{ $swValue === '' ? 'true' : 'false' }}"><i class="fas {{ $swIcon }}" aria-hidden="true"></i><span>{{ $swLabel }}</span></button>
+                <button type="button" class="sw-tile" data-a11y-choice="color" data-value="{{ $swValue }}" aria-pressed="{{ $swValue === '' ? 'true' : 'false' }}"><i class="fas {{ $swFavicon }}" aria-hidden="true"></i><span>{{ $swLabel }}</span></button>
             @endforeach
         </div>
 
         <h3 class="sw-section">Reading and navigation</h3>
         <div class="sw-grid">
             @foreach ($swToggles as $swKey => [$swLabel, $swIcon])
-                <button type="button" class="sw-tile" data-a11y-toggle="{{ $swKey }}" aria-pressed="false"><i class="fas {{ $swIcon }}" aria-hidden="true"></i><span>{{ $swLabel }}</span></button>
+                <button type="button" class="sw-tile" data-a11y-toggle="{{ $swKey }}" aria-pressed="false"><i class="fas {{ $swFavicon }}" aria-hidden="true"></i><span>{{ $swLabel }}</span></button>
             @endforeach
             <button type="button" class="sw-tile" data-a11y-choice="guide" data-value="line" data-allow-none aria-pressed="false"><i class="fas fa-ruler-horizontal" aria-hidden="true"></i><span>Reading guide</span></button>
             <button type="button" class="sw-tile" data-a11y-choice="guide" data-value="mask" data-allow-none aria-pressed="false"><i class="fas fa-window-maximize" aria-hidden="true"></i><span>Reading mask</span></button>
@@ -130,9 +134,10 @@
     <section class="sw-panel sw-chat" id="sw-chat" role="dialog" aria-modal="false" aria-labelledby="sw-chat-title" data-chat hidden
              data-user="{{ $swUser?->id ?? 'guest' }}"
              @if ($swUser) data-endpoint="{{ route('chatbot.message') }}" data-consent-endpoint="{{ route('chatbot.consent') }}" @endif
-             data-max="{{ \App\Ai\Assistant::CHAT_MESSAGE_CHARS }}" data-history="{{ \App\Ai\Assistant::CHAT_HISTORY_MESSAGES }}">
-        <header class="sw-panel-head">
-            <h2 class="sw-panel-title" id="sw-chat-title" tabindex="-1"><i class="fas fa-comments" aria-hidden="true"></i> Ask {{ $brand['site_name'] ?? 'Hive' }} <span class="badge badge-scheduled">AI</span></h2>
+             data-max="{{ \App\Ai\Assistant::CHAT_MESSAGE_CHARS }}" data-history="{{ \App\Ai\Assistant::CHAT_HISTORY_MESSAGES }}"
+             data-icon="{{ $swFavicon }}" data-file-max="{{ \App\Ai\ChatAttachment::MAX_KB * 1024 }}" data-file-types="{{ $swAccept }}">
+        <header class="sw-panel-head sw-chat-head">
+            <h2 class="sw-panel-title" id="sw-chat-title" tabindex="-1"><img src="{{ $swFavicon }}" alt="" width="28" height="28" class="sw-brand-icon sw-brand-icon-head"> Ask {{ $swName }} <span class="sw-ai-badge">AI</span></h2>
             @if ($swUser)
                 <button type="button" class="sw-icon-btn" data-chat-autoread aria-pressed="false" title="Read answers aloud"><i class="fas fa-volume-high" aria-hidden="true"></i><span class="visually-hidden">Read answers aloud automatically</span></button>
                 <button type="button" class="sw-icon-btn" data-chat-clear title="Start a new conversation"><i class="fas fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">Clear the conversation</span></button>
@@ -149,13 +154,16 @@
             </div>
         @else
             <div class="sw-chat-consent sw-panel-body" data-chat-consent @if ($swConsented) hidden @endif>
-                <p>AI chat is off for your account. When you send a message, we send it, the earlier messages in this chat and the title of the page you are on to <strong>{{ $swProvider }}</strong> to write an answer. We don’t keep the conversation: it stays in this browser tab until you close it or clear it.</p>
+                <p>AI chat is off for your account. When you send a message, we send it, the earlier messages in this chat, the title of the page you are on and the text of any file you attach to <strong>{{ $swProvider }}</strong> to write an answer. We don’t keep the conversation or your files: the chat stays in this browser tab until you close it or clear it.</p>
                 <p>Don’t type passwords, codes, bank details or other private information. AI can be wrong: check important answers.</p>
                 <button type="button" class="btn btn-primary btn-sm" data-chat-grant><i class="fas fa-toggle-on" aria-hidden="true"></i> Turn on AI chat</button>
             </div>
             <div class="sw-chat-main" data-chat-main @unless ($swConsented) hidden @endunless>
                 <div class="sw-chat-log" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation" tabindex="0" data-chat-log>
-                    <p class="sw-chat-msg is-assistant sw-chat-welcome">Hello {{ \Illuminate\Support\Str::of($swUser->name)->explode(' ')->first() }}. I can explain how the platform works and where to find things. What would you like to know?</p>
+                    <div class="sw-chat-row is-assistant sw-chat-welcome">
+                        <img src="{{ $swFavicon }}" alt="" width="28" height="28" class="sw-chat-avatar">
+                        <p class="sw-chat-msg is-assistant">Hello {{ \Illuminate\Support\Str::of($swUser->name)->explode(' ')->first() }}. I can explain how the platform works and where to find things, or help with a file you attach. What would you like to know?</p>
+                    </div>
                 </div>
                 <div class="sw-chat-suggestions" data-chat-suggestions>
                     <button type="button" class="sw-chip" data-chat-suggest>How do I register my startup?</button>
@@ -163,12 +171,21 @@
                     <button type="button" class="sw-chip" data-chat-suggest>How can I make the text bigger?</button>
                 </div>
                 <p class="sw-chat-status" aria-live="assertive" data-chat-status></p>
+                <div class="sw-chat-file" data-chat-file hidden>
+                    <i class="fas fa-file-lines" aria-hidden="true"></i>
+                    <span class="sw-chat-file-name" data-chat-file-name></span>
+                    <button type="button" class="sw-icon-btn sw-icon-btn-sm" data-chat-file-remove><i class="fas fa-xmark" aria-hidden="true"></i><span class="visually-hidden">Remove the attached file</span></button>
+                </div>
                 <form class="sw-chat-form" data-chat-form>
+                    <input type="file" id="sw-chat-attach" class="visually-hidden" accept="{{ $swAccept }}" data-chat-attach>
+                    <label for="sw-chat-attach" class="sw-icon-btn sw-attach" title="Attach a file" tabindex="0" role="button" data-chat-attach-label>
+                        <i class="fas fa-paperclip" aria-hidden="true"></i><span class="visually-hidden">Attach a file ({{ \App\Ai\ChatAttachment::typeList() }}, up to {{ \App\Ai\ChatAttachment::MAX_KB / 1024 }} MB)</span>
+                    </label>
                     <label for="sw-chat-input" class="visually-hidden">Your message</label>
                     <textarea id="sw-chat-input" rows="2" maxlength="{{ \App\Ai\Assistant::CHAT_MESSAGE_CHARS }}" placeholder="Type your question…" aria-describedby="sw-chat-hint" data-chat-input></textarea>
                     <button type="submit" class="btn btn-primary" data-chat-send><i class="fas fa-paper-plane" aria-hidden="true"></i><span class="visually-hidden">Send</span></button>
                 </form>
-                <p class="sw-chat-foot" id="sw-chat-hint">Enter to send, Shift+Enter for a new line · Sent to {{ $swProvider }} · not stored ·
+                <p class="sw-chat-foot" id="sw-chat-hint">Enter to send, Shift+Enter for a new line · Attach {{ \App\Ai\ChatAttachment::typeList() }} (up to {{ \App\Ai\ChatAttachment::MAX_KB / 1024 }} MB) or drop a file here · Sent to {{ $swProvider }} · not stored ·
                     <button type="button" class="sw-link" data-chat-revoke>Turn off AI chat</button></p>
             </div>
         @endif

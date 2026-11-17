@@ -367,17 +367,40 @@
   function scrollLog() { if (log) log.scrollTop = log.scrollHeight; }
   function setStatus(text) { status.textContent = text || ''; }
 
+  var icon = chat.getAttribute('data-icon');
+
   function render(message) {
+    var row = document.createElement('div');
+    row.className = 'sw-chat-row is-' + message.role;
+    if (message.role === 'assistant' && icon) {
+      var avatar = document.createElement('img');
+      avatar.className = 'sw-chat-avatar';
+      avatar.src = icon;
+      avatar.alt = '';
+      avatar.width = 28;
+      avatar.height = 28;
+      row.appendChild(avatar);
+    }
     var item = document.createElement('div');
     item.className = 'sw-chat-msg is-' + message.role + (message.error ? ' is-error' : '');
+    row.appendChild(item);
     var who = document.createElement('span');
     who.className = 'visually-hidden';
     who.textContent = message.role === 'user' ? 'You said: ' : (message.error ? 'Problem: ' : 'Assistant: ');
+    item.appendChild(who);
+    if (message.file) {
+      var file = document.createElement('div');
+      file.className = 'sw-chat-attachment';
+      file.innerHTML = '<i class="fas fa-paperclip" aria-hidden="true"></i> ';
+      var fileName = document.createElement('span');
+      fileName.textContent = 'Attached: ' + message.file;
+      file.appendChild(fileName);
+      item.appendChild(file);
+    }
     var body = document.createElement('div');
     body.className = 'sw-chat-text';
     body.textContent = message.text;
-    item.appendChild(who);
-    item.appendChild(body);
+    if (message.text) item.appendChild(body);
     if (message.role === 'assistant' && !message.error) {
       var actions = document.createElement('div');
       actions.className = 'sw-chat-actions';
@@ -391,9 +414,60 @@
       actions.appendChild(note);
       item.appendChild(actions);
     }
-    log.appendChild(item);
+    log.appendChild(row);
     scrollLog();
-    return item;
+    return row;
+  }
+  function clearLog() { qsa(log, ':scope > :not(.sw-chat-welcome)').forEach(function (n) { n.remove(); }); }
+
+  /* Attached file: picked with the paperclip (or keyboard) or dropped on the chat. Sent once with the next message. */
+  var attachInput = chat.querySelector('[data-chat-attach]');
+  var attachLabel = chat.querySelector('[data-chat-attach-label]');
+  var fileChip = chat.querySelector('[data-chat-file]');
+  var fileMax = parseInt(chat.getAttribute('data-file-max'), 10) || 2097152;
+  var fileTypes = (chat.getAttribute('data-file-types') || '').split(',');
+  var attached = null;
+
+  function attach(file) {
+    if (!file) return;
+    var ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
+    if (fileTypes.indexOf(ext) === -1) { setStatus('You can attach ' + fileTypes.join(', ') + ' files.'); return; }
+    if (file.size > fileMax) { setStatus('Attach a file under ' + Math.round(fileMax / 1048576) + ' MB.'); return; }
+    attached = file;
+    fileChip.querySelector('[data-chat-file-name]').textContent = file.name + ' (' + Math.max(1, Math.round(file.size / 1024)) + ' KB)';
+    fileChip.hidden = false;
+    setStatus('File attached: ' + file.name + '. Type a question about it, or press Send for a summary.');
+    input.focus();
+  }
+  function detach(silent) {
+    attached = null;
+    if (attachInput) attachInput.value = '';
+    if (fileChip) fileChip.hidden = true;
+    if (!silent) { setStatus('Attachment removed.'); input.focus(); }
+  }
+  if (attachInput) {
+    attachInput.addEventListener('change', function () { attach(attachInput.files && attachInput.files[0]); });
+    attachLabel.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); attachInput.click(); }
+    });
+    fileChip.querySelector('[data-chat-file-remove]').addEventListener('click', function () { detach(false); });
+    ['dragenter', 'dragover'].forEach(function (type) {
+      chat.addEventListener(type, function (event) {
+        if (!event.dataTransfer || Array.prototype.indexOf.call(event.dataTransfer.types || [], 'Files') === -1) return;
+        event.preventDefault();
+        chat.classList.add('is-dropping');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (type) {
+      chat.addEventListener(type, function (event) {
+        if (type === 'dragleave' && chat.contains(event.relatedTarget)) return;
+        chat.classList.remove('is-dropping');
+        if (type === 'drop' && event.dataTransfer && event.dataTransfer.files.length) {
+          event.preventDefault();
+          if (!chat.querySelector('[data-chat-main]').hidden) attach(event.dataTransfer.files[0]);
+        }
+      });
+    });
   }
   function actionButton(icon, label, handler) {
     var b = document.createElement('button');
@@ -425,11 +499,14 @@
   }
 
   function post(url, payload) {
+    var multipart = typeof FormData === 'function' && payload instanceof FormData;
+    var headers = { Accept: 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' };
+    if (!multipart) headers['Content-Type'] = 'application/json';
     return window.fetch(url, {
       method: 'POST',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': csrf, 'X-Requested-With': 'XMLHttpRequest' },
-      body: JSON.stringify(payload)
+      headers: headers,
+      body: multipart ? payload : JSON.stringify(payload)
     }).then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (data) { return { status: response.status, data: data }; });
     });
@@ -439,17 +516,31 @@
     if (code === 429) return 'You are sending messages too quickly. Wait a minute and try again.';
     if (code === 404) return 'AI chat has been switched off. Reload the page.';
     if (code === 401) return 'Sign in again to use AI chat.';
+    if (code === 413) return 'That file is too large. Attach a smaller file.';
     return (data && data.message) || 'The assistant could not answer just now. Try again in a moment.';
   }
 
   function ask(text) {
     text = (text || '').trim();
-    if (!text || busy) return;
+    if ((!text && !attached) || busy) return;
     busy = true;
     send.disabled = true;
     input.setAttribute('aria-busy', 'true');
-    var earlier = history.filter(function (m) { return !m.error; }).slice(-maxHistory).map(function (m) { return { role: m.role, text: m.text }; });
+    var earlier = history.filter(function (m) { return !m.error; }).slice(-maxHistory).map(function (m) {
+      // Only the file's name goes back with later messages; its text was sent once.
+      return { role: m.role, text: (m.text || '') + (m.file ? ' [Attached file: ' + m.file + ']' : '') || '[Attached file]' };
+    });
+    var file = attached;
+    var payload = { message: text, history: earlier, page: document.title };
+    if (file) {
+      payload = new FormData();
+      payload.append('message', text);
+      payload.append('history', JSON.stringify(earlier));
+      payload.append('page', document.title);
+      payload.append('attachment', file, file.name);
+    }
     var mine = { role: 'user', text: text };
+    if (file) mine.file = file.name;
     history.push(mine);
     persist();
     render(mine);
@@ -463,9 +554,10 @@
     log.appendChild(typing);
     scrollLog();
 
-    post(chat.getAttribute('data-endpoint'), { message: text, history: earlier, page: document.title })
+    post(chat.getAttribute('data-endpoint'), payload)
       .then(function (res) {
         var ok = res.status === 200 && res.data && res.data.text;
+        if (file && res.status === 200) detach(true);
         var reply = ok
           ? { role: 'assistant', text: res.data.text }
           : { role: 'assistant', error: true, text: res.status === 200 ? (res.data.message || 'The assistant could not answer just now.') : problem(res.status, res.data) };
@@ -500,8 +592,9 @@
       speech.stop();
       history = [];
       persist();
-      qsa(log, '.sw-chat-msg:not(.sw-chat-welcome)').forEach(function (n) { n.remove(); });
+      clearLog();
       refreshSuggestions();
+      detach(true);
       setStatus('Conversation cleared.');
       input.focus();
     }
@@ -522,7 +615,7 @@
       if (!grant) {
         history = [];
         persist();
-        qsa(log, '.sw-chat-msg:not(.sw-chat-welcome)').forEach(function (n) { n.remove(); });
+        clearLog();
         refreshSuggestions();
       }
       showConsent(!grant);
