@@ -111,7 +111,7 @@
         @foreach (['today' => 'Today', 'month' => 'Last 30 days'] as $period => $label)
             <h3>{{ $label }}</h3>
             @include('partials.stats', ['label' => $label.' AI usage', 'stats' => [
-                ['icon' => 'fa-wand-magic-sparkles', 'label' => 'Requests', 'value' => $usage[$period]['requests'], 'tone' => 'blue', 'note' => $usage[$period]['failed'].' failed'],
+                ['icon' => 'fa-chart-column', 'label' => 'Requests', 'value' => $usage[$period]['requests'], 'tone' => 'blue', 'note' => $usage[$period]['failed'].' failed'],
                 ['icon' => 'fa-arrow-right-to-bracket', 'label' => 'Input tokens', 'value' => number_format($usage[$period]['input_tokens']), 'tone' => 'purple'],
                 ['icon' => 'fa-arrow-right-from-bracket', 'label' => 'Output tokens', 'value' => number_format($usage[$period]['output_tokens']), 'tone' => 'green'],
                 ['icon' => 'fa-coins', 'label' => 'Estimated cost', 'value' => 'US$ '.number_format($usage[$period]['cost'], 2), 'tone' => 'amber'],

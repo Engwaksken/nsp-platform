@@ -361,9 +361,25 @@
     if (!Array.isArray(history)) history = [];
   } catch (e) { history = []; }
 
+  // Older assistant replies can still be in this tab's session storage. Apply the
+  // same emoji/pictograph cleanup as new server answers before displaying them.
+  function cleanAssistantText(text) {
+    return String(text || '').replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{1F1E6}-\u{1F1FF}\uFE0F\u200D\u20E3]/gu, '');
+  }
+  var migratedHistory = false;
+  history = history.filter(function (message) {
+    return message && (message.role === 'user' || message.role === 'assistant');
+  }).map(function (message) {
+    if (message.role !== 'assistant' || typeof message.text !== 'string') return message;
+    var cleaned = cleanAssistantText(message.text);
+    if (cleaned !== message.text) migratedHistory = true;
+    return Object.assign({}, message, { text: cleaned });
+  });
+
   function persist() {
     try { window.sessionStorage.setItem(storeKey, JSON.stringify(history.slice(-40))); } catch (e) { /* storage blocked */ }
   }
+  if (migratedHistory) persist();
   function scrollLog() { if (log) log.scrollTop = log.scrollHeight; }
   function setStatus(text) { status.textContent = text || ''; }
 

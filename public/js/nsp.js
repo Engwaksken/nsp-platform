@@ -1135,8 +1135,7 @@
       output.innerHTML = '';
       output.appendChild(el('div', { 'class': 'ai-text' }, body.text));
       var meta = el('div', { 'class': 'ai-meta' });
-      meta.appendChild(el('i', { 'class': 'fas fa-robot', 'aria-hidden': 'true' }));
-      meta.appendChild(document.createTextNode(' AI-generated' + (body.model ? ' by ' + body.model : '') + ' on ' + body.generated_at + '. Check the facts before you use it. '));
+      meta.appendChild(document.createTextNode('AI-generated' +(body.model ? ' by ' + body.model : '') + ' on ' + body.generated_at + '. Check the facts before you use it. '));
       var copy = el('button', { type: 'button', 'class': 'btn-link ai-copy' }, 'Copy');
       copy.addEventListener('click', function () {
         if (navigator.clipboard) navigator.clipboard.writeText(body.text).then(function () { copy.textContent = 'Copied'; window.setTimeout(function () { copy.textContent = 'Copy'; }, 1800); });
@@ -1270,4 +1269,98 @@
 
   NSP.enhance(document);
   openCardForHash(); // after enhance, so a remembered "closed" does not hide the linked card
+  initFaqPage();
+
+  /* ------------------------------------------------------------------ */
+  /* FAQ page: search filter, topic list that follows the reading         */
+  /* position, and opening a question linked by #faq-q-<id>.              */
+  /* ------------------------------------------------------------------ */
+  function initFaqPage() {
+    var search = document.querySelector('[data-faq-search]');
+    var sections = qsa(document, '[data-faq-section]');
+    if (!sections.length) return;
+    var links = qsa(document, '[data-faq-topic-link]');
+    var items = qsa(document, '[data-faq-item]');
+    var empty = document.querySelector('[data-faq-empty]');
+    var status = document.querySelector('[data-faq-status]');
+    var originals = items.map(function (item) { return item.querySelector('summary').textContent; });
+
+    // A question linked directly (#faq-q-12) opens.
+    if (/^#faq-q-\d+$/.test(window.location.hash)) {
+      var linked = document.querySelector(window.location.hash);
+      if (linked) linked.open = true;
+    }
+
+    if (search) {
+      search.hidden = false;
+      var input = search.querySelector('[data-faq-search-input]');
+      var timer = null;
+      var normalise = function (text) { return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); };
+      var apply = function () {
+        var words = normalise(input.value.trim()).split(/\s+/).filter(Boolean);
+        var shown = 0;
+        items.forEach(function (item, i) {
+          var summary = item.querySelector('summary');
+          var haystack = normalise(originals[i] + ' ' + item.querySelector('.faq-answer').textContent);
+          var match = words.every(function (w) { return haystack.indexOf(w) !== -1; });
+          item.hidden = !match;
+          summary.textContent = originals[i];
+          if (match && words.length) {
+            shown += 1;
+            // Highlight matches in the question (built with text nodes, never HTML from the page).
+            var text = originals[i];
+            var lower = normalise(text);
+            var marks = [];
+            words.forEach(function (w) {
+              var at = lower.indexOf(w);
+              if (at !== -1) marks.push([at, at + w.length]);
+            });
+            marks.sort(function (a, b) { return a[0] - b[0]; });
+            summary.textContent = '';
+            var pos = 0;
+            marks.forEach(function (m) {
+              if (m[0] < pos) return;
+              summary.appendChild(document.createTextNode(text.slice(pos, m[0])));
+              summary.appendChild(el('mark', {}, text.slice(m[0], m[1])));
+              pos = m[1];
+            });
+            summary.appendChild(document.createTextNode(text.slice(pos)));
+          } else if (match) {
+            shown += 1;
+          }
+        });
+        sections.forEach(function (section, i) {
+          var visible = qsa(section, '[data-faq-item]').some(function (item) { return !item.hidden; });
+          section.hidden = !visible;
+          if (links[i]) links[i].classList.toggle('is-empty', !visible);
+        });
+        if (empty) empty.hidden = shown > 0;
+        if (status) status.textContent = words.length ? shown + (shown === 1 ? ' question matches.' : ' questions match.') : '';
+      };
+      input.addEventListener('input', function () { window.clearTimeout(timer); timer = window.setTimeout(apply, 120); });
+      input.addEventListener('keydown', function (event) { if (event.key === 'Escape' && input.value) { input.value = ''; apply(); } });
+    }
+
+    // Highlight the topic being read.
+    if (links.length && 'IntersectionObserver' in window) {
+      var current = function (id) {
+        links.forEach(function (link) {
+          if (link.getAttribute('href') === '#' + id) {
+            link.setAttribute('aria-current', 'true');
+            if (link.scrollIntoView && window.matchMedia('(max-width: 900px)').matches) {
+              var list = link.closest('ul');
+              if (list) list.scrollTo({ left: link.offsetLeft - 16, behavior: 'smooth' });
+            }
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        });
+      };
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) { if (entry.isIntersecting) current(entry.target.id); });
+      }, { rootMargin: '-20% 0px -70% 0px' });
+      sections.forEach(function (section) { observer.observe(section); });
+      current(sections[0].id);
+    }
+  }
 })();

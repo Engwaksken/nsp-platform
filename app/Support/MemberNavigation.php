@@ -129,7 +129,7 @@ class MemberNavigation
                 $on('intelligence') ? $this->link('workspace.intelligence', 'Guidance', 'fa-compass', 'workspace.intelligence*', $s) : null,
                 $on('venture_builder') ? $this->link('workspace.builder', 'Venture Builder', 'fa-diagram-project', 'workspace.builder*', $s) : null,
                 $on('ai_assistant') && Assistant::unavailableReason() === null
-                    ? $this->link('workspace.assistant', 'AI assistant', 'fa-wand-magic-sparkles', 'workspace.assistant*', $s) : null,
+                    ? $this->link('workspace.assistant', 'AI assistant', 'fa-pen-to-square', 'workspace.assistant*', $s) : null,
                 $on('ims_integration') ? $this->link('workspace.startups.programs', 'Applications & programs', 'fa-graduation-cap', 'workspace.startups.programs', $s) : null,
             ]);
         }

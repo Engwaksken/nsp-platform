@@ -19,7 +19,7 @@
             @include('partials.field', ['name' => 'question', 'label' => 'What would you like help with?', 'type' => 'textarea', 'rows' => 2, 'maxlength' => 4000, 'value' => old('question'), 'placeholder' => 'Ask for an explanation or practical suggestions…'])
             <label class="checkbox"><input type="checkbox" name="acknowledge" value="1" required> <span>I understand this page context and my question will be sent to the configured AI provider.</span></label>
             @error('acknowledge')<p class="error">{{ $message }}</p>@enderror
-            <button class="btn btn-secondary" type="submit"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Ask AI</button>
+            <button class="btn btn-secondary" type="submit">Ask AI</button>
         </form>
         @if ($result)
             <div class="ai-output" aria-live="polite">

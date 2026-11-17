@@ -18,7 +18,7 @@
         'admin.experts.index' => 'fa-user-tie', 'admin.engagements.index' => 'fa-handshake', 'admin.vacancies.index' => 'fa-briefcase',
         'admin.marketplace.index' => 'fa-store', 'admin.integrations.index' => 'fa-plug', 'admin.communications.index' => 'fa-paper-plane',
         'admin.messages.index' => 'fa-envelope', 'admin.redirects.index' => 'fa-arrow-right-arrow-left', 'admin.users.index' => 'fa-users',
-        'admin.settings.edit' => 'fa-sliders', 'admin.features.index' => 'fa-toggle-on', 'admin.ai.edit' => 'fa-wand-magic-sparkles',
+        'admin.settings.edit' => 'fa-sliders', 'admin.features.index' => 'fa-toggle-on', 'admin.ai.edit' => 'fa-gear',
         'admin.audit.index' => 'fa-clipboard-list', 'admin.system' => 'fa-heart-pulse',
         'admin.organizations.index' => 'fa-building', 'admin.builder.index' => 'fa-diagram-project',
         'admin.intelligence.index' => 'fa-brain', 'admin.challenges.index' => 'fa-lightbulb',

@@ -137,7 +137,7 @@
              data-max="{{ \App\Ai\Assistant::CHAT_MESSAGE_CHARS }}" data-history="{{ \App\Ai\Assistant::CHAT_HISTORY_MESSAGES }}"
              data-icon="{{ $swFavicon }}" data-file-max="{{ \App\Ai\ChatAttachment::MAX_KB * 1024 }}" data-file-types="{{ $swAccept }}">
         <header class="sw-panel-head sw-chat-head">
-            <h2 class="sw-panel-title" id="sw-chat-title" tabindex="-1"><img src="{{ $swFavicon }}" alt="" width="28" height="28" class="sw-brand-icon sw-brand-icon-head"> Ask {{ $swName }} <span class="sw-ai-badge">AI</span></h2>
+            <h2 class="sw-panel-title" id="sw-chat-title" tabindex="-1"><img src="{{ $swFavicon }}" alt="" width="28" height="28" class="sw-brand-icon sw-brand-icon-head"> Ask {{ $swName }}</h2>
             @if ($swUser)
                 <button type="button" class="sw-icon-btn" data-chat-autoread aria-pressed="false" title="Read answers aloud"><i class="fas fa-volume-high" aria-hidden="true"></i><span class="visually-hidden">Read answers aloud automatically</span></button>
                 <button type="button" class="sw-icon-btn" data-chat-clear title="Start a new conversation"><i class="fas fa-trash-can" aria-hidden="true"></i><span class="visually-hidden">Clear the conversation</span></button>
