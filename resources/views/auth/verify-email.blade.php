@@ -5,6 +5,7 @@
 @section('content')
     <div class="container">
         <div class="auth-card card">
+            @include('partials.auth-brand')
             <h1>Confirm your email</h1>
             @include('partials.flash')
             <p>We sent a confirmation link to <strong>{{ auth()->user()->email }}</strong>. Open that link to confirm this email address.</p>

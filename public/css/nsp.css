@@ -307,7 +307,7 @@ main { min-height: 60vh; display: block; }
 .site-header .container { max-width: 100rem; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: 4.25rem; flex-wrap: wrap; }
 .brand { display: inline-flex; align-items: center; gap: .6rem; font-weight: 700; font-size: 1.2rem; letter-spacing: -.02em; color: var(--ink-strong); text-decoration: none; }
 .brand:hover { color: var(--ink-strong); }
-.brand img { max-height: 2.5rem; width: auto; }
+.brand img { display: block; height: 2.5rem; max-height: 2.5rem; width: auto; max-width: min(14rem, 50vw); object-fit: contain; object-position: left center; }
 .site-header .brand img { padding: 0; background: none; border-radius: 0; mix-blend-mode: multiply; }
 :root[data-theme="dark"] .site-header .brand img { mix-blend-mode: normal; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .site-header .brand img { mix-blend-mode: normal; } }
@@ -766,6 +766,11 @@ a.tag:hover { border-color: var(--ink-subtle); background: var(--surface-alt); c
 main:has(> .container > .auth-card) { background: linear-gradient(180deg, var(--surface-alt), var(--surface) 70%); }
 .auth-card { max-width: 28.75rem; margin: clamp(2rem, 6vw, 4.5rem) auto; padding: clamp(1.5rem, 4vw, 2.5rem); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); border-top: 4px solid var(--brand-accent); }
 .auth-card h1 { font-size: 1.65rem; margin-bottom: var(--space-5); }
+/* Site logo at the top of account forms: one height for every logo shape, centred, never wider than the card. */
+.auth-brand { display: flex; justify-content: center; align-items: center; margin: 0 auto var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); color: var(--ink-strong); font-weight: 700; font-size: 1.3rem; letter-spacing: -.02em; text-decoration: none; }
+.auth-brand:hover { color: var(--ink-strong); }
+.auth-brand img { display: block; height: 3.25rem; width: auto; max-width: min(100%, 15rem); object-fit: contain; padding: var(--logo-chip-pad); background: var(--logo-chip); border-radius: 8px; }
+@media (max-width: 30rem) { .auth-brand img { height: 2.75rem; } }
 .auth-card form .btn-primary { width: 100%; }
 .auth-card form .btn-primary + .btn-link { display: block; margin: var(--space-4) auto 0; text-align: center; }
 .auth-card > p > .btn-primary { width: 100%; }
@@ -1758,3 +1763,12 @@ details.faq mark { background: color-mix(in srgb, var(--brand-secondary) 35%, tr
 .ai-footnote { margin: var(--space-3) 0 0; font-size: .78rem; }
 @media (max-width: 640px) { .ai-question { flex-direction: column; align-items: stretch; } }
 @media print { .ai-panel { display: none; } }
+
+/* Admin settings: preview of the site logo as it will appear in the header. */
+.logo-preview { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); margin: var(--space-2) 0 var(--space-3); padding: var(--space-3) var(--space-4); border: 1px dashed var(--line-strong); border-radius: 8px; background: var(--surface-alt); }
+.logo-preview[hidden] { display: none; }
+.logo-preview img { display: block; height: 2.5rem; width: auto; max-width: 100%; object-fit: contain; }
+.logo-preview .logo-preview-label { font-size: .8rem; color: var(--ink-muted); }
+.logo-preview [data-new], .logo-preview.is-new [data-current] { display: none; }
+.logo-preview.is-new [data-new] { display: inline; }
+.logo-preview.is-new { border-color: var(--brand-accent); }

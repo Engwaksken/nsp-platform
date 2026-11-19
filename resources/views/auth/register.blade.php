@@ -13,6 +13,7 @@
 @section('content')
     <div class="container">
         <div class="auth-card card">
+            @include('partials.auth-brand')
             <h1>Create an account</h1>
             <p>One account for everything on NSP. Choose what brings you here; after you confirm your email and sign in, we take you to the right place to start.</p>
 

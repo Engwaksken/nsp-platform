@@ -21,8 +21,13 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="logo-upload">Upload site logo</label>
-                    <input id="logo-upload" type="file" name="logo_upload" accept="image/jpeg,image/png,image/webp,image/gif">
-                    <p class="hint">JPG, PNG, WebP or GIF; up to 5 MB. Uploading replaces the selected logo.</p>
+                    <div class="logo-preview" data-image-preview-box @if (empty($brandLogo)) hidden @endif>
+                        <img id="logo-preview-img" @if (! empty($brandLogo)) src="{{ $brandLogo->url() }}" @endif alt="Logo preview">
+                        <span class="logo-preview-label" data-current>Current logo</span>
+                        <span class="logo-preview-label" data-new>New logo (saved when you choose Save)</span>
+                    </div>
+                    <input id="logo-upload" type="file" name="logo_upload" accept="image/jpeg,image/png,image/webp,image/gif" data-image-preview="logo-preview-img" aria-describedby="logo-upload-hint">
+                    <p class="hint" id="logo-upload-hint">JPG, PNG, WebP or GIF; up to 5 MB. Uploading replaces the selected logo. Empty margins are trimmed and the logo is resized automatically, so it looks the same size everywhere. A transparent PNG works best.</p>
                     @error('logo_upload')<p class="error">{{ $message }}</p>@enderror
                 </div>
                 <div class="form-group">

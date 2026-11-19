@@ -1251,6 +1251,31 @@
     });
   }
 
+  /* Image file inputs with [data-image-preview="<img id>"]: show the chosen file before it is uploaded. */
+  function initImagePreviews(root) {
+    qsa(root, 'input[type="file"][data-image-preview]').forEach(function (input) {
+      if (input.__nspPreview) return;
+      input.__nspPreview = true;
+      var img = document.getElementById(input.getAttribute('data-image-preview'));
+      if (!img) return;
+      var original = img.getAttribute('src') || '';
+      var wrap = img.closest('[data-image-preview-box]');
+      var lastUrl = null;
+      input.addEventListener('change', function () {
+        if (lastUrl) { URL.revokeObjectURL(lastUrl); lastUrl = null; }
+        var file = input.files && input.files[0];
+        if (file && /^image\//.test(file.type)) {
+          lastUrl = URL.createObjectURL(file);
+          img.src = lastUrl;
+          if (wrap) { wrap.hidden = false; wrap.classList.add('is-new'); }
+        } else {
+          if (original) img.src = original; else img.removeAttribute('src');
+          if (wrap) { wrap.hidden = !original; wrap.classList.remove('is-new'); }
+        }
+      });
+    });
+  }
+
   NSP.enhance = function (root) {
     root = root || document;
     initCardGrids(root);
@@ -1265,6 +1290,7 @@
     initBgVideos(root);
     initSlug(root);
     initOtp(root);
+    initImagePreviews(root);
   };
 
   NSP.enhance(document);

@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
 use App\Models\Media;
 use App\Support\Audit;
+use App\Support\LogoImage;
 use App\Support\MapEmbed;
 use App\Support\Settings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -42,7 +44,7 @@ class SettingsController extends Controller
             'font_family' => ['required', Rule::in(array_keys(Settings::FONTS))],
             'logo_media_id' => ['nullable', 'integer', 'exists:media,id'],
             'favicon_media_id' => ['nullable', 'integer', 'exists:media,id'],
-            'logo_upload' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp,gif'],
+            'logo_upload' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,webp,gif', 'dimensions:max_width='.LogoImage::MAX_SOURCE_SIDE.',max_height='.LogoImage::MAX_SOURCE_SIDE],
             'favicon_upload' => ['nullable', 'file', 'max:5120', 'mimes:png,ico'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:40'],
@@ -55,6 +57,7 @@ class SettingsController extends Controller
             'routing.*' => ['nullable', 'email', 'max:255'],
         ], [
             '*.regex' => 'Use a colour like #1d4ed8.',
+            'logo_upload.dimensions' => 'The logo can be at most '.LogoImage::MAX_SOURCE_SIDE.' × '.LogoImage::MAX_SOURCE_SIDE.' pixels. Export a smaller version and try again.',
             'social.*.url' => 'Social links must start with https://.',
         ]);
 
@@ -82,11 +85,20 @@ class SettingsController extends Controller
                 return back()->withErrors([$uploadKey => 'The uploaded file contents do not match the selected image type.']);
             }
 
-            $path = $file->storeAs('media/'.now()->format('Y/m'), Str::uuid().'.'.$extension, 'public');
+            // Logos are trimmed and resized to one crisp size (App\Support\LogoImage); the favicon is kept as uploaded.
+            $prepared = $uploadKey === 'logo_upload' ? LogoImage::prepare($file->getRealPath()) : null;
+            if ($prepared) {
+                $path = 'media/'.now()->format('Y/m').'/'.Str::uuid().'.png';
+                Storage::disk('public')->put($path, $prepared['data']);
+                [$mime, $size] = ['image/png', strlen($prepared['data'])];
+            } else {
+                $path = $file->storeAs('media/'.now()->format('Y/m'), Str::uuid().'.'.$extension, 'public');
+                $size = $file->getSize();
+            }
             $media = Media::query()->create([
                 'disk' => 'public', 'path' => $path,
                 'original_name' => mb_substr(basename($file->getClientOriginalName()), 0, 255),
-                'mime_type' => $mime, 'size' => $file->getSize(),
+                'mime_type' => $mime, 'size' => $size,
                 'alt_text' => $uploadKey === 'logo_upload' ? 'Site logo' : null,
                 'uploaded_by' => $request->user()->id,
             ]);
