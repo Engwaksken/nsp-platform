@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\MfaController;
 use App\Http\Controllers\Auth\OidcController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\EngagementController;
 use App\Http\Controllers\ExpertController;
@@ -83,6 +84,9 @@ Route::middleware('feature:marketplace')->group(function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
     Route::post('/login', [LoginController::class, 'store'])->name('login.store');
+    Route::get('/register', [RegisterController::class, 'show'])->name('register');
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:signup')->name('register.store');
+    Route::get('/register/check-your-email', [RegisterController::class, 'sent'])->name('register.sent');
     Route::get('/forgot-password', [PasswordResetController::class, 'request'])->name('password.request');
     Route::post('/forgot-password', [PasswordResetController::class, 'email'])->middleware('throttle:password-reset')->name('password.email');
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
@@ -144,8 +148,8 @@ Route::get('/workspace', [WorkspaceController::class, 'index'])->middleware('aut
 Route::middleware(['auth', 'feature:registry'])->group(function () {
     Route::prefix('workspace/startups')->name('workspace.startups.')->group(function () {
         Route::get('/', [Workspace\StartupController::class, 'index'])->name('index');
-        Route::get('/new', [Workspace\StartupController::class, 'create'])->name('create');
-        Route::post('/', [Workspace\StartupController::class, 'store'])->middleware('throttle:20,1')->name('store');
+        Route::get('/new', [Workspace\StartupController::class, 'create'])->middleware('verified')->name('create');
+        Route::post('/', [Workspace\StartupController::class, 'store'])->middleware(['verified', 'throttle:20,1'])->name('store');
         Route::get('/{startup}', [Workspace\StartupController::class, 'show'])->name('show');
         Route::get('/{startup}/edit', [Workspace\StartupController::class, 'edit'])->name('edit');
         Route::put('/{startup}', [Workspace\StartupController::class, 'update'])->name('update');
@@ -153,7 +157,7 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::get('/{startup}/history', [Workspace\StartupController::class, 'history'])->name('history');
         Route::get('/{startup}/overview', [Workspace\OverviewController::class, 'index'])->name('overview');
         Route::get('/{startup}/export', [Workspace\OverviewController::class, 'export'])->middleware('throttle:10,60')->name('export');
-        Route::post('/{startup}/join', [Workspace\StartupController::class, 'requestJoin'])->middleware('throttle:10,1')->name('join');
+        Route::post('/{startup}/join', [Workspace\StartupController::class, 'requestJoin'])->middleware(['verified', 'throttle:10,1'])->name('join');
         Route::get('/{startup}/team', [Workspace\TeamController::class, 'index'])->name('team');
         Route::post('/{startup}/team', [Workspace\TeamController::class, 'invite'])->middleware('throttle:30,1')->name('team.invite');
         Route::put('/{startup}/team/{member}', [Workspace\TeamController::class, 'updateRole'])->name('team.role');
@@ -227,7 +231,7 @@ Route::middleware(['auth', 'feature:registry'])->group(function () {
         Route::post('/connect/{clientId}', [Workspace\ConnectController::class, 'decide'])->name('connect.decide');
     });
     Route::get('/invitations/{token}', [Workspace\InvitationController::class, 'show'])->name('invitations.show');
-    Route::post('/invitations/{token}/accept', [Workspace\InvitationController::class, 'accept'])->middleware('throttle:20,1')->name('invitations.accept');
+    Route::post('/invitations/{token}/accept', [Workspace\InvitationController::class, 'accept'])->middleware(['verified', 'throttle:20,1'])->name('invitations.accept');
     Route::post('/invitations/{token}/decline', [Workspace\InvitationController::class, 'decline'])->name('invitations.decline');
 });
 

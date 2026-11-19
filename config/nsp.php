@@ -9,6 +9,7 @@ return [
     'features' => [
         'oidc' => ['default' => (bool) env('NSP_OIDC_ENABLED', false), 'label' => 'Single sign-on (OIDC)', 'description' => 'Sign in through the shared Hive identity provider.'],
         'local_login' => ['default' => (bool) env('NSP_LOCAL_LOGIN', true), 'label' => 'Email and password login', 'description' => 'Local fallback login for development and admin until the shared IdP is live.'],
+        'startup_signup' => ['default' => (bool) env('NSP_STARTUP_SIGNUP', true), 'label' => 'Founder sign-up', 'description' => 'Founders create their own account with email and password (needs email and password login). The account must confirm its email before registering or joining a startup.'],
         'registry' => ['default' => (bool) env('NSP_REGISTRY_ENABLED', true), 'label' => 'Startup registry', 'description' => 'Startup profiles, teams, invitations and consent (Hive Startup Registry, hosted in NSP).'],
         'ims_integration' => ['default' => (bool) env('NSP_IMS_INTEGRATION', false), 'label' => 'IMS integration', 'description' => 'Connect flow, Registry API and events with Hive IMS; application and program summaries (docs/integration-contract-v1.md).'],
         'vgi' => ['default' => (bool) env('NSP_VGI_ENABLED', true), 'label' => 'Growth and VGI', 'description' => 'Growth assessments with an approved rubric, results and growth plans.'],
