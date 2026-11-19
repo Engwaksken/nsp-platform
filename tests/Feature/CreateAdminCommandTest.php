@@ -13,7 +13,7 @@ class CreateAdminCommandTest extends TestCase
     public function test_creates_an_admin_who_can_sign_in(): void
     {
         $this->artisan('nsp:create-admin', ['email' => 'Owner@Example.test'])
-            ->expectsQuestion('Password (at least 12 characters, letters and numbers; typing is hidden)', self::PASSWORD)
+            ->expectsQuestion('Password (at least 8 characters, letters and numbers; typing is hidden)', self::PASSWORD)
             ->expectsQuestion('Repeat the password', self::PASSWORD)
             ->assertSuccessful();
 
@@ -26,7 +26,7 @@ class CreateAdminCommandTest extends TestCase
     public function test_mismatched_passwords_change_nothing(): void
     {
         $this->artisan('nsp:create-admin', ['email' => 'owner@example.test'])
-            ->expectsQuestion('Password (at least 12 characters, letters and numbers; typing is hidden)', self::PASSWORD)
+            ->expectsQuestion('Password (at least 8 characters, letters and numbers; typing is hidden)', self::PASSWORD)
             ->expectsQuestion('Repeat the password', self::PASSWORD.'x')
             ->expectsOutput('The two passwords do not match. Nothing was changed.')
             ->assertFailed();
@@ -42,7 +42,7 @@ class CreateAdminCommandTest extends TestCase
         $this->assertTrue(Hash::check('OldPassword2025', $user->fresh()->password));
 
         $this->artisan('nsp:create-admin', ['email' => 'owner@example.test', '--reset-password' => true])
-            ->expectsQuestion('Password (at least 12 characters, letters and numbers; typing is hidden)', self::PASSWORD)
+            ->expectsQuestion('Password (at least 8 characters, letters and numbers; typing is hidden)', self::PASSWORD)
             ->expectsQuestion('Repeat the password', self::PASSWORD)
             ->expectsOutput('Password reset for owner@example.test.')
             ->assertSuccessful();

@@ -19,7 +19,7 @@ class CreateAdmin extends Command
     /** Ask for the password twice and validate it; null when it is rejected. */
     private function askPassword(string $email): ?string
     {
-        $password = (string) $this->secret('Password (at least 12 characters, letters and numbers; typing is hidden)');
+        $password = (string) $this->secret('Password (at least 8 characters, letters and numbers; typing is hidden)');
         $repeat = (string) $this->secret('Repeat the password');
         if (! hash_equals($password, $repeat)) {
             $this->error('The two passwords do not match. Nothing was changed.');
@@ -28,7 +28,7 @@ class CreateAdmin extends Command
         }
         $validator = Validator::make(
             ['email' => $email, 'password' => $password],
-            ['email' => ['required', 'email'], 'password' => ['required', Password::min(12)->letters()->numbers()]]
+            ['email' => ['required', 'email'], 'password' => ['required', Password::min(8)->letters()->numbers()]]
         );
         if ($validator->fails()) {
             foreach ($validator->errors()->all() as $message) {

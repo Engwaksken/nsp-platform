@@ -4,7 +4,7 @@ Your startup has **one Hive profile**. You register it once, and your team, Hive
 
 ## Create your account
 1. Choose **Register your startup** on the home page (or **Create an account** on the sign-in page and pick **I run or work at a startup**).
-2. Enter your name, email and a password (at least 12 characters, letters and numbers). Use the email your co-founders will invite.
+2. Enter your name, email and a password (at least 8 characters, letters and numbers). Use the email your co-founders will invite.
 3. Open the confirmation link we email you, then sign in. You go straight to the startup form.
 
 You must confirm your email before you can register a startup, ask to join one, or accept an invitation.

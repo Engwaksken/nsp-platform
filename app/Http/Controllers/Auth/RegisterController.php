@@ -73,16 +73,18 @@ class RegisterController extends Controller
         return route($definition[3]);
     }
 
-    public function show(Request $request): View
+    public function show(Request $request): View|RedirectResponse
     {
         abort_unless(self::available(), 404);
         $purposes = self::purposes();
-        $selected = $request->query('as');
 
-        return view('auth.register', [
-            'purposes' => $purposes,
-            'selected' => is_string($selected) && isset($purposes[$selected]) ? $selected : null,
-        ]);
+        // Older links use ?as=investor; each kind of member now has its own tab, opened by #investor.
+        $as = $request->query('as');
+        if (is_string($as)) {
+            return redirect()->to(route('register').(isset($purposes[$as]) ? '#'.$as : ''));
+        }
+
+        return view('auth.register', ['purposes' => $purposes]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -94,7 +96,7 @@ class RegisterController extends Controller
             'purpose' => [$purposes ? 'required' : 'nullable', Rule::in(array_keys($purposes))],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
-            'password' => ['required', 'confirmed', PasswordRule::min(12)->letters()->numbers()],
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],
         ], ['purpose.required' => 'Choose what brings you to NSP.']);
         $email = Str::lower(trim($data['email']));
 

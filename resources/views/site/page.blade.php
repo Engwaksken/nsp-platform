@@ -28,7 +28,7 @@
                     @if ($dashboardUrl)
                         <a class="btn btn-primary" href="{{ $dashboardUrl }}">Go to dashboard</a>
                     @elseif (\App\Http\Controllers\Auth\RegisterController::available())
-                        <a class="btn btn-primary" href="{{ route('register', ['as' => 'startup']) }}">Register your startup</a>
+                        <a class="btn btn-primary" href="{{ route('register').'#startup' }}">Register your startup</a>
                         <a class="btn btn-secondary" href="{{ route('register') }}">Join as an investor, expert or job seeker</a>
                     @else
                         <a class="btn btn-primary" href="{{ route('login') }}">Sign in to get started</a>
