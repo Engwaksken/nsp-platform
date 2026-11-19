@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="robots" content="noindex">
     <title>You are offline | {{ $brand['site_name'] }}</title>
-    <script src="{{ asset('js/theme.js') }}?v=1"></script>
-    <link rel="stylesheet" href="{{ asset('css/palette-hive.css') }}?v=1">
-    <link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=33">
+    <script src="{{ \App\Support\AssetVersion::url('js/theme.js') }}"></script>
+    <link rel="stylesheet" href="{{ \App\Support\AssetVersion::url('css/palette-hive.css') }}">
+    <link rel="stylesheet" href="{{ \App\Support\AssetVersion::url('css/nsp.css') }}">
 </head>
 <body>
 <main class="container section narrow" style="text-align:center;padding-top:20vh">

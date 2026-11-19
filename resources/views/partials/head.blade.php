@@ -18,7 +18,7 @@
 <meta name="nsp-sw" content="{{ asset('sw.js') }}">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 {{-- Blocking on purpose: sets the "js" class and the saved colour theme before the first paint. --}}
-<script src="{{ asset('js/theme.js') }}?v=2"></script>
+<script src="{{ \App\Support\AssetVersion::url('js/theme.js') }}"></script>
 <title>{{ trim(($pageTitle ?? '') !== '' ? $pageTitle . ' | ' . $brand['site_name'] : $brand['site_name']) }}</title>
 @if (!empty($metaDescription ?? $brand['meta_description']))
     <meta name="description" content="{{ $metaDescription ?? $brand['meta_description'] }}">
@@ -35,15 +35,15 @@
 @if (in_array($brand['font_family'], ['Poppins', 'Outfit'], true))
     {{-- Brand fonts are self-hosted (public/fonts) so pages make no third-party requests. --}}
     <link rel="preload" href="{{ asset('fonts/'.strtolower($brand['font_family']).'/'.strtolower($brand['font_family']).($brand['font_family'] === 'Outfit' ? '' : '-400').'-latin.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ asset('css/fonts.css') }}?v=1">
+    <link rel="stylesheet" href="{{ \App\Support\AssetVersion::url('css/fonts.css') }}">
 @endif
-<link rel="stylesheet" href="{{ asset('css/palette-hive.css') }}?v=1">
+<link rel="stylesheet" href="{{ \App\Support\AssetVersion::url('css/palette-hive.css') }}">
 {{-- Font Awesome Free 6.5.2, solid icons only, self-hosted (public/vendor/fontawesome; the CSP allows no CDNs). --}}
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/fontawesome.min.css') }}?v=6.5.2">
 <link rel="stylesheet" href="{{ asset('vendor/fontawesome/css/solid.min.css') }}?v=6.5.2">
-<link rel="stylesheet" href="{{ asset('css/nsp.css') }}?v=39">
+<link rel="stylesheet" href="{{ \App\Support\AssetVersion::url('css/nsp.css') }}">
 {{-- Big monitors, TVs, ultra-wide, very small and short screens (scales the rem-based layout in nsp.css). --}}
-<link rel="stylesheet" href="{{ asset('css/responsive.css') }}?v=1">
+<link rel="stylesheet" href="{{ \App\Support\AssetVersion::url('css/responsive.css') }}">
 <style>
     :root {
         --brand-primary: {{ $brand['primary_color'] }};
@@ -57,6 +57,6 @@
         @endforeach
     }
 </style>
-<link rel="stylesheet" href="{{ asset('css/widgets.css') }}?v=3">
-<script src="{{ asset('js/nsp.js') }}?v=17" defer></script>
-<script src="{{ asset('js/widgets.js') }}?v=2" defer></script>
+<link rel="stylesheet" href="{{ \App\Support\AssetVersion::url('css/widgets.css') }}">
+<script src="{{ \App\Support\AssetVersion::url('js/nsp.js') }}" defer></script>
+<script src="{{ \App\Support\AssetVersion::url('js/widgets.js') }}" defer></script>

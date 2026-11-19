@@ -1,9 +1,11 @@
 // Hive NSP service worker. Deliberately small:
 // - pages are always fetched from the network and never stored (they hold private data);
 //   if the network fails, the cached /offline page is shown instead;
-// - versioned static files (CSS, JS, fonts, icons) are cached after first use.
+// - versioned static files (CSS, JS, fonts, icons) are cached after first use. Pages link them
+//   with the file's change time (?v=..., App\Support\AssetVersion), so a changed file has a new
+//   URL and is fetched fresh; the older copy of that file is then dropped from the cache.
 // Bump VERSION to drop old caches.
-var VERSION = 'nsp-v2';
+var VERSION = 'nsp-v3';
 var OFFLINE_URL = '/offline';
 
 self.addEventListener('install', function (event) {
@@ -41,7 +43,16 @@ self.addEventListener('fetch', function (event) {
     event.respondWith(caches.open(VERSION).then(function (cache) {
       return cache.match(request).then(function (hit) {
         return hit || fetch(request).then(function (response) {
-          if (response.ok) cache.put(request, response.clone());
+          if (response.ok) {
+            cache.put(request, response.clone());
+            // Drop older versions of the same file (same path, different ?v=).
+            cache.keys().then(function (keys) {
+              keys.forEach(function (key) {
+                var old = new URL(key.url);
+                if (old.pathname === url.pathname && old.search !== url.search) cache.delete(key);
+              });
+            });
+          }
           return response;
         });
       });
