@@ -769,7 +769,10 @@ main:has(> .container > .auth-card) { background: linear-gradient(180deg, var(--
 /* Site logo at the top of account forms: one height for every logo shape, centred, never wider than the card. */
 .auth-brand { display: flex; justify-content: center; align-items: center; margin: 0 auto var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--line); color: var(--ink-strong); font-weight: 700; font-size: 1.3rem; letter-spacing: -.02em; text-decoration: none; }
 .auth-brand:hover { color: var(--ink-strong); }
-.auth-brand img { display: block; height: 3.25rem; width: auto; max-width: min(100%, 15rem); object-fit: contain; padding: var(--logo-chip-pad); background: var(--logo-chip); border-radius: 8px; }
+.auth-brand img { display: block; height: 3.25rem; width: auto; max-width: min(100%, 15rem); object-fit: contain; padding: 0; background: none; border-radius: 0; mix-blend-mode: multiply; }
+/* Uploaded logos have a transparent background (App\Support\LogoImage); "multiply" also hides the white of older uploads on light cards. */
+:root[data-theme="dark"] .auth-brand img { mix-blend-mode: normal; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .auth-brand img { mix-blend-mode: normal; } }
 @media (max-width: 30rem) { .auth-brand img { height: 2.75rem; } }
 .auth-card form .btn-primary { width: 100%; }
 .auth-card form .btn-primary + .btn-link { display: block; margin: var(--space-4) auto 0; text-align: center; }

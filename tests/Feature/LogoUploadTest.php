@@ -51,6 +51,34 @@ class LogoUploadTest extends TestCase
         $this->assertEqualsWithDelta(4.0, $w / $h, 0.35);
     }
 
+    public function test_white_background_becomes_transparent_but_white_inside_the_logo_stays(): void
+    {
+        // A dark ring with a white hole in the middle, on a white page.
+        $image = imagecreatetruecolor(600, 600);
+        imagefill($image, 0, 0, imagecolorallocate($image, 255, 255, 255));
+        imagefilledellipse($image, 300, 300, 400, 400, imagecolorallocate($image, 20, 40, 90));
+        imagefilledellipse($image, 300, 300, 150, 150, imagecolorallocate($image, 255, 255, 255));
+        $path = tempnam(sys_get_temp_dir(), 'logo').'.png';
+        imagepng($image, $path);
+        unset($image);
+
+        $result = LogoImage::prepare($path);
+        $out = imagecreatefromstring($result['data']);
+        $pixel = fn (int $x, int $y) => imagecolorsforindex($out, imagecolorat($out, $x, $y));
+        $centre = $pixel(intdiv($result['width'], 2), intdiv($result['height'], 2));
+
+        $this->assertSame(127, $pixel(0, 0)['alpha'], 'The white page around the logo is see-through.');
+        $this->assertSame(0, $centre['alpha'], 'The white hole inside the ring is kept.');
+        $this->assertSame(255, $centre['red']);
+    }
+
+    public function test_account_form_logo_has_no_white_backing(): void
+    {
+        $css = file_get_contents(public_path('css/nsp.css'));
+
+        $this->assertMatchesRegularExpression('/\.auth-brand img \{[^}]*background: none;[^}]*mix-blend-mode: multiply;/', $css);
+    }
+
     public function test_transparent_margins_are_trimmed_and_transparency_kept(): void
     {
         $result = LogoImage::prepare($this->logoFile(800, 800, 400, 100, transparent: true));
