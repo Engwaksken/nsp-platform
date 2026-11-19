@@ -32,6 +32,10 @@
                 </form>
             @endif
 
+            @if (\App\Http\Controllers\Auth\RegisterController::available())
+                <p class="hint">New to NSP? <a href="{{ route('register') }}">Create an account</a></p>
+            @endif
+
             @if (!$oidcLogin && !$localLogin)
                 <p class="alert alert-warning">Sign-in is not available right now. Please try again later.</p>
             @endif

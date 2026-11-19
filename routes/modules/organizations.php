@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'feature:organizations'])->prefix('organizations')->name('organizations.')->group(function () {
     Route::get('/', [PortalController::class, 'index'])->name('index');
     Route::get('/invitations/{token}', [MemberController::class, 'showInvitation'])->name('invitations.show');
-    Route::post('/invitations/{token}/accept', [MemberController::class, 'acceptInvitation'])->middleware('throttle:10,1')->name('invitations.accept');
+    Route::post('/invitations/{token}/accept', [MemberController::class, 'acceptInvitation'])->middleware(['verified', 'throttle:10,1'])->name('invitations.accept');
     Route::post('/invitations/{token}/decline', [MemberController::class, 'declineInvitation'])->name('invitations.decline');
 
     Route::get('/{organization}', [PortalController::class, 'show'])->name('show');

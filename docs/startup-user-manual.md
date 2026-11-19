@@ -2,6 +2,13 @@
 
 Your startup has **one Hive profile**. You register it once, and your team, Hive programs and NSP services all use the same record.
 
+## Create your account
+1. Choose **Register your startup** on the home page (or **Create an account** on the sign-in page and pick **I run or work at a startup**).
+2. Enter your name, email and a password (at least 12 characters, letters and numbers). Use the email your co-founders will invite.
+3. Open the confirmation link we email you, then sign in. You go straight to the startup form.
+
+You must confirm your email before you can register a startup, ask to join one, or accept an invitation.
+
 ## Register your startup
 1. Sign in and open **My workspace › My startups › Register a startup**.
 2. Fill in the company details. Only the registered name and the everyday name are required, and you can add the rest later.

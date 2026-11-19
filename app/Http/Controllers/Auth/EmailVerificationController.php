@@ -29,7 +29,7 @@ class EmailVerificationController extends Controller
         abort_unless(hash_equals(sha1($user->getEmailForVerification()), $hash), 403);
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->route('home')->with('status', 'Your email address is already confirmed.');
+            return $this->next($request, $user, 'Your email address is already confirmed.');
         }
 
         if ($user->markEmailAsVerified()) {
@@ -37,7 +37,34 @@ class EmailVerificationController extends Controller
             Audit::log('auth.email_verified', $user);
         }
 
-        return redirect()->route('home')->with('status', 'Your email address has been confirmed.');
+        return $this->next($request, $user, 'Your email address has been confirmed.');
+    }
+
+    /**
+     * New members go to the page for what they signed up for (startup form, investor
+     * or expert profile, candidate profile); signed-out people sign in first.
+     * The link alone never signs anyone in.
+     */
+    private function next(Request $request, User $user, string $status): RedirectResponse
+    {
+        $target = RegisterController::landingFor($user);
+        if ($user->signup_purpose !== null) {
+            // Only the first landing is steered; afterwards the usual dashboard applies.
+            $user->forceFill(['signup_purpose' => null])->save();
+        }
+
+        if (! $request->user()) {
+            if ($target) {
+                $request->session()->put('url.intended', $target);
+            }
+
+            return redirect()->route('login')->with('status', $status.' Sign in to continue.');
+        }
+        if ($request->user()->is($user) && $target) {
+            return redirect()->to($target)->with('status', $status.' Next, complete your profile.');
+        }
+
+        return redirect()->route('home')->with('status', $status);
     }
 
     public function resend(Request $request): RedirectResponse

@@ -99,6 +99,11 @@ class AppServiceProvider extends ServiceProvider
             Limit::perHour(5)->by('pw-email|'.strtolower((string) $request->input('email'))),
         ]);
         RateLimiter::for('api-clients', fn (Request $request) => Limit::perMinute(120)->by('api|'.strtok((string) $request->bearerToken(), '.').'|'.$request->ip()));
+        RateLimiter::for('signup', fn (Request $request) => [
+            Limit::perMinute(3)->by('signup|'.$request->ip()),
+            Limit::perDay(20)->by('signup-day|'.$request->ip()),
+            Limit::perHour(3)->by('signup-email|'.strtolower((string) $request->input('email'))),
+        ]);
         RateLimiter::for('oidc', fn (Request $request) => Limit::perMinute(20)->by('oidc|'.$request->ip()));
 
         // Branding and menus for every page view; loaded once per request.
