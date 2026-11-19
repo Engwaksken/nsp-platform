@@ -124,7 +124,7 @@ class AccountController extends Controller
 
         $data = $request->validate([
             'current_password' => ['required', 'string'],
-            'password' => ['required', 'confirmed', PasswordRule::min(12)->letters()->numbers()],
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],
         ]);
 
         if (! Hash::check($data['current_password'], $user->password)) {

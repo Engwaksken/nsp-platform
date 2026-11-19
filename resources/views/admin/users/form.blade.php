@@ -15,7 +15,7 @@
         @include('partials.field', ['name' => 'name', 'label' => 'Name', 'value' => $user->name, 'required' => true, 'autocomplete' => 'off'])
         @include('partials.field', ['name' => 'email', 'label' => 'Email', 'type' => 'email', 'value' => $user->email, 'required' => true, 'autocomplete' => 'off'])
         @include('partials.field', ['name' => 'password', 'label' => $user->exists ? 'New password (optional)' : 'Password (optional)', 'type' => 'password', 'value' => '', 'autocomplete' => 'new-password',
-            'hint' => 'At least 12 characters with letters and numbers. Leave empty for accounts that sign in only with Hive single sign-on.'])
+            'hint' => 'At least 8 characters with letters and numbers. Leave empty for accounts that sign in only with Hive single sign-on.'])
         @if (! $user->exists)
             <p class="hint">A confirmation email will be sent to the new account. They can confirm their address from the secure link.</p>
         @elseif ($user->hasVerifiedEmail())

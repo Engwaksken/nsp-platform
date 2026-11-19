@@ -89,6 +89,16 @@ class FounderSignupTest extends TestCase
         $this->assertSame(0, User::query()->where('email', 'amina@startup.test')->count());
     }
 
+    public function test_passwords_need_at_least_eight_characters_with_letters_and_numbers(): void
+    {
+        Notification::fake();
+
+        $this->signup(['password' => 'abcdef1', 'password_confirmation' => 'abcdef1'])->assertSessionHasErrors('password');
+        $this->signup(['password' => 'abcdefgh', 'password_confirmation' => 'abcdefgh'])->assertSessionHasErrors('password');
+        $this->signup(['password' => 'abcdefg1', 'password_confirmation' => 'abcdefg1'])->assertSessionDoesntHaveErrors();
+        $this->assertTrue(User::query()->where('email', 'amina@startup.test')->exists());
+    }
+
     public function test_sign_up_can_be_switched_off(): void
     {
         Features::set('startup_signup', false, null);
@@ -142,8 +152,31 @@ class FounderSignupTest extends TestCase
         $this->assertFalse(User::query()->where('email', 'amina@startup.test')->exists());
     }
 
-    public function test_home_page_links_preselect_the_startup_choice(): void
+    public function test_each_kind_of_member_has_its_own_tab(): void
     {
-        $this->get('/register?as=startup')->assertOk()->assertSee('value="startup" checked', false);
+        $this->get('/register')->assertOk()
+            ->assertSee('data-tabs="What brings you to NSP?"', false)
+            ->assertSee('id="startup" data-tab="Startup"', false)
+            ->assertSee('id="investor" data-tab="Investor"', false)
+            ->assertSee('id="expert" data-tab="Expert"', false)
+            ->assertSee('id="talent" data-tab="Job seeker"', false)
+            ->assertSee('<input type="hidden" name="purpose" value="investor">', false);
+        $this->get('/')->assertSee(route('register').'#startup', false);
+
+        // Older ?as= links open the matching tab.
+        $this->get('/register?as=expert')->assertRedirect(route('register').'#expert');
+        $this->get('/register?as=nonsense')->assertRedirect(route('register'));
+    }
+
+    public function test_errors_show_only_on_the_tab_that_was_submitted(): void
+    {
+        $this->from('/register')->signup(['purpose' => 'investor', 'password' => 'short1', 'password_confirmation' => 'short1'])
+            ->assertRedirect('/register');
+
+        $page = $this->get('/register')->assertOk()->getContent();
+        $this->assertStringContainsString('id="investor-password-error"', $page);
+        $this->assertStringNotContainsString('id="startup-password-error"', $page);
+        // What they typed carries over, so switching tabs does not lose it.
+        $this->assertStringContainsString('value="amina@startup.test"', strtolower($page));
     }
 }

@@ -64,7 +64,7 @@
         <section class="security-card" id="password" aria-labelledby="password-heading" data-tab="Password" data-tab-icon="fa-key">
             <h2 id="password-heading">Password</h2>
             @if ($canChangeCredentials)
-                <p class="lead-muted">At least 12 characters, with letters and numbers. Changing it signs you out on your other devices.</p>
+                <p class="lead-muted">At least 8 characters, with letters and numbers. Changing it signs you out on your other devices.</p>
                 <form method="post" action="{{ route('account.password.update') }}" novalidate>
                     @csrf
                     @method('put')
