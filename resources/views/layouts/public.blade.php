@@ -15,7 +15,7 @@
     <div class="container">
         <a class="brand" href="{{ route('home') }}">
             @if ($brandLogo)
-                <img src="{{ $brandLogo->url() }}" alt="{{ $brandLogo->alt_text ?: $brand['site_name'] }}" width="160" height="40">
+                <img src="{{ $brandLogo->url() }}" alt="{{ $brandLogo->alt_text ?: $brand['site_name'] }}" height="40" decoding="async">
             @else
                 {{ $brand['site_name'] }}
             @endif

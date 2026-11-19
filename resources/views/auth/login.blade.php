@@ -5,6 +5,7 @@
 @section('content')
     <div class="container">
         <div class="auth-card card">
+            @include('partials.auth-brand')
             <h1>Sign in</h1>
 
             @error('oidc')<div class="alert alert-danger" role="alert">{{ $message }}</div>@enderror

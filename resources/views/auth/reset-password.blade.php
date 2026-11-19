@@ -5,6 +5,7 @@
 @section('content')
     <div class="container">
         <div class="auth-card card">
+            @include('partials.auth-brand')
             <h1>Choose a new password</h1>
             @include('partials.flash')
             <form method="post" action="{{ route('password.update') }}" novalidate>

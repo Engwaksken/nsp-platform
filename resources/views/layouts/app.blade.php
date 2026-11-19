@@ -24,7 +24,7 @@
         <div class="app-sidebar-head">
             <a class="brand" href="{{ route('workspace') }}">
                 @if ($brandLogo)
-                    <img src="{{ $brandLogo->url() }}" alt="{{ $brandLogo->alt_text ?: $brand['site_name'] }}" width="140" height="36">
+                    <img src="{{ $brandLogo->url() }}" alt="{{ $brandLogo->alt_text ?: $brand['site_name'] }}" height="36" decoding="async">
                 @else
                     {{ $brand['site_name'] }}
                 @endif

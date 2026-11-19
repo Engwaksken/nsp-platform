@@ -5,6 +5,7 @@
 @section('content')
     <div class="container">
         <div class="auth-card card">
+            @include('partials.auth-brand')
             <h1>Reset your password</h1>
             @include('partials.flash')
             <p>Enter your email and we'll send a reset link. If you sign in with your Hive account, reset your password there instead.</p>

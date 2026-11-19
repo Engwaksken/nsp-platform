@@ -5,6 +5,7 @@
 @section('content')
     <div class="container">
         <div class="auth-card card is-centered">
+            @include('partials.auth-brand')
             <span class="shield auth-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/><path d="M9.5 9.5l1.8 1.8 3.2-3.3"/></svg>
             </span>
